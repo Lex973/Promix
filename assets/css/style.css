@@ -966,6 +966,22 @@ body.is-menu-open {
   transition: color var(--transition), border-color var(--transition), transform var(--transition);
 }
 
+/* Логотип вместо названия, если марка его загрузила */
+.brand__logo {
+  max-height: 34px;
+  width: auto;
+  object-fit: contain;
+  filter: grayscale(1);
+  opacity: 0.75;
+  transition: filter var(--transition), opacity var(--transition);
+}
+
+.brand:hover .brand__logo,
+.brand:focus-visible .brand__logo {
+  filter: none;
+  opacity: 1;
+}
+
 .brand:hover,
 .brand:focus-visible {
   color: var(--brand-color);
