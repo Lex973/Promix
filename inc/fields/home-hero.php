@@ -39,16 +39,21 @@ Container::make( 'post_meta', __( 'Первый экран', 'promix' ) )
                 ->set_layout( 'tabbed-horizontal' )
                 ->set_max( 4 )
                 ->set_help_text( __( 'До четырёх цифр в ряд под кнопкой.', 'promix' ) )
+                ->setup_labels(
+                    array(
+                        'singular_name' => __( 'Цифру', 'promix' ),
+                        'plural_name'   => __( 'Цифры', 'promix' ),
+                    )
+                )
                 ->add_fields(
                     array(
-                        Field::make( 'text', 'value', __( 'Значение', 'promix' ) )
+                        Field::make( 'text', 'stat_value', __( 'Значение', 'promix' ) )
                             ->set_help_text( __( 'Например: 10+ лет', 'promix' ) )
                             ->set_width( 40 ),
 
-                        Field::make( 'text', 'label', __( 'Подпись', 'promix' ) )
+                        Field::make( 'text', 'stat_label', __( 'Подпись', 'promix' ) )
                             ->set_width( 60 ),
                     )
-                )
-                ->set_header_template( '<%- value %>' ),
+                ),
         )
     );

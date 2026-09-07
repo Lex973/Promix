@@ -16,10 +16,10 @@ $cta_url    = promix_field( 'hero_cta_url', '#catalog' );
 $stats = promix_field(
     'hero_stats',
     array(
-        array( 'value' => '10+ лет', 'label' => 'опыта в строительной сфере' ),
-        array( 'value' => '3 года',  'label' => 'магазину PROMIX в Казани' ),
-        array( 'value' => '4,9',     'label' => 'рейтинг в 2ГИС' ),
-        array( 'value' => '50+',     'label' => 'отзывов клиентов' ),
+        array( 'stat_value' => '10+ лет', 'stat_label' => 'опыта в строительной сфере' ),
+        array( 'stat_value' => '3 года',  'stat_label' => 'магазину PROMIX в Казани' ),
+        array( 'stat_value' => '4,9',     'stat_label' => 'рейтинг в 2ГИС' ),
+        array( 'stat_value' => '50+',     'stat_label' => 'отзывов клиентов' ),
     )
 );
 
@@ -62,8 +62,8 @@ $stats = promix_field(
                 <dl class="hero__stats">
                     <?php foreach ( $stats as $stat ) : ?>
                         <div class="hero__stat">
-                            <dt><?php echo esc_html( $stat['value'] ); ?></dt>
-                            <dd><?php echo esc_html( $stat['label'] ); ?></dd>
+                            <dt><?php echo esc_html( $stat['stat_value'] ); ?></dt>
+                            <dd><?php echo esc_html( $stat['stat_label'] ); ?></dd>
                         </div>
                     <?php endforeach; ?>
                 </dl>
