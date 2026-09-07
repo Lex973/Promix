@@ -36,7 +36,7 @@ function promix_register_fields(): void {
         return;
     }
 
-    foreach ( array( 'home-hero' ) as $group ) {
+    foreach ( array( 'home-hero', 'home-catalog' ) as $group ) {
         $file = get_theme_file_path( "inc/fields/{$group}.php" );
 
         if ( file_exists( $file ) ) {
