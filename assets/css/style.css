@@ -1685,6 +1685,11 @@ body.is-menu-open {
   border: 0;
 }
 
+/* Кнопка на странице 404 */
+.page404__cta {
+  margin-top: 28px;
+}
+
 /* ===== Footer ===== */
 
 .footer {

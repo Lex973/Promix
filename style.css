@@ -1,0 +1,14 @@
+/*
+Theme Name: PROMIX
+Theme URI: https://github.com/Lex973/Promix
+Description: Тема малярного центра PROMIX (Казань). Главная собирается из полей ACF, каталог — на WooCommerce.
+Author: Lex973
+Version: 0.1.0
+Requires at least: 6.4
+Requires PHP: 8.1
+Text Domain: promix
+*/
+
+/* Файл нужен WordPress для описания темы.
+   Реальные стили лежат в assets/css/variables.css и assets/css/style.css
+   и подключаются из functions.php. */

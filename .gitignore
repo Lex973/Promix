@@ -1,45 +1,17 @@
 # ============================================
-#  В git попадает ТОЛЬКО тема promix.
-#  Ядро WordPress, плагины, загрузки и конфиг
-#  живут локально и на сервере, но не в репозитории.
-#
-#  Префикс **/ обязателен: без него правило со слэшем
-#  внутри привязывается к корню репозитория и не сработает
-#  для WordPress, лежащего в подпапке (app/public/...).
+#  Репозиторий — это сама тема promix.
+#  Клонируется в wp-content/themes/promix.
+#  Ядро WordPress, плагины и загрузки живут
+#  локально и на сервере, но не в git.
 # ============================================
 
-# --- Ядро WordPress ---
-**/wp-admin/
-**/wp-includes/
-**/wp-*.php
-**/xmlrpc.php
-**/license.txt
-**/readme.html
-**/.htaccess
-
-# --- Секреты: НИКОГДА в git ---
+# --- Секреты ---
 **/wp-config.php
-**/wp-config-local.php
-**/.env
-**/.env.local
+.env
+.env.local
 
-# --- wp-content: всё, кроме нашей темы ---
-**/wp-content/plugins/
-**/wp-content/uploads/
-**/wp-content/upgrade/
-**/wp-content/cache/
-**/wp-content/languages/
-**/wp-content/mu-plugins/
-**/wp-content/*.php
-**/wp-content/themes/*
-!**/wp-content/themes/promix/
-
-# --- Служебные папки Local ---
-**/conf/
-**/logs/
-**/app/sql/
-*.sql
-*.sql.gz
+# --- Клиентские документы и черновики ---
+docs/
 
 # --- IDE ---
 .idea/
@@ -54,13 +26,12 @@ Desktop.ini
 *.zip
 *.rar
 *.7z
+*.sql
+*.sql.gz
 *.tmp
 *.bak
 *~
 
-# --- Node (если понадобится сборка ассетов) ---
+# --- Node, если появится сборка ассетов ---
 node_modules/
 dist/
-
-# --- Клиентские документы и черновики: не в репозиторий ---
-docs/
