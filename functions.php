@@ -38,6 +38,9 @@ function promix_setup(): void {
 }
 add_action( 'after_setup_theme', 'promix_setup' );
 
+// Поля админки на Carbon Fields.
+require_once get_theme_file_path( 'inc/fields.php' );
+
 /**
  * Стили и скрипты фронта.
  */

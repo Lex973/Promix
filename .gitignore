@@ -35,3 +35,13 @@ Desktop.ini
 # --- Node, если появится сборка ассетов ---
 node_modules/
 dist/
+
+# --- Выгрузки из 1С и прочие таблицы: не в репозиторий темы ---
+*.xls
+*.xlsx
+*.csv
+
+# --- Carbon Fields ставится composer'ом, vendor коммитим:
+#     на хостинге composer может быть недоступен ---
+vendor/**/node_modules/
+vendor/**/.git/
