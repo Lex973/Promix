@@ -1,0 +1,81 @@
+/* PROMIX — дизайн-токены. Цвета, шрифты и размеры задаются только здесь. */
+
+:root {
+
+  /* Бренд */
+  --color-brand:            #DF0101;
+  --color-brand-bright:     #F51212;
+  --color-brand-dark:       #B50000;
+  --color-brand-soft:       rgba(223, 1, 1, 0.06);
+  --color-brand-line:       rgba(223, 1, 1, 0.22);
+  --color-on-brand:         #FFFFFF;
+
+  /* Нейтральные */
+  --color-bg:               #FFFFFF;
+  --color-surface:          #FFFFFF;
+  --color-surface-alt:      #F8F9FA;
+  --color-surface-dim:      #EDEFF3;
+  --color-graphite:         #16181B;
+  --color-graphite-soft:    #1E2126;
+  --color-graphite-lift:    #262A31;
+  --color-ink:              #1A1A1A;
+  --color-ink-soft:         #3D3D3D;
+  --color-muted:            #666666;
+  --color-border:           #E5E5E5;
+  --color-border-strong:    #C7CBD2;
+  --color-overlay:          rgba(20, 20, 20, 0.45);
+
+  /* Состояния */
+  --color-focus:            #1D6EF5;
+  --color-success:          #14884A;
+  --color-warning:          #C97A00;
+
+  /* Шрифты */
+  --font-body:    'Onest', 'Segoe UI', Arial, sans-serif;
+  --font-heading: var(--font-body);
+  --font-display: 'Unbounded', 'Segoe UI', Arial, sans-serif;
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semi:    600;
+  --fw-bold:    700;
+  --fw-black:   800;
+
+  /* Сетка */
+  --container-width:   1450px;
+  --container-gutter:  32px;
+  --header-height:     96px;
+  --header-height-sm:  70px;
+
+  /* Радиусы */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 24px;
+  --radius-lg: 40px;
+  --radius-pill: 999px;
+
+  /* Тени */
+  --shadow-header: 0 6px 24px rgba(0, 0, 0, 0.06);
+  --shadow-card:   0 16px 40px rgba(0, 0, 0, 0.05);
+  --shadow-lift:   0 24px 64px rgba(0, 0, 0, 0.08);
+  --shadow-menu:   -24px 0 60px rgba(0, 0, 0, 0.14);
+
+  /* Анимации */
+  --ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-fast: 0.18s var(--ease);
+  --transition:      0.3s  var(--ease);
+  --transition-slow: 0.45s var(--ease);
+
+  /* Слои */
+  --z-header:  100;
+  --z-overlay: 200;
+  --z-menu:    300;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0.01ms;
+    --transition:      0.01ms;
+    --transition-slow: 0.01ms;
+  }
+}
