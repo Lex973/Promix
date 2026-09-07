@@ -28,6 +28,9 @@ function promix_boot_carbon_fields(): void {
 }
 add_action( 'after_setup_theme', 'promix_boot_carbon_fields', 20 );
 
+// Иконки Lucide для полей и шаблонов.
+require_once get_theme_file_path( 'inc/icons.php' );
+
 // Список марок для секции брендов, пока повторитель в админке пустой.
 require_once get_theme_file_path( 'inc/brands-default.php' );
 
@@ -39,7 +42,7 @@ function promix_register_fields(): void {
         return;
     }
 
-    foreach ( array( 'home-hero', 'home-catalog', 'home-brands' ) as $group ) {
+    foreach ( array( 'home-hero', 'home-catalog', 'home-brands', 'home-about' ) as $group ) {
         $file = get_theme_file_path( "inc/fields/{$group}.php" );
 
         if ( file_exists( $file ) ) {
