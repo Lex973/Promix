@@ -5,6 +5,7 @@
  * @package promix
  */
 
+$promix = promix_contacts();
 ?>
 </main>
 
@@ -24,7 +25,7 @@
 
                 <p class="footer__about">Малярный центр в Казани: краски, инструмент и оборудование для мастеров, дизайнеров, строительных компаний и частных клиентов.</p>
 
-                <a class="btn-max footer__max" href="#">
+                <a class="btn-max footer__max" href="<?php echo esc_url( $promix['max_url'] ); ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
@@ -60,21 +61,21 @@
             <div class="footer__col">
                 <h2 class="footer__title">Контакты</h2>
                 <ul class="footer__list">
-                    <li><a class="footer__phone" href="tel:+79534840000">+7 (953) 484-00-00</a></li>
-                    <li>Казань, ул. Габдуллы Тукая, 91</li>
-                    <li>Пн–Пт 9:00–18:00<br>Сб 9:00–14:00 · Вс — выходной</li>
+                    <li><a class="footer__phone" href="tel:<?php echo esc_attr( $promix['phone_raw'] ); ?>"><?php echo esc_html( $promix['phone'] ); ?></a></li>
+                    <li><?php echo esc_html( $promix['address'] ); ?></li>
+                    <li><?php echo esc_html( $promix['hours'] ); ?><br><?php echo esc_html( $promix['hours_extra'] ); ?></li>
                 </ul>
 
                 <div class="footer__maps">
-                    <a href="https://2gis.ru/kazan/firm/70000001060590384" target="_blank" rel="noopener">2ГИС</a>
-                    <a href="https://yandex.ru/maps/org/promix/59684652364/" target="_blank" rel="noopener">Яндекс Карты</a>
+                    <a href="<?php echo esc_url( $promix['gis_url'] ); ?>" target="_blank" rel="noopener">2ГИС</a>
+                    <a href="<?php echo esc_url( $promix['yandex_url'] ); ?>" target="_blank" rel="noopener">Яндекс Карты</a>
                 </div>
             </div>
 
         </div>
 
         <div class="footer__bottom">
-            <p>© 2026 PROMIX — малярный центр в Казани</p>
+            <p>© <?php echo esc_html( wp_date( 'Y' ) ); ?> PROMIX — малярный центр в Казани</p>
             <a class="footer__policy" href="#">Политика конфиденциальности</a>
         </div>
 

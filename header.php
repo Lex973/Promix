@@ -23,7 +23,11 @@
     <?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
-<?php wp_body_open(); ?>
+<?php
+wp_body_open();
+
+$promix = promix_contacts();
+?>
 
 <a class="skip-link" href="#main">Перейти к содержимому</a>
 
@@ -49,11 +53,11 @@
         <div class="header__actions">
 
             <div class="header__contact">
-                <a class="header__phone" href="tel:+79534840000">+7 (953) 484-00-00</a>
-                <span class="header__hours">Пн–Пт 9:00–18:00</span>
+                <a class="header__phone" href="tel:<?php echo esc_attr( $promix['phone_raw'] ); ?>"><?php echo esc_html( $promix['phone'] ); ?></a>
+                <span class="header__hours"><?php echo esc_html( $promix['hours'] ); ?></span>
             </div>
 
-            <a class="btn-max" href="#" aria-label="Написать менеджеру в MAX">
+            <a class="btn-max" href="<?php echo esc_url( $promix['max_url'] ); ?>" aria-label="<?php esc_attr_e( 'Написать менеджеру в MAX', 'promix' ); ?>">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
@@ -115,9 +119,9 @@
     </nav>
 
     <div class="mobile-menu__foot">
-        <a class="mobile-menu__phone" href="tel:+79534840000">+7 (953) 484-00-00</a>
-        <p class="mobile-menu__hint">Пн–Пт 9:00–18:00 · Казань, ул. Габдуллы Тукая, 91</p>
-        <a class="btn-max" href="#">
+        <a class="mobile-menu__phone" href="tel:<?php echo esc_attr( $promix['phone_raw'] ); ?>"><?php echo esc_html( $promix['phone'] ); ?></a>
+        <p class="mobile-menu__hint"><?php echo esc_html( $promix['hours'] . ' · ' . $promix['address'] ); ?></p>
+        <a class="btn-max" href="<?php echo esc_url( $promix['max_url'] ); ?>">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>

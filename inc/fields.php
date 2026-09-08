@@ -34,6 +34,9 @@ require_once get_theme_file_path( 'inc/icons.php' );
 // Список марок для секции брендов, пока повторитель в админке пустой.
 require_once get_theme_file_path( 'inc/brands-default.php' );
 
+// Отзывы из 2ГИС, пока повторитель в админке пустой.
+require_once get_theme_file_path( 'inc/reviews-default.php' );
+
 /**
  * Наборы полей подключаются по одному файлу на секцию главной.
  */
@@ -42,7 +45,7 @@ function promix_register_fields(): void {
         return;
     }
 
-    foreach ( array( 'home-hero', 'home-catalog', 'home-brands', 'home-about' ) as $group ) {
+    foreach ( array( 'home-hero', 'home-catalog', 'home-brands', 'options', 'home-about', 'home-why', 'home-reviews', 'home-contacts' ) as $group ) {
         $file = get_theme_file_path( "inc/fields/{$group}.php" );
 
         if ( file_exists( $file ) ) {
@@ -119,6 +122,46 @@ function promix_field( string $name, $default = '' ) {
     }
 
     return $value;
+}
+
+/**
+ * Значение общей настройки сайта с запасным вариантом.
+ *
+ * Контакты повторяются в шапке, меню, секции контактов и подвале —
+ * читаются одним помощником, чтобы правка в админке доходила везде.
+ *
+ * @param string $name    Имя поля без префикса promix_.
+ * @param string $default Что вернуть, если поле пустое.
+ * @return string
+ */
+function promix_option( string $name, string $default = '' ): string {
+    if ( ! function_exists( 'carbon_get_theme_option' ) ) {
+        return $default;
+    }
+
+    $value = carbon_get_theme_option( 'promix_' . $name );
+
+    return ( '' === $value || null === $value ) ? $default : (string) $value;
+}
+
+/**
+ * Контакты магазина: значения по умолчанию совпадают с согласованной статикой.
+ *
+ * @return array<string, string>
+ */
+function promix_contacts(): array {
+    return array(
+        'phone'         => promix_option( 'phone', '+7 (953) 484-00-00' ),
+        'phone_raw'     => promix_option( 'phone_raw', '+79534840000' ),
+        'address'       => promix_option( 'address', 'Казань, ул. Габдуллы Тукая, 91' ),
+        'address_short' => promix_option( 'address_short', 'Габдуллы Тукая, 91' ),
+        'hours'         => promix_option( 'hours', 'Пн–Пт 9:00–18:00' ),
+        'hours_extra'   => promix_option( 'hours_extra', 'Сб 9:00–14:00 · Вс — выходной' ),
+        'max_url'       => promix_option( 'max_url', '#' ),
+        'gis_url'       => promix_option( '2gis_url', 'https://2gis.ru/kazan/firm/70000001060590384' ),
+        'yandex_url'    => promix_option( 'yandex_url', 'https://yandex.ru/maps/org/promix/59684652364/' ),
+        'map_embed'     => promix_option( 'map_embed', 'https://yandex.ru/map-widget/v1/org/promix/59684652364/?ll=49.120092%2C55.774053&z=17' ),
+    );
 }
 
 /**
