@@ -1710,6 +1710,8 @@ body.is-menu-open {
 
 body.is-modal-open {
   overflow: hidden;
+  /* полоса прокрутки исчезает — компенсируем, иначе страница дёргается вбок */
+  padding-right: var(--scrollbar-width, 0px);
 }
 
 .modal {
@@ -1733,6 +1735,15 @@ body.is-modal-open {
   background: var(--color-overlay);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  animation: overlay-in var(--transition) both;
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+  }
 }
 
 .modal__window {
@@ -1744,13 +1755,21 @@ body.is-modal-open {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   box-shadow: var(--shadow-lift);
-  animation: modal-in var(--transition) both;
+  /* Окно чуть отстаёт от затемнения: сначала гаснет фон, потом выезжает форма */
+  animation: modal-in var(--transition-slow) var(--ease) 0.05s both;
 }
 
 @keyframes modal-in {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(24px) scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal__overlay,
+  .modal__window {
+    animation: none;
   }
 }
 

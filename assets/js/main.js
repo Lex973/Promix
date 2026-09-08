@@ -32,6 +32,10 @@
     };
 
     requestAnimationFrame(raf);
+
+    /* Плавный скролл нужен и другим скриптам: модалка останавливает его,
+       пока открыта, иначе страница уезжает под окном */
+    window.promixLenis = lenis;
   }
 
   var burger = document.querySelector('[data-menu-open]');
