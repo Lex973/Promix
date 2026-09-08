@@ -41,6 +41,10 @@ Container::make( 'theme_options', __( 'Контакты PROMIX', 'promix' ) )
                 ->set_help_text( __( 'Например: Сб 9:00–14:00 · Вс — выходной', 'promix' ) )
                 ->set_width( 50 ),
 
+            Field::make( 'text', 'promix_lead_email', __( 'Почта для заявок', 'promix' ) )
+                ->set_attribute( 'type', 'email' )
+                ->set_help_text( __( 'Пусто — письма уходят на адрес администратора сайта.', 'promix' ) ),
+
             Field::make( 'separator', 'promix_links_sep', __( 'Ссылки', 'promix' ) ),
 
             Field::make( 'text', 'promix_max_url', __( 'Ссылка на MAX', 'promix' ) )

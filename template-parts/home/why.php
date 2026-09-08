@@ -89,7 +89,9 @@ $wide_cta_url  = promix_field( 'why_wide_cta_url', '#contacts' );
                             <p class="reason__text"><?php echo esc_html( $wide_text ); ?></p>
                         </div>
                         <?php if ( $wide_cta_text ) : ?>
-                            <a class="reason__cta" href="<?php echo esc_url( $wide_cta_url ); ?>">
+                            <a class="reason__cta" href="<?php echo esc_url( $wide_cta_url ); ?>"
+                               data-lead-open="<?php echo esc_attr( $wide_cta_text ); ?>"
+                               data-lead-title="<?php esc_attr_e( 'Обсудим условия', 'promix' ); ?>">
                                 <?php echo esc_html( $wide_cta_text ); ?>
                                 <span aria-hidden="true">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"

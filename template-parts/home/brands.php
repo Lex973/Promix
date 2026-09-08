@@ -94,7 +94,9 @@ $rows   = array(
                     <p class="brands__note"><?php echo esc_html( $note ); ?></p>
                 <?php endif; ?>
                 <?php if ( $cta_text ) : ?>
-                    <a class="btn btn--outline brands__btn" href="<?php echo esc_url( $cta_url ); ?>">
+                    <a class="btn btn--outline brands__btn" href="<?php echo esc_url( $cta_url ); ?>"
+                       data-lead-open="<?php echo esc_attr( $cta_text ); ?>"
+                       data-lead-title="<?php esc_attr_e( 'Спросим у технолога', 'promix' ); ?>">
                         <?php echo esc_html( $cta_text ); ?>
                         <span class="brands__btn-arrow" aria-hidden="true">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"

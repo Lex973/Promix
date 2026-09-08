@@ -82,6 +82,8 @@ $promix = promix_contacts();
     </div>
 </footer>
 
+<?php get_template_part( 'template-parts/lead-modal' ); ?>
+
 <?php wp_footer(); ?>
 </body>
 </html>

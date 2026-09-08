@@ -41,6 +41,9 @@ add_action( 'after_setup_theme', 'promix_setup' );
 // Поля админки на Carbon Fields.
 require_once get_theme_file_path( 'inc/fields.php' );
 
+// Заявки с сайта.
+require_once get_theme_file_path( 'inc/lead-form.php' );
+
 /**
  * Стили и скрипты фронта.
  */
@@ -75,7 +78,7 @@ function promix_assets(): void {
         true
     );
 
-    foreach ( array( 'main', 'brands', 'reviews' ) as $handle ) {
+    foreach ( array( 'main', 'brands', 'reviews', 'lead' ) as $handle ) {
         wp_enqueue_script(
             'promix-' . $handle,
             get_theme_file_uri( "assets/js/{$handle}.js" ),
@@ -84,6 +87,18 @@ function promix_assets(): void {
             true
         );
     }
+
+    // Форме нужен адрес обработчика и тексты ответов.
+    wp_localize_script(
+        'promix-lead',
+        'PROMIX_LEAD',
+        array(
+            'url'     => admin_url( 'admin-ajax.php' ),
+            'sending' => __( 'Отправляем…', 'promix' ),
+            'done'    => __( 'Спасибо! Перезвоним в рабочее время.', 'promix' ),
+            'error'   => __( 'Не получилось отправить. Позвоните нам, пожалуйста.', 'promix' ),
+        )
+    );
 }
 add_action( 'wp_enqueue_scripts', 'promix_assets' );
 
