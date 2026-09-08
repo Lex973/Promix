@@ -1722,6 +1722,11 @@ body.is-modal-open {
   padding: 20px;
 }
 
+/* display: flex сильнее браузерного правила для [hidden], поэтому прячем явно */
+.modal[hidden] {
+  display: none;
+}
+
 .modal__overlay {
   position: absolute;
   inset: 0;
