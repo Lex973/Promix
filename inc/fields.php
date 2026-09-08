@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Carbon_Fields\Carbon_Fields;
+use Carbon_Fields\Container;
 
 /**
  * Библиотека ставится composer'ом в vendor/ и коммитится вместе с темой:
@@ -122,6 +123,57 @@ function promix_field( string $name, $default = '' ) {
     }
 
     return $value;
+}
+
+/**
+ * Контейнер полей для главной страницы.
+ *
+ * Условия у всех секций одинаковые, поэтому собираются в одном месте.
+ * Заодно блок сворачивается по умолчанию: секций семь, развёрнутыми они
+ * превращают страницу редактирования в километровую простыню.
+ *
+ * @param string $title Заголовок блока в админке.
+ * @return \Carbon_Fields\Container\Post_Meta_Container
+ */
+function promix_front_container( string $title ) {
+    $container = Container::make( 'post_meta', $title )
+        ->where( 'post_type', '=', 'page' )
+        ->where( 'post_id', '=', (int) get_option( 'page_on_front' ) );
+
+    $GLOBALS['promix_front_containers'][] = $container->get_id();
+
+    return $container;
+}
+
+/**
+ * Свернуть блоки полей: фильтры вешаются на add_meta_boxes, когда
+ * зарегистрированы уже все секции — в момент создания контейнера
+ * последний из них не успевал.
+ */
+function promix_collapse_field_boxes(): void {
+    foreach ( (array) ( $GLOBALS['promix_front_containers'] ?? array() ) as $id ) {
+        add_filter( 'postbox_classes_page_' . $id, 'promix_close_postbox' );
+    }
+}
+add_action( 'add_meta_boxes', 'promix_collapse_field_boxes', 99 );
+
+/**
+ * Класс свёрнутого блока — пока редактор не решил иначе.
+ *
+ * Как только он свернёт или развернёт хоть один блок, WordPress запомнит
+ * его выбор в настройках пользователя, и мы больше не вмешиваемся.
+ *
+ * @param string[] $classes Классы блока.
+ * @return string[]
+ */
+function promix_close_postbox( array $classes ): array {
+    if ( false !== get_user_option( 'closedpostboxes_page' ) ) {
+        return $classes;
+    }
+
+    $classes[] = 'closed';
+
+    return $classes;
 }
 
 /**

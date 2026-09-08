@@ -7,12 +7,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 
-Container::make( 'post_meta', __( 'Первый экран', 'promix' ) )
-    ->where( 'post_type', '=', 'page' )
-    ->where( 'post_id', '=', (int) get_option( 'page_on_front' ) )
+promix_front_container( __( 'Первый экран', 'promix' ) )
     ->add_fields(
         array(
             Field::make( 'image', 'promix_hero_image', __( 'Фоновое фото', 'promix' ) )

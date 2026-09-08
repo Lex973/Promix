@@ -7,12 +7,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 
-Container::make( 'post_meta', __( 'О компании', 'promix' ) )
-    ->where( 'post_type', '=', 'page' )
-    ->where( 'post_id', '=', (int) get_option( 'page_on_front' ) )
+promix_front_container( __( 'О компании', 'promix' ) )
     ->add_fields(
         array(
             Field::make( 'text', 'promix_about_title', __( 'Заголовок', 'promix' ) ),
