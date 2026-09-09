@@ -79,10 +79,17 @@ function promix_assets(): void {
     );
 
     foreach ( array( 'main', 'brands', 'reviews', 'lead' ) as $handle ) {
+        $deps = array( 'lenis' );
+
+        // Модалке нужна общая ловушка фокуса из main.js.
+        if ( 'lead' === $handle ) {
+            $deps[] = 'promix-main';
+        }
+
         wp_enqueue_script(
             'promix-' . $handle,
             get_theme_file_uri( "assets/js/{$handle}.js" ),
-            array( 'lenis' ),
+            $deps,
             promix_asset_version( "assets/js/{$handle}.js" ),
             true
         );

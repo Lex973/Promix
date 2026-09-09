@@ -38,6 +38,67 @@
     window.promixLenis = lenis;
   }
 
+  /* ===== Ловушка фокуса ===== */
+
+  var FOCUSABLE = 'a[href], button:not([disabled]), input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  /* Пока открыто окно или меню, остальная страница выключена через inert:
+     мышь и скринридер до неё не достают, Tab ходит по кругу внутри.
+     Возвращает функцию, которая включает страницу обратно.
+
+     keep — элемент, который нужно оставить живым (подложка меню: по клику
+     она закрывает панель, а inert съел бы этот клик). */
+  window.promixTrap = function (container, keep) {
+    var disabled = [];
+
+    Array.prototype.forEach.call(document.body.children, function (el) {
+      if (el === container || el === keep || el.tagName === 'SCRIPT' || el.hasAttribute('inert')) {
+        return;
+      }
+
+      el.setAttribute('inert', '');
+      disabled.push(el);
+    });
+
+    /* Tab по кругу — для браузеров без inert */
+    function onKeydown(event) {
+      if (event.key !== 'Tab') {
+        return;
+      }
+
+      var items = Array.prototype.slice.call(container.querySelectorAll(FOCUSABLE)).filter(function (el) {
+        return el.tabIndex >= 0 && el.getClientRects().length > 0;
+      });
+
+      if (!items.length) {
+        return;
+      }
+
+      var first = items[0];
+      var last = items[items.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener('keydown', onKeydown, true);
+
+    return function () {
+      disabled.forEach(function (el) {
+        el.removeAttribute('inert');
+      });
+
+      document.removeEventListener('keydown', onKeydown, true);
+    };
+  };
+
+  /* ===== Мобильное меню ===== */
+
   var burger = document.querySelector('[data-menu-open]');
   var menu = document.querySelector('[data-menu]');
   var overlay = document.querySelector('[data-menu-overlay]');
@@ -47,8 +108,8 @@
     return;
   }
 
-  var FOCUSABLE = 'a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])';
   var lastFocused = null;
+  var releaseTrap = null;
 
   function openMenu() {
     lastFocused = document.activeElement;
@@ -63,6 +124,8 @@
       lenis.stop();
     }
 
+    releaseTrap = window.promixTrap(menu, overlay);
+
     var first = menu.querySelector(FOCUSABLE);
     if (first) {
       first.focus();
@@ -75,6 +138,11 @@
     document.body.classList.remove('is-menu-open');
     burger.setAttribute('aria-expanded', 'false');
     menu.setAttribute('aria-hidden', 'true');
+
+    if (releaseTrap) {
+      releaseTrap();
+      releaseTrap = null;
+    }
 
     if (lenis) {
       lenis.start();
@@ -114,26 +182,6 @@
 
     if (event.key === 'Escape') {
       closeMenu();
-      return;
-    }
-
-    /* Tab не выпускает фокус из открытой панели */
-    if (event.key === 'Tab') {
-      var items = Array.prototype.slice.call(menu.querySelectorAll(FOCUSABLE));
-      if (!items.length) {
-        return;
-      }
-
-      var first = items[0];
-      var last = items[items.length - 1];
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
     }
   });
 

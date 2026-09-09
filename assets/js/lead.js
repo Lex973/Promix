@@ -22,6 +22,8 @@
 
   var defaultTitle = titleEl ? titleEl.textContent : '';
   var lastFocused = null;
+  var releaseTrap = null;
+  var closeTimer = null;
 
   /* ===== Маска телефона ===== */
 
@@ -84,6 +86,9 @@
   /* ===== Открытие и закрытие ===== */
 
   function open(trigger) {
+    /* Окно могли открыть снова, пока висело закрытие после прошлой заявки */
+    window.clearTimeout(closeTimer);
+
     lastFocused = trigger || document.activeElement;
 
     var source = trigger ? (trigger.getAttribute('data-lead-open') || trigger.textContent.trim()) : '';
@@ -105,6 +110,10 @@
     modal.hidden = false;
     document.body.classList.add('is-modal-open');
 
+    if (window.promixTrap) {
+      releaseTrap = window.promixTrap(modal);
+    }
+
     if (window.promixLenis) {
       window.promixLenis.stop();
     }
@@ -117,8 +126,15 @@
   }
 
   function close() {
+    window.clearTimeout(closeTimer);
+
     modal.hidden = true;
     document.body.classList.remove('is-modal-open');
+
+    if (releaseTrap) {
+      releaseTrap();
+      releaseTrap = null;
+    }
 
     if (window.promixLenis) {
       window.promixLenis.start();
@@ -160,17 +176,38 @@
     return;
   }
 
+  /* Ключ проверки берём перед самой отправкой: в закэшированной странице
+     он давно протух, и заявка молча падала бы с 403 */
+  function requestNonce() {
+    return window.fetch(window.PROMIX_LEAD.url + '?action=promix_lead_nonce', {
+      credentials: 'same-origin',
+      cache: 'no-store'
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (result) {
+        if (!result || !result.success || !result.data.nonce) {
+          throw new Error('no nonce');
+        }
+
+        return result.data.nonce;
+      });
+  }
+
   form.addEventListener('submit', function (event) {
     event.preventDefault();
-
-    var data = new FormData(form);
-    data.append('action', 'promix_lead');
 
     submit.disabled = true;
     message.className = 'lead__note';
     message.textContent = window.PROMIX_LEAD.sending;
 
-    window.fetch(window.PROMIX_LEAD.url, { method: 'POST', body: data, credentials: 'same-origin' })
+    requestNonce()
+      .then(function (nonce) {
+        var data = new FormData(form);
+        data.append('action', 'promix_lead');
+        data.append('nonce', nonce);
+
+        return window.fetch(window.PROMIX_LEAD.url, { method: 'POST', body: data, credentials: 'same-origin' });
+      })
       .then(function (response) { return response.json(); })
       .then(function (result) {
         var ok = result && result.success;
@@ -182,7 +219,7 @@
         if (ok) {
           form.reset();
           /* Окно закрывается не сразу: человек должен успеть прочитать ответ */
-          window.setTimeout(close, 2500);
+          closeTimer = window.setTimeout(close, 2500);
         }
       })
       .catch(function () {
