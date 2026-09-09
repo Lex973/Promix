@@ -38,6 +38,26 @@
     window.promixLenis = lenis;
   }
 
+  /* ===== Карта по клику =====
+     Пока плашку не нажали, сайт не ходит на Яндекс: ни запросов на чужой
+     домен, ни его кук у посетителя. */
+
+  var mapButton = document.querySelector('[data-map]');
+
+  if (mapButton) {
+    mapButton.addEventListener('click', function () {
+      var frame = document.createElement('iframe');
+
+      frame.src = mapButton.getAttribute('data-map');
+      frame.title = mapButton.getAttribute('data-map-title') || '';
+      frame.loading = 'lazy';
+      frame.allowFullscreen = true;
+      frame.setAttribute('frameborder', '0');
+
+      mapButton.replaceWith(frame);
+    });
+  }
+
   /* ===== Ловушка фокуса ===== */
 
   var FOCUSABLE = 'a[href], button:not([disabled]), input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';

@@ -50,15 +50,15 @@ require_once get_theme_file_path( 'inc/lead-form.php' );
 function promix_assets(): void {
     wp_enqueue_style(
         'promix-fonts',
-        'https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap',
+        get_theme_file_uri( 'assets/css/fonts.css' ),
         array(),
-        null
+        promix_asset_version( 'assets/css/fonts.css' )
     );
 
     wp_enqueue_style(
         'promix-variables',
         get_theme_file_uri( 'assets/css/variables.css' ),
-        array(),
+        array( 'promix-fonts' ),
         promix_asset_version( 'assets/css/variables.css' )
     );
 
@@ -69,21 +69,29 @@ function promix_assets(): void {
         promix_asset_version( 'assets/css/style.css' )
     );
 
-    // Плавная прокрутка; скрипты темы идут после неё.
+    // Плавная прокрутка; лежит в теме, чтобы не ходить на сторонний CDN.
     wp_enqueue_script(
         'lenis',
-        'https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js',
+        get_theme_file_uri( 'assets/js/vendor/lenis.min.js' ),
         array(),
         '1.3.26',
-        true
+        array(
+            'strategy'  => 'defer',
+            'in_footer' => true,
+        )
     );
 
-    foreach ( array( 'main', 'brands', 'reviews', 'lead' ) as $handle ) {
-        $deps = array( 'lenis' );
+    $scripts = array(
+        'main'    => array( 'lenis' ),
+        'lead'    => array( 'promix-main' ),
+        'brands'  => array(),
+        'reviews' => array(),
+    );
 
-        // Модалке нужна общая ловушка фокуса из main.js.
-        if ( 'lead' === $handle ) {
-            $deps[] = 'promix-main';
+    foreach ( $scripts as $handle => $deps ) {
+        // Ленты брендов и отзывов есть только на главной.
+        if ( ! is_front_page() && in_array( $handle, array( 'brands', 'reviews' ), true ) ) {
+            continue;
         }
 
         wp_enqueue_script(
@@ -91,7 +99,10 @@ function promix_assets(): void {
             get_theme_file_uri( "assets/js/{$handle}.js" ),
             $deps,
             promix_asset_version( "assets/js/{$handle}.js" ),
-            true
+            array(
+                'strategy'  => 'defer',
+                'in_footer' => true,
+            )
         );
     }
 
@@ -110,16 +121,19 @@ function promix_assets(): void {
 add_action( 'wp_enqueue_scripts', 'promix_assets' );
 
 /**
- * Ранний коннект к CDN шрифтов — текст не мигает при загрузке.
+ * Начертания для основного текста грузятся сразу, а не после разбора CSS:
+ * так текст меньше времени показывается запасным шрифтом.
+ *
+ * crossorigin обязателен даже для своего домена — шрифты браузер всегда
+ * запрашивает как чужой ресурс.
  */
-function promix_resource_hints( array $urls, string $relation ): array {
-    if ( 'preconnect' === $relation ) {
-        $urls[] = array(
-            'href'        => 'https://fonts.gstatic.com',
-            'crossorigin' => 'anonymous',
+function promix_preload_fonts(): void {
+    foreach ( array( 'onest-cyrillic', 'onest-latin' ) as $font ) {
+        printf(
+            '<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "
+",
+            esc_url( get_theme_file_uri( "assets/fonts/{$font}.woff2" ) )
         );
     }
-
-    return $urls;
 }
-add_filter( 'wp_resource_hints', 'promix_resource_hints', 10, 2 );
+add_action( 'wp_head', 'promix_preload_fonts', 2 );

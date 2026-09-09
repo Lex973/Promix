@@ -90,9 +90,17 @@ $c = promix_contacts();
 
                 <?php if ( $c['map_embed'] ) : ?>
                     <div class="contacts__map">
-                        <iframe src="<?php echo esc_url( $c['map_embed'] ); ?>"
-                                title="<?php echo esc_attr( sprintf( /* translators: %s — адрес магазина. */ __( 'Карта: %s', 'promix' ), $c['address'] ) ); ?>"
-                                width="100%" height="100%" frameborder="0" allowfullscreen loading="lazy"></iframe>
+                        <?php /* Карту рисует Яндекс. Пока её не открыли, сайт наружу не ходит:
+                                 ни запросов на чужой домен, ни его кук у посетителя. */ ?>
+                        <button class="mapbox" type="button"
+                                data-map="<?php echo esc_url( $c['map_embed'] ); ?>"
+                                data-map-title="<?php echo esc_attr( sprintf( /* translators: %s — адрес магазина. */ __( 'Карта: %s', 'promix' ), $c['address'] ) ); ?>">
+                            <span class="mapbox__icon" aria-hidden="true">
+                                <?php echo promix_icon( 'map-pin' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            </span>
+                            <span class="mapbox__title"><?php esc_html_e( 'Показать карту', 'promix' ); ?></span>
+                            <span class="mapbox__hint"><?php echo esc_html( $c['address'] ); ?></span>
+                        </button>
                     </div>
                 <?php endif; ?>
 
