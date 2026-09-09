@@ -23,6 +23,17 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+
+  /* Колонка на всю высоту окна: на короткой странице подвал стоит внизу,
+     а не посреди экрана с белым полем под ним */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+main {
+  flex: 1 0 auto;
 }
 
 h1, h2, h3, h4 {
@@ -1454,6 +1465,7 @@ body.is-menu-open {
   font-size: 17px;
   font-weight: var(--fw-bold);
   letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
 }
 
 .review__source {
@@ -1742,9 +1754,69 @@ body.is-menu-open {
   font-size: 15px;
 }
 
-/* Кнопка на странице 404 */
-.page404__cta {
-  margin-top: 28px;
+/* ===== Страница 404 ===== */
+
+/* Экран короткий, поэтому содержимое стоит по центру между шапкой и подвалом */
+body.error404 main {
+  display: flex;
+  align-items: center;
+}
+
+.nf {
+  width: 100%;
+  padding: clamp(48px, 7vw, 110px) 0;
+}
+
+.nf__inner {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: clamp(24px, 5vw, 72px);
+}
+
+.nf__code {
+  font-family: var(--font-heading);
+  font-size: clamp(104px, 17vw, 240px);
+  font-weight: var(--fw-black);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  color: var(--color-surface-dim);
+}
+
+.nf__code span {
+  color: var(--color-brand);
+}
+
+.nf__title {
+  margin-top: 10px;
+  font-size: clamp(28px, 3.4vw, 44px);
+}
+
+.nf__text {
+  max-width: 46ch;
+  margin-top: 16px;
+  color: var(--color-muted);
+}
+
+.nf__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+@media (max-width: 780px) {
+  .nf__inner {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nf__actions .btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
 }
 
 /* ===== Форма заявки ===== */
@@ -2118,7 +2190,24 @@ body.is-modal-open {
 
   .contacts__maps { grid-template-columns: 1fr; }
 
-  .footer__top { grid-template-columns: 1fr; }
+  /* Две колонки вместо одной: справа оставалось пустое место, а подвал
+     тянулся на два экрана */
+  .footer__top {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px 20px;
+  }
+
+  .footer__brand,
+  .footer__col--contacts {
+    grid-column: 1 / -1;
+  }
+
+  .footer__col--contacts .footer__list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 20px;
+  }
+
   .footer__about { max-width: none; }
   .contacts__map, .contacts__map iframe { min-height: 280px; }
 
@@ -2225,4 +2314,33 @@ body.is-modal-open {
 
   .hero__stat dt { font-size: 24px; }
   .hero__stat dd { font-size: 13px; }
+}
+
+@media (max-width: 420px) {
+  /* Карточка становится почти во всю ширину и чуть приземистее: в одну
+     строку с именем дата уже не влезает и наезжала на него */
+  .review {
+    flex: 0 0 92%;
+    padding: 20px;
+  }
+
+  .review__head {
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+
+  .review__avatar {
+    width: 42px;
+    height: 42px;
+  }
+
+  .review__date {
+    flex-basis: 100%;
+    /* по левому краю имени: аватар плюс отступ */
+    padding-left: 56px;
+  }
+
+  .footer__col--contacts .footer__list {
+    grid-template-columns: 1fr;
+  }
 }

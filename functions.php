@@ -49,16 +49,9 @@ require_once get_theme_file_path( 'inc/lead-form.php' );
  */
 function promix_assets(): void {
     wp_enqueue_style(
-        'promix-fonts',
-        get_theme_file_uri( 'assets/css/fonts.css' ),
-        array(),
-        promix_asset_version( 'assets/css/fonts.css' )
-    );
-
-    wp_enqueue_style(
         'promix-variables',
         get_theme_file_uri( 'assets/css/variables.css' ),
-        array( 'promix-fonts' ),
+        array(),
         promix_asset_version( 'assets/css/variables.css' )
     );
 
@@ -121,19 +114,45 @@ function promix_assets(): void {
 add_action( 'wp_enqueue_scripts', 'promix_assets' );
 
 /**
- * Начертания для основного текста грузятся сразу, а не после разбора CSS:
- * так текст меньше времени показывается запасным шрифтом.
+ * Шрифты объявлены прямо в head.
  *
- * crossorigin обязателен даже для своего домена — шрифты браузер всегда
- * запрашивает как чужой ресурс.
+ * Так браузер узнаёт о них из первого же ответа и не ждёт, пока догрузится
+ * отдельный css-файл: preload с его предупреждениями в консоли не нужен.
+ *
+ * Оба шрифта переменные — один файл на все начертания; кириллица и латиница
+ * лежат отдельно, каждая грузится только если на странице есть её буквы.
+ * Unbounded (--font-display) пока ни к одному элементу не применён, и файл
+ * не скачивается: браузер берёт шрифт только тогда, когда тот кому-то нужен.
  */
-function promix_preload_fonts(): void {
-    foreach ( array( 'onest-cyrillic', 'onest-latin' ) as $font ) {
-        printf(
-            '<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "
-",
-            esc_url( get_theme_file_uri( "assets/fonts/{$font}.woff2" ) )
-        );
+function promix_font_faces(): void {
+    $ranges = array(
+        'cyrillic' => 'U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116',
+        'latin'    => 'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD',
+    );
+
+    $families = array(
+        'Onest'     => '400 800',
+        'Unbounded' => '500 700',
+    );
+
+    $css = '';
+
+    foreach ( $families as $family => $weight ) {
+        foreach ( $ranges as $subset => $range ) {
+            $file = sprintf( 'assets/fonts/%s-%s.woff2', strtolower( $family ), $subset );
+
+            $css .= sprintf(
+                '@font-face{font-family:"%1$s";font-style:normal;font-weight:%2$s;font-display:swap;src:url(%3$s) format("woff2");unicode-range:%4$s}',
+                $family,
+                $weight,
+                esc_url( get_theme_file_uri( $file ) ),
+                $range
+            );
+        }
     }
+
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- css собран из констант выше, адреса пропущены через esc_url().
+    echo '<style id="promix-fonts">' . $css . '</style>' . "
+";
 }
-add_action( 'wp_head', 'promix_preload_fonts', 2 );
+add_action( 'wp_head', 'promix_font_faces', 2 );

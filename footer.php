@@ -58,7 +58,7 @@ $promix = promix_contacts();
                 </ul>
             </nav>
 
-            <div class="footer__col">
+            <div class="footer__col footer__col--contacts">
                 <h2 class="footer__title">Контакты</h2>
                 <ul class="footer__list">
                     <li><a class="footer__phone" href="tel:<?php echo esc_attr( $promix['phone_raw'] ); ?>"><?php echo esc_html( $promix['phone'] ); ?></a></li>
