@@ -311,6 +311,98 @@
     }
   }
 
+  /* ===== Артикул по клику копируется ===== */
+
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var value = btn.getAttribute('data-copy');
+      var label = btn.querySelector('span');
+
+      var done = function () {
+        if (!label) {
+          return;
+        }
+
+        var was = label.textContent;
+
+        btn.classList.add('is-copied');
+        label.textContent = 'скопирован';
+
+        setTimeout(function () {
+          btn.classList.remove('is-copied');
+          label.textContent = was;
+        }, 1400);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value).then(done, function () {});
+        return;
+      }
+
+      /* Без защищённого соединения clipboard недоступен — старый способ */
+      var tmp = document.createElement('textarea');
+      tmp.value = value;
+      tmp.setAttribute('readonly', '');
+      tmp.style.position = 'absolute';
+      tmp.style.left = '-9999px';
+      document.body.appendChild(tmp);
+      tmp.select();
+
+      try {
+        document.execCommand('copy');
+        done();
+      } catch (e) {
+        /* Не скопировалось — артикул всё равно виден на карточке */
+      }
+
+      document.body.removeChild(tmp);
+    });
+  });
+
+  /* ===== Отложенные товары =====
+     Пока живут в браузере: список избранного появится вместе с личным
+     кабинетом WooCommerce. */
+
+  var FAV_KEY = 'promix-favourites';
+
+  function readFavourites() {
+    try {
+      return JSON.parse(localStorage.getItem(FAV_KEY)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  var favourites = readFavourites();
+
+  document.querySelectorAll('[data-fav]').forEach(function (btn) {
+    var sku = btn.getAttribute('data-fav');
+
+    if (favourites.indexOf(sku) !== -1) {
+      btn.setAttribute('aria-pressed', 'true');
+    }
+
+    btn.addEventListener('click', function () {
+      var on = btn.getAttribute('aria-pressed') !== 'true';
+
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+
+      var index = favourites.indexOf(sku);
+
+      if (on && index === -1) {
+        favourites.push(sku);
+      } else if (!on && index !== -1) {
+        favourites.splice(index, 1);
+      }
+
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favourites));
+      } catch (e) {
+        /* Приватное окно — отметка живёт до перезагрузки */
+      }
+    });
+  });
+
   /* ===== Панель фильтров на узких экранах ===== */
 
   var panel = document.querySelector('[data-filters]');

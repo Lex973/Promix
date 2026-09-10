@@ -451,32 +451,75 @@
 .products {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(224px, 1fr));
-  gap: 20px;
+  gap: 16px;
 }
 
 .product {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  padding: 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
-  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .product:hover {
-  transform: translateY(-3px);
   border-color: transparent;
   box-shadow: var(--shadow-card);
 }
 
-/* Фотографий товаров пока нет: место под них держит иконка раздела */
+/* Верхняя строка поверх фото: слева пометка, справа «отложить» */
+.product__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.product__badge {
+  padding: 5px 9px;
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-dim);
+  font-size: 11px;
+  font-weight: var(--fw-semi);
+  line-height: 1.2;
+  color: var(--color-ink-soft);
+}
+
+.product__fav {
+  margin-left: auto;
+  padding: 2px;
+  color: var(--color-border-strong);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.product__fav svg {
+  width: 20px;
+  height: 20px;
+}
+
+.product__fav:hover {
+  color: var(--color-brand);
+}
+
+/* Отложенный товар — залитое сердце */
+.product__fav[aria-pressed='true'] {
+  color: var(--color-brand);
+}
+
+.product__fav[aria-pressed='true'] svg {
+  fill: currentColor;
+}
+
 .product__media {
   display: flex;
   align-items: center;
   justify-content: center;
   aspect-ratio: 4 / 3;
-  background: var(--color-surface-alt);
+  margin-top: 4px;
   color: var(--color-border-strong);
   transition: color var(--transition);
 }
@@ -486,7 +529,7 @@
 }
 
 .product__icon {
-  width: 34%;
+  width: 38%;
   height: auto;
 }
 
@@ -494,56 +537,14 @@
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  padding: 18px;
+  margin-top: 12px;
 }
 
-.product__brand {
-  margin-bottom: 8px;
-  font-size: 12px;
-  font-weight: var(--fw-bold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-brand);
-}
-
-.product__title {
-  font-size: 15px;
-  font-weight: var(--fw-medium);
-  line-height: 1.4;
-  letter-spacing: -0.01em;
-}
-
-.product__title a {
-  /* Длинные названия из 1С обрезаем, чтобы карточки не разъезжались */
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  transition: color var(--transition-fast);
-}
-
-.product__title a:hover {
-  color: var(--color-brand);
-}
-
-.product__sku {
-  margin-top: 8px;
-  font-size: 13px;
-  color: var(--color-muted);
-}
-
-.product__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: auto;
-  padding-top: 16px;
-}
-
+/* Цена стоит над названием: по ней ведут глазами вдоль списка */
 .product__price {
-  font-size: 19px;
+  font-size: 22px;
   font-weight: var(--fw-bold);
+  line-height: 1.1;
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
@@ -553,20 +554,89 @@
   color: var(--color-muted);
 }
 
+.product__title {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: var(--fw-regular);
+  line-height: 1.4;
+}
+
+.product__title a {
+  /* Длинные названия из 1С обрезаем, чтобы карточки не разъезжались */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--color-ink-soft);
+  transition: color var(--transition-fast);
+}
+
+.product__title a:hover {
+  color: var(--color-brand);
+}
+
+.product__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.product__brand {
+  font-size: 12px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-brand);
+}
+
+/* Артикул копируется по клику: его переспрашивают у менеджера чаще всего */
+.product__sku {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.product__sku svg {
+  width: 13px;
+  height: 13px;
+  opacity: 0.7;
+}
+
+.product__sku:hover {
+  color: var(--color-ink);
+}
+
+.product__sku.is-copied {
+  color: var(--color-success);
+}
+
+.product__stock {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-success);
+}
+
+/* Кнопка прижата к низу: названия разной длины, иначе кнопки в ряду
+   встают лесенкой */
 .product__buy {
-  gap: 0;
-  padding: 11px;
-  border-radius: var(--radius-pill);
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 11px 22px;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
 }
 
-.product__buy svg {
-  width: 18px;
-  height: 18px;
-}
-
-/* Подпись у кнопки появляется, когда карточке хватает ширины */
-.product__buy span {
-  display: none;
+.product__meta,
+.product__stock {
+  margin-bottom: 14px;
 }
 
 .products__empty {
@@ -591,12 +661,7 @@
   }
 
   .product__buy {
-    gap: 8px;
-    padding: 11px 18px;
-  }
-
-  .product__buy span {
-    display: inline;
+    padding: 12px 26px;
   }
 }
 
@@ -677,29 +742,36 @@
   }
 
   .products {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+    gap: 10px;
   }
 
-  .product__body {
-    padding: 14px;
+  .product {
+    padding: 12px;
   }
 
   .product__title {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .product__price {
-    font-size: 17px;
+    font-size: 19px;
+  }
+
+  .product__buy {
+    align-self: stretch;
+    padding: 11px 16px;
+    text-align: center;
   }
 }
 
 @media (max-width: 420px) {
-  .product__foot {
-    padding-top: 12px;
+  .product__meta {
+    flex-wrap: wrap;
+    gap: 4px;
   }
 
-  .product__buy {
-    padding: 9px;
+  .product__sku {
+    margin-left: 0;
   }
 }
