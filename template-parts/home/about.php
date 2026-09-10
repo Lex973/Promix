@@ -51,7 +51,7 @@ $doodles = array( 'paint-bucket', 'paint-roller', 'brush', 'palette', 'spray-can
                     );
                     ?>
                 <?php else : ?>
-                    <img class="about__photo" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/office/1.png' ) ); ?>"
+                    <img class="about__photo" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/office/1.webp' ) ); ?>"
                          alt="<?php echo esc_attr( $photo_alt ); ?>" loading="lazy" width="1280" height="853">
                 <?php endif; ?>
 

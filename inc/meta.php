@@ -50,7 +50,9 @@ function promix_meta_description(): string {
  * Картинка для предпросмотра ссылки.
  *
  * Порядок такой: заданная в настройках, потом изображение записи,
- * потом логотип — чтобы ссылка никогда не уходила голой.
+ * потом общая картинка 1200×630 — чтобы ссылка никогда не уходила голой.
+ * Логотип для этого не годится: он маленький и с прозрачным фоном,
+ * который мессенджеры заливают чёрным.
  *
  * @return string
  */
@@ -71,7 +73,7 @@ function promix_og_image(): string {
         return (string) get_the_post_thumbnail_url( null, 'full' );
     }
 
-    return get_theme_file_uri( 'assets/img/logo.png' );
+    return get_theme_file_uri( 'assets/img/og-default.jpg' );
 }
 
 /**

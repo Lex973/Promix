@@ -69,7 +69,7 @@ $wide_url   = promix_field( 'catalog_wide_url', '#' );
                         );
                         ?>
                     <?php else : ?>
-                        <img class="cat__photo" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/office/11.png' ) ); ?>" alt="" loading="lazy">
+                        <img class="cat__photo" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/office/11.webp' ) ); ?>" alt="" loading="lazy">
                     <?php endif; ?>
                     <span class="cat__wide-text">
                         <span class="cat__wide-title"><?php echo esc_html( $wide_title ); ?></span>
