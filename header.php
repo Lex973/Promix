@@ -5,6 +5,8 @@
  * @package promix
  */
 
+defined( 'ABSPATH' ) || exit;
+
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -29,25 +31,15 @@ wp_body_open();
 $promix = promix_contacts();
 ?>
 
-<a class="skip-link" href="#main">Перейти к содержимому</a>
+<a class="skip-link" href="#main"><?php esc_html_e( 'Перейти к содержимому', 'promix' ); ?></a>
 
 <header class="header" data-header>
     <div class="container header__inner">
 
-        <a class="logo" href="/" aria-label="PROMIX — на главную">
-            <img class="logo__mark" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/logo.png' ) ); ?>" alt="" width="78" height="52">
-            <span class="logo__text">
-                <span class="logo__name">PROMIX</span>
-                <span class="logo__tagline">пространство для<br>профессионалов</span>
-            </span>
-        </a>
+        <?php get_template_part( 'template-parts/logo' ); ?>
 
-        <nav class="nav" aria-label="Основная навигация">
-            <a class="nav__link" href="#catalog">Каталог</a>
-            <a class="nav__link" href="#brands">Бренды</a>
-            <a class="nav__link" href="#about">О компании</a>
-            <a class="nav__link" href="#reviews">Отзывы</a>
-            <a class="nav__link" href="#contacts">Контакты</a>
+        <nav class="nav" aria-label="<?php esc_attr_e( 'Основная навигация', 'promix' ); ?>">
+            <?php promix_menu( 'primary', 'nav__list' ); ?>
         </nav>
 
         <div class="header__actions">
@@ -57,21 +49,19 @@ $promix = promix_contacts();
                 <span class="header__hours"><?php echo esc_html( $promix['hours'] ); ?></span>
             </div>
 
-            <a class="btn-max" href="<?php echo esc_url( $promix['max_url'] ); ?>" aria-label="<?php esc_attr_e( 'Написать менеджеру в MAX', 'promix' ); ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                </svg>
-                <span>MAX</span>
-            </a>
+            <?php
+            get_template_part(
+                'template-parts/btn-max',
+                null,
+                array(
+                    'label' => __( 'MAX', 'promix' ),
+                    'aria'  => __( 'Написать менеджеру в MAX', 'promix' ),
+                )
+            );
+            ?>
 
-            <a class="icon-btn" href="#cart" data-count="0" aria-label="Корзина: товаров нет">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="9" cy="21" r="1"></circle>
-                    <circle cx="20" cy="21" r="1"></circle>
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                </svg>
+            <a class="icon-btn" href="#cart" data-count="0" aria-label="<?php esc_attr_e( 'Корзина: товаров нет', 'promix' ); ?>">
+                <?php echo promix_icon( 'cart' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
                 <span class="icon-btn__count">0</span>
             </a>
 
@@ -79,7 +69,7 @@ $promix = promix_contacts();
                     data-menu-open
                     aria-expanded="false"
                     aria-controls="mobile-menu"
-                    aria-label="Открыть меню">
+                    aria-label="<?php esc_attr_e( 'Открыть меню', 'promix' ); ?>">
                 <span class="burger__box" aria-hidden="true">
                     <span></span><span></span><span></span>
                 </span>
@@ -91,43 +81,24 @@ $promix = promix_contacts();
 
 <div class="menu-overlay" data-menu-overlay aria-hidden="true"></div>
 
-<aside class="mobile-menu" id="mobile-menu" data-menu data-lenis-prevent aria-hidden="true" aria-label="Мобильное меню">
+<aside class="mobile-menu" id="mobile-menu" data-menu data-lenis-prevent aria-hidden="true" aria-label="<?php esc_attr_e( 'Мобильное меню', 'promix' ); ?>">
 
     <div class="mobile-menu__head">
-        <a class="logo" href="/" aria-label="PROMIX — на главную">
-            <img class="logo__mark" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/logo.png' ) ); ?>" alt="" width="78" height="52">
-            <span class="logo__text">
-                <span class="logo__name">PROMIX</span>
-                <span class="logo__tagline">пространство для<br>профессионалов</span>
-            </span>
-        </a>
+        <?php get_template_part( 'template-parts/logo' ); ?>
 
-        <button class="mobile-menu__close" type="button" data-menu-close aria-label="Закрыть меню">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" aria-hidden="true">
-                <path d="M18 6 6 18M6 6l12 12"></path>
-            </svg>
+        <button class="mobile-menu__close" type="button" data-menu-close aria-label="<?php esc_attr_e( 'Закрыть меню', 'promix' ); ?>">
+            <?php echo promix_icon( 'x', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
         </button>
     </div>
 
-    <nav class="mobile-menu__nav" aria-label="Мобильная навигация">
-        <a class="mobile-menu__link" href="#catalog">Каталог <span aria-hidden="true">→</span></a>
-        <a class="mobile-menu__link" href="#brands">Бренды <span aria-hidden="true">→</span></a>
-        <a class="mobile-menu__link" href="#about">О компании <span aria-hidden="true">→</span></a>
-        <a class="mobile-menu__link" href="#reviews">Отзывы <span aria-hidden="true">→</span></a>
-        <a class="mobile-menu__link" href="#contacts">Контакты <span aria-hidden="true">→</span></a>
+    <nav class="mobile-menu__nav" aria-label="<?php esc_attr_e( 'Мобильная навигация', 'promix' ); ?>">
+        <?php promix_menu( 'primary', 'mobile-menu__list' ); ?>
     </nav>
 
     <div class="mobile-menu__foot">
         <a class="mobile-menu__phone" href="tel:<?php echo esc_attr( $promix['phone_raw'] ); ?>"><?php echo esc_html( $promix['phone'] ); ?></a>
         <p class="mobile-menu__hint"><?php echo esc_html( $promix['hours'] . ' · ' . $promix['address'] ); ?></p>
-        <a class="btn-max" href="<?php echo esc_url( $promix['max_url'] ); ?>">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-            </svg>
-            <span>Написать в MAX</span>
-        </a>
+        <?php get_template_part( 'template-parts/btn-max' ); ?>
     </div>
 </aside>
 

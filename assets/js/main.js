@@ -22,8 +22,7 @@
 
   if (window.Lenis && !isTouch && !reducedMotion) {
     lenis = new window.Lenis({
-      duration: 1.05,
-      anchors: { offset: -112 }
+      duration: 1.05
     });
 
     var raf = function (time) {
@@ -36,6 +35,64 @@
     /* Плавный скролл нужен и другим скриптам: модалка останавливает его,
        пока открыта, иначе страница уезжает под окном */
     window.promixLenis = lenis;
+  }
+
+  /* ===== Якоря =====
+     Пункты меню приходят из админки в виде /#catalog — с полным адресом,
+     иначе с внутренних страниц они никуда не ведут. Здесь такие ссылки
+     разбираются: свой хэш скроллим сами, чужой адрес отдаём браузеру. */
+
+  var HEADER_OFFSET = -112;
+
+  function scrollToHash(hash, immediate) {
+    var target = null;
+
+    try {
+      target = hash ? document.querySelector(hash) : null;
+    } catch (e) {
+      return false;
+    }
+
+    if (!target) {
+      return false;
+    }
+
+    if (lenis) {
+      lenis.scrollTo(target, { offset: HEADER_OFFSET, immediate: !!immediate });
+    } else {
+      window.scrollTo({
+        top: target.getBoundingClientRect().top + window.scrollY + HEADER_OFFSET,
+        behavior: immediate || reducedMotion ? 'auto' : 'smooth'
+      });
+    }
+
+    return true;
+  }
+
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest && event.target.closest('a[href]');
+
+    if (!link || !link.hash || link.host !== window.location.host) {
+      return;
+    }
+
+    /* Тот же адрес, другой хэш — значит цель на этой же странице */
+    if (link.pathname !== window.location.pathname) {
+      return;
+    }
+
+    if (scrollToHash(link.hash)) {
+      event.preventDefault();
+      window.history.pushState(null, '', link.hash);
+    }
+  });
+
+  /* Пришли на /#contacts с другой страницы: браузер прыгает сам, но под
+     шапку — доводим до места, когда всё загрузилось */
+  if (window.location.hash) {
+    window.addEventListener('load', function () {
+      scrollToHash(window.location.hash, true);
+    });
   }
 
   /* ===== Карта по клику =====
@@ -191,7 +248,7 @@
     closeBtn.addEventListener('click', closeMenu);
   }
 
-  menu.querySelectorAll('a[href^="#"]').forEach(function (link) {
+  menu.querySelectorAll('a[href]').forEach(function (link) {
     link.addEventListener('click', closeMenu);
   });
 

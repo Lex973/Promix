@@ -95,26 +95,17 @@ $reviews = promix_field( 'reviews_items', promix_default_reviews() );
             <div class="reviews__foot">
                 <div class="reviews__ctrls">
                     <button class="ctrl" type="button" data-reviews-prev aria-label="<?php esc_attr_e( 'Предыдущие отзывы', 'promix' ); ?>">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M19 12H5M11 18l-6-6 6-6"></path>
-                        </svg>
+                        <?php echo promix_icon( 'arrow-left', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
                     </button>
                     <button class="ctrl" type="button" data-reviews-next aria-label="<?php esc_attr_e( 'Следующие отзывы', 'promix' ); ?>">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M5 12h14M13 6l6 6-6 6"></path>
-                        </svg>
+                        <?php echo promix_icon( 'arrow-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
                     </button>
                 </div>
 
                 <?php if ( $all_text ) : ?>
                     <a class="reviews__all" href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener">
                         <?php echo esc_html( $all_text ); ?>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M5 12h14M13 6l6 6-6 6"></path>
-                        </svg>
+                        <?php echo promix_icon( 'arrow-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
                     </a>
                 <?php endif; ?>
             </div>

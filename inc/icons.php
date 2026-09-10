@@ -77,8 +77,9 @@ function promix_icon( string $name, float $stroke = 1.8, string $extra_class = '
         return '';
     }
 
+    // Иконки декоративные: рядом либо текст, либо aria-label на кнопке.
     return sprintf(
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="%s" stroke-linecap="round" stroke-linejoin="round"%s>%s</svg>',
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="%s" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"%s>%s</svg>',
         esc_attr( (string) $stroke ),
         $extra_class ? ' class="' . esc_attr( $extra_class ) . '"' : '',
         $cache[ $name ]

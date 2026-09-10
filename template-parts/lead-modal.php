@@ -15,10 +15,7 @@ $policy_url = get_privacy_policy_url();
 
     <div class="modal__window" role="dialog" aria-modal="true" aria-labelledby="lead-modal-title">
         <button class="modal__close" type="button" data-lead-close aria-label="<?php esc_attr_e( 'Закрыть', 'promix' ); ?>">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" aria-hidden="true">
-                <path d="M18 6 6 18M6 6l12 12"></path>
-            </svg>
+            <?php echo promix_icon( 'x', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
         </button>
 
         <p class="kicker" data-lead-kicker><?php esc_html_e( 'Заявка', 'promix' ); ?></p>

@@ -49,10 +49,7 @@ $wide_url   = promix_field( 'catalog_wide_url', '#' );
                     <h3 class="cat__title"><?php echo esc_html( $item['cat_title'] ); ?></h3>
                     <p class="cat__text"><?php echo esc_html( $item['cat_text'] ); ?></p>
                     <span class="cat__arrow" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M7 17 17 7M9 7h8v8"></path>
-                    </svg>
+                    <?php echo promix_icon( 'arrow-up-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
                 </span>
                 </a>
             <?php endforeach; ?>
@@ -79,10 +76,7 @@ $wide_url   = promix_field( 'catalog_wide_url', '#' );
                         <span class="cat__wide-note"><?php echo esc_html( $wide_note ); ?></span>
                     </span>
                     <span class="cat__arrow" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M7 17 17 7M9 7h8v8"></path>
-                    </svg>
+                    <?php echo promix_icon( 'arrow-up-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
                 </span>
                 </a>
             </div>

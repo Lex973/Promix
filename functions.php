@@ -31,12 +31,16 @@ function promix_setup(): void {
 
     register_nav_menus(
         array(
-            'primary' => __( 'Основное меню', 'promix' ),
-            'footer'  => __( 'Меню в подвале', 'promix' ),
+            'primary'        => __( 'Основное меню (шапка и мобильное)', 'promix' ),
+            'footer'         => __( 'Подвал: разделы', 'promix' ),
+            'footer_catalog' => __( 'Подвал: каталог', 'promix' ),
         )
     );
 }
 add_action( 'after_setup_theme', 'promix_setup' );
+
+// Меню сайта.
+require_once get_theme_file_path( 'inc/nav.php' );
 
 // Поля админки на Carbon Fields.
 require_once get_theme_file_path( 'inc/fields.php' );

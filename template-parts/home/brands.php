@@ -99,10 +99,7 @@ $rows   = array(
                        data-lead-title="<?php esc_attr_e( 'Спросим у технолога', 'promix' ); ?>">
                         <?php echo esc_html( $cta_text ); ?>
                         <span class="brands__btn-arrow" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                 stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M5 12h14M13 6l6 6-6 6"></path>
-                            </svg>
+                            <?php echo promix_icon( 'arrow-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
                         </span>
                     </a>
                 <?php endif; ?>

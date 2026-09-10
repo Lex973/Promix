@@ -94,10 +94,7 @@ $wide_cta_url  = promix_field( 'why_wide_cta_url', '#contacts' );
                                data-lead-title="<?php esc_attr_e( 'Обсудим условия', 'promix' ); ?>">
                                 <?php echo esc_html( $wide_cta_text ); ?>
                                 <span aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                         stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M5 12h14M13 6l6 6-6 6"></path>
-                                    </svg>
+                                    <?php echo promix_icon( 'arrow-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
                                 </span>
                             </a>
                         <?php endif; ?>
