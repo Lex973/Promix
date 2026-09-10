@@ -15,7 +15,7 @@ get_header();
             the_post();
             ?>
             <h1 class="section__title"><?php the_title(); ?></h1>
-            <div class="about__text"><?php the_content(); ?></div>
+            <div class="doc"><?php the_content(); ?></div>
             <?php
         endwhile;
         ?>

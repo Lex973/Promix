@@ -76,13 +76,18 @@ $promix = promix_contacts();
 
         <div class="footer__bottom">
             <p>© <?php echo esc_html( wp_date( 'Y' ) ); ?> PROMIX — малярный центр в Казани</p>
-            <a class="footer__policy" href="#">Политика конфиденциальности</a>
+            <?php $promix_policy = get_privacy_policy_url(); ?>
+            <?php if ( $promix_policy ) : ?>
+                <a class="footer__policy" href="<?php echo esc_url( $promix_policy ); ?>">Политика конфиденциальности</a>
+            <?php endif; ?>
         </div>
 
     </div>
 </footer>
 
 <?php get_template_part( 'template-parts/lead-modal' ); ?>
+
+<?php get_template_part( 'template-parts/cookie-notice' ); ?>
 
 <?php wp_footer(); ?>
 </body>

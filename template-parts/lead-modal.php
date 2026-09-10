@@ -41,8 +41,9 @@ $policy_url = get_privacy_policy_url();
                 <textarea class="lead__input lead__input--area" name="note" rows="3"></textarea>
             </label>
 
+            <?php /* Галочка снята намеренно: согласие — действие человека, а не заводская настройка. */ ?>
             <label class="lead__agree">
-                <input type="checkbox" name="agree" value="1" checked>
+                <input type="checkbox" name="agree" value="1" required>
                 <span>
                     <?php esc_html_e( 'Согласен на обработку персональных данных', 'promix' ); ?>
                     <?php if ( $policy_url ) : ?>

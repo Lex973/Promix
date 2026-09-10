@@ -79,6 +79,7 @@ function promix_assets(): void {
         'lead'    => array( 'promix-main' ),
         'brands'  => array(),
         'reviews' => array(),
+        'cookie'  => array(),
     );
 
     foreach ( $scripts as $handle => $deps ) {
