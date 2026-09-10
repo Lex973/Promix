@@ -59,12 +59,36 @@ function promix_assets(): void {
         promix_asset_version( 'assets/css/variables.css' )
     );
 
-    wp_enqueue_style(
-        'promix-style',
-        get_theme_file_uri( 'assets/css/style.css' ),
-        array( 'promix-variables' ),
-        promix_asset_version( 'assets/css/style.css' )
-    );
+    /*
+     * Стили разложены по кускам страницы. Первые четыре нужны везде,
+     * остальные — только там, где эти блоки есть: незачем возить стили
+     * главной на страницу политики.
+     */
+    $sheets = array( 'base', 'header', 'footer', 'modal' );
+
+    if ( is_front_page() ) {
+        $sheets[] = 'home';
+    }
+
+    if ( is_404() ) {
+        $sheets[] = 'notfound';
+    }
+
+    // Каждый следующий зависит от предыдущего — порядок подключения важен.
+    $deps = array( 'promix-variables' );
+
+    foreach ( $sheets as $sheet ) {
+        $handle = 'promix-' . $sheet;
+
+        wp_enqueue_style(
+            $handle,
+            get_theme_file_uri( "assets/css/{$sheet}.css" ),
+            $deps,
+            promix_asset_version( "assets/css/{$sheet}.css" )
+        );
+
+        $deps = array( $handle );
+    }
 
     // Плавная прокрутка; лежит в теме, чтобы не ходить на сторонний CDN.
     wp_enqueue_script(
