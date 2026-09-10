@@ -580,7 +580,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-top: 10px;
+  min-height: 18px;
 }
 
 .product__brand {
@@ -618,25 +618,26 @@
 }
 
 .product__stock {
-  margin-top: 10px;
+  margin-top: 8px;
   font-size: 13px;
   line-height: 1.45;
   color: var(--color-success);
 }
 
-/* Кнопка прижата к низу: названия разной длины, иначе кнопки в ряду
-   встают лесенкой */
+/* Низ карточки прижат к нижнему краю целиком: бренд, артикул и кнопка
+   стоят на одной высоте во всём ряду, а разницу в длине названий
+   забирает пустое место над ними */
+.product__foot {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
 .product__buy {
   align-self: flex-start;
-  margin-top: auto;
+  margin-top: 14px;
   padding: 11px 22px;
   border-radius: var(--radius-sm);
   font-size: 15px;
-}
-
-.product__meta,
-.product__stock {
-  margin-bottom: 14px;
 }
 
 .products__empty {

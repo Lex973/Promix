@@ -65,27 +65,29 @@ $stock = (string) ( $product['stock'] ?? '' );
             <a href="#"><?php echo esc_html( $name ); ?></a>
         </h2>
 
-        <div class="product__meta">
-            <?php if ( $brand ) : ?>
-                <span class="product__brand"><?php echo esc_html( $brand ); ?></span>
+        <div class="product__foot">
+            <div class="product__meta">
+                <?php if ( $brand ) : ?>
+                    <span class="product__brand"><?php echo esc_html( $brand ); ?></span>
+                <?php endif; ?>
+
+                <?php if ( $sku ) : ?>
+                    <button class="product__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>"
+                            aria-label="<?php echo esc_attr( sprintf( /* translators: %s — артикул. */ __( 'Скопировать артикул %s', 'promix' ), $sku ) ); ?>">
+                        <span><?php echo esc_html( $sku ); ?></span>
+                        <?php echo promix_icon( 'copy', 1.7 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                    </button>
+                <?php endif; ?>
+            </div>
+
+            <?php if ( $stock ) : ?>
+                <p class="product__stock"><?php echo esc_html( $stock ); ?></p>
             <?php endif; ?>
 
-            <?php if ( $sku ) : ?>
-                <button class="product__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>"
-                        aria-label="<?php echo esc_attr( sprintf( /* translators: %s — артикул. */ __( 'Скопировать артикул %s', 'promix' ), $sku ) ); ?>">
-                    <span><?php echo esc_html( $sku ); ?></span>
-                    <?php echo promix_icon( 'copy', 1.7 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                </button>
-            <?php endif; ?>
+            <button class="btn btn--primary product__buy" type="button"
+                    aria-label="<?php echo esc_attr( sprintf( /* translators: %s — название товара. */ __( 'В корзину: %s', 'promix' ), $name ) ); ?>">
+                <?php esc_html_e( 'В корзину', 'promix' ); ?>
+            </button>
         </div>
-
-        <?php if ( $stock ) : ?>
-            <p class="product__stock"><?php echo esc_html( $stock ); ?></p>
-        <?php endif; ?>
-
-        <button class="btn btn--primary product__buy" type="button"
-                aria-label="<?php echo esc_attr( sprintf( /* translators: %s — название товара. */ __( 'В корзину: %s', 'promix' ), $name ) ); ?>">
-            <?php esc_html_e( 'В корзину', 'promix' ); ?>
-        </button>
     </div>
 </article>
