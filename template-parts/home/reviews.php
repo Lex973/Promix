@@ -35,7 +35,7 @@ $reviews = promix_field( 'reviews_items', promix_default_reviews() );
 
                     <div class="rating__meta">
                         <?php
-                        echo promix_stars( 5, sprintf( /* translators: %s — оценка компании. */ __( 'Рейтинг %s из 5', 'promix' ), $rating ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка звёзд.
+                        echo promix_stars( (float) str_replace( ',', '.', $rating ), sprintf( /* translators: %s — оценка компании. */ __( 'Рейтинг %s из 5', 'promix' ), $rating ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка звёзд.
                         ?>
                         <p class="rating__count"><?php echo esc_html( $count ); ?></p>
                     </div>

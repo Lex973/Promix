@@ -87,20 +87,35 @@ function promix_icon( string $name, float $stroke = 1.8, string $extra_class = '
 }
 
 /**
- * Ряд закрашенных звёзд.
+ * Ряд звёзд с дробной оценкой.
  *
- * @param int    $count Сколько звёзд закрасить.
- * @param string $label Подпись для программ чтения с экрана.
+ * Пять контурных звёзд и залитая копия поверх, обрезанная по ширине:
+ * 4,9 из 5 — это 98% ширины, а не «четыре звезды» и не «пять».
+ *
+ * @param float  $rating Оценка от 0 до 5, можно дробную.
+ * @param string $label  Подпись для программ чтения с экрана.
  * @return string
  */
-function promix_stars( int $count, string $label = '' ): string {
-    $count = max( 0, min( 5, $count ) );
-    $star  = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z"/></svg>';
+function promix_stars( float $rating, string $label = '' ): string {
+    $rating = max( 0.0, min( 5.0, $rating ) );
+    $path   = 'M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z';
+
+    $outline = sprintf(
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="%s"/></svg>',
+        $path
+    );
+
+    $filled = sprintf(
+        '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="%s"/></svg>',
+        $path
+    );
 
     return sprintf(
-        '<div class="stars"%s>%s</div>',
-        $label ? ' aria-label="' . esc_attr( $label ) . '"' : '',
-        str_repeat( $star, $count )
+        '<div class="stars"%s style="--stars: %s"><div class="stars__row">%s</div><div class="stars__row stars__row--fill">%s</div></div>',
+        $label ? ' role="img" aria-label="' . esc_attr( $label ) . '"' : '',
+        esc_attr( (string) round( $rating / 5 * 100, 2 ) ),
+        str_repeat( $outline, 5 ),
+        str_repeat( $filled, 5 )
     );
 }
 

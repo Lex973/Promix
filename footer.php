@@ -44,7 +44,7 @@ $promix_policy = get_privacy_policy_url();
             <div class="footer__col footer__col--contacts">
                 <h2 class="footer__title"><?php esc_html_e( 'Контакты', 'promix' ); ?></h2>
                 <ul class="footer__list">
-                    <li><a class="footer__phone" href="tel:<?php echo esc_attr( $promix['phone_raw'] ); ?>"><?php echo esc_html( $promix['phone'] ); ?></a></li>
+                    <li><a class="footer__phone" href="tel:<?php echo esc_attr( promix_tel_href() ); ?>"><?php echo esc_html( $promix['phone'] ); ?></a></li>
                     <li><?php echo esc_html( $promix['address'] ); ?></li>
                     <li><?php echo esc_html( $promix['hours'] ); ?><br><?php echo esc_html( $promix['hours_extra'] ); ?></li>
                 </ul>

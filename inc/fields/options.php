@@ -19,18 +19,10 @@ Container::make( 'theme_options', __( 'Контакты PROMIX', 'promix' ) )
     ->add_fields(
         array(
             Field::make( 'text', 'promix_phone', __( 'Телефон', 'promix' ) )
-                ->set_help_text( __( 'Как показывать на сайте: +7 (953) 484-00-00', 'promix' ) )
-                ->set_width( 50 ),
-
-            Field::make( 'text', 'promix_phone_raw', __( 'Телефон для ссылки', 'promix' ) )
-                ->set_help_text( __( 'Только цифры и плюс: +79534840000', 'promix' ) )
+                ->set_help_text( __( 'Как показывать на сайте: +7 (953) 484-00-00. Ссылка «позвонить» соберётся сама.', 'promix' ) )
                 ->set_width( 50 ),
 
             Field::make( 'text', 'promix_address', __( 'Адрес', 'promix' ) )
-                ->set_width( 50 ),
-
-            Field::make( 'text', 'promix_address_short', __( 'Адрес коротко', 'promix' ) )
-                ->set_help_text( __( 'Для подвала: Габдуллы Тукая, 91', 'promix' ) )
                 ->set_width( 50 ),
 
             Field::make( 'text', 'promix_hours', __( 'Режим работы', 'promix' ) )

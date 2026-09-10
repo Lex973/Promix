@@ -60,7 +60,7 @@ $c = promix_contacts();
                         </span>
                         <div>
                             <h3 class="contact__title"><?php esc_html_e( 'Телефон', 'promix' ); ?></h3>
-                            <p class="contact__value"><a href="tel:<?php echo esc_attr( $c['phone_raw'] ); ?>"><?php echo esc_html( $c['phone'] ); ?></a></p>
+                            <p class="contact__value"><a href="tel:<?php echo esc_attr( promix_tel_href() ); ?>"><?php echo esc_html( $c['phone'] ); ?></a></p>
                             <?php
                             get_template_part(
                                 'template-parts/btn-max',

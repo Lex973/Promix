@@ -132,18 +132,49 @@ function promix_field( string $name, $default = '' ) {
  * Заодно блок сворачивается по умолчанию: секций семь, развёрнутыми они
  * превращают страницу редактирования в километровую простыню.
  *
+ * Поля привязаны к шаблону «Главная PROMIX», а не к ID страницы: ID меняется
+ * при смене главной и при переносе сайта, и поля тогда пропадают из админки.
+ *
  * @param string $title Заголовок блока в админке.
  * @return \Carbon_Fields\Container\Post_Meta_Container
  */
 function promix_front_container( string $title ) {
     $container = Container::make( 'post_meta', $title )
         ->where( 'post_type', '=', 'page' )
-        ->where( 'post_id', '=', (int) get_option( 'page_on_front' ) );
+        ->where( 'post_template', '=', 'templates/home.php' );
 
     $GLOBALS['promix_front_containers'][] = $container->get_id();
 
     return $container;
 }
+
+/**
+ * Разово проставить главной шаблон «Главная PROMIX».
+ *
+ * Поля секций привязаны к шаблону; на уже работающем сайте главная его
+ * не выбирала, поэтому ставим сами — один раз и только если шаблон
+ * не выбран вручную.
+ */
+function promix_ensure_home_template(): void {
+    if ( get_option( 'promix_home_template_set' ) ) {
+        return;
+    }
+
+    $front_id = (int) get_option( 'page_on_front' );
+
+    if ( ! $front_id ) {
+        return;
+    }
+
+    $current = (string) get_post_meta( $front_id, '_wp_page_template', true );
+
+    if ( '' === $current || 'default' === $current ) {
+        update_post_meta( $front_id, '_wp_page_template', 'templates/home.php' );
+    }
+
+    update_option( 'promix_home_template_set', 1, false );
+}
+add_action( 'admin_init', 'promix_ensure_home_template' );
 
 /**
  * Свернуть блоки полей: фильтры вешаются на add_meta_boxes, когда
@@ -202,18 +233,47 @@ function promix_option( string $name, string $default = '' ): string {
  * @return array<string, string>
  */
 function promix_contacts(): array {
-    return array(
-        'phone'         => promix_option( 'phone', '+7 (953) 484-00-00' ),
-        'phone_raw'     => promix_option( 'phone_raw', '+79534840000' ),
-        'address'       => promix_option( 'address', 'Казань, ул. Габдуллы Тукая, 91' ),
-        'address_short' => promix_option( 'address_short', 'Габдуллы Тукая, 91' ),
-        'hours'         => promix_option( 'hours', 'Пн–Пт 9:00–18:00' ),
-        'hours_extra'   => promix_option( 'hours_extra', 'Сб 9:00–14:00 · Вс — выходной' ),
-        'max_url'       => promix_option( 'max_url', '#' ),
-        'gis_url'       => promix_option( '2gis_url', 'https://2gis.ru/kazan/firm/70000001060590384' ),
-        'yandex_url'    => promix_option( 'yandex_url', 'https://yandex.ru/maps/org/promix/59684652364/' ),
-        'map_embed'     => promix_option( 'map_embed', 'https://yandex.ru/map-widget/v1/org/promix/59684652364/?ll=49.120092%2C55.774053&z=17' ),
+    // Контакты нужны шапке, меню, секции контактов и подвалу: читаем один раз за запрос.
+    static $contacts = null;
+
+    if ( null !== $contacts ) {
+        return $contacts;
+    }
+
+    $contacts = array(
+        'phone'       => promix_option( 'phone', '+7 (953) 484-00-00' ),
+        'address'     => promix_option( 'address', 'Казань, ул. Габдуллы Тукая, 91' ),
+        'hours'       => promix_option( 'hours', 'Пн–Пт 9:00–18:00' ),
+        'hours_extra' => promix_option( 'hours_extra', 'Сб 9:00–14:00 · Вс — выходной' ),
+        'max_url'     => promix_option( 'max_url', '#' ),
+        'gis_url'     => promix_option( '2gis_url', 'https://2gis.ru/kazan/firm/70000001060590384' ),
+        'yandex_url'  => promix_option( 'yandex_url', 'https://yandex.ru/maps/org/promix/59684652364/' ),
+        'map_embed'   => promix_option( 'map_embed', 'https://yandex.ru/map-widget/v1/org/promix/59684652364/?ll=49.120092%2C55.774053&z=17' ),
     );
+
+    return $contacts;
+}
+
+/**
+ * Телефон для ссылки «позвонить»: собирается из того же поля, что и видимый.
+ *
+ * Отдельное поле для этого держать не нужно — его забывали править вместе
+ * с основным, и кнопка звонила по старому номеру.
+ *
+ * @return string Номер вида +79534840000 или пустая строка.
+ */
+function promix_tel_href(): string {
+    $digits = (string) preg_replace( '/\D/', '', promix_contacts()['phone'] );
+
+    if ( 11 === strlen( $digits ) && '8' === $digits[0] ) {
+        $digits = '7' . substr( $digits, 1 );
+    }
+
+    if ( 10 === strlen( $digits ) ) {
+        $digits = '7' . $digits;
+    }
+
+    return $digits ? '+' . $digits : '';
 }
 
 /**
