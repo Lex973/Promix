@@ -14,14 +14,6 @@ defined( 'ABSPATH' ) || exit;
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#DF0101">
-
-    <meta name="description" content="PROMIX — малярный центр в Казани: краски, шпаклёвки, грунты, инструмент и оборудование. Подбор материалов, колеровка, семинары для мастеров.">
-
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="PROMIX">
-    <meta property="og:title" content="PROMIX — профессиональный малярный центр в Казани">
-    <meta property="og:description" content="Краски, шпаклёвки, грунты, инструмент и оборудование для полного цикла малярных работ.">
-    <meta property="og:locale" content="ru_RU">
     <?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>

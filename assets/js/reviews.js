@@ -34,7 +34,7 @@
 
   /* Кнопка гаснет, когда лента упёрлась в край */
   function syncButtons() {
-    var max = track.scrollWidth - viewport.clientWidth - 1;
+    var max = viewport.scrollWidth - viewport.clientWidth - 1;
 
     if (prevBtn) {
       prevBtn.disabled = viewport.scrollLeft <= 0;

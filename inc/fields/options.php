@@ -37,6 +37,15 @@ Container::make( 'theme_options', __( 'Контакты PROMIX', 'promix' ) )
                 ->set_attribute( 'type', 'email' )
                 ->set_help_text( __( 'Пусто — письма уходят на адрес администратора сайта.', 'promix' ) ),
 
+            Field::make( 'separator', 'promix_seo_sep', __( 'Для поиска и мессенджеров', 'promix' ) ),
+
+            Field::make( 'textarea', 'promix_meta_description', __( 'Описание главной', 'promix' ) )
+                ->set_rows( 2 )
+                ->set_help_text( __( 'Показывается в результатах поиска под заголовком. Две-три строки о магазине.', 'promix' ) ),
+
+            Field::make( 'image', 'promix_og_image', __( 'Картинка для ссылок', 'promix' ) )
+                ->set_help_text( __( 'Видна, когда ссылку на сайт отправляют в мессенджер. Лучше от 1200×630. Если пусто — логотип.', 'promix' ) ),
+
             Field::make( 'separator', 'promix_links_sep', __( 'Ссылки', 'promix' ) ),
 
             Field::make( 'text', 'promix_max_url', __( 'Ссылка на MAX', 'promix' ) )

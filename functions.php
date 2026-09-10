@@ -39,6 +39,9 @@ function promix_setup(): void {
 }
 add_action( 'after_setup_theme', 'promix_setup' );
 
+// Мета-теги: описание и Open Graph.
+require_once get_theme_file_path( 'inc/meta.php' );
+
 // Меню сайта.
 require_once get_theme_file_path( 'inc/nav.php' );
 

@@ -262,9 +262,19 @@
     }
   });
 
-  window.addEventListener('resize', function () {
-    if (window.innerWidth > 980 && isOpen()) {
+  /* Порог тот же, что в CSS: шире — меню становится обычным, и открытую
+     панель надо закрыть. Слушаем сам переход, а не каждый пиксель resize */
+  var desktop = window.matchMedia('(min-width: 981px)');
+
+  var onDesktop = function (event) {
+    if (event.matches && isOpen()) {
       closeMenu();
     }
-  });
+  };
+
+  if (desktop.addEventListener) {
+    desktop.addEventListener('change', onDesktop);
+  } else {
+    desktop.addListener(onDesktop);
+  }
 })();
