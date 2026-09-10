@@ -8,6 +8,11 @@
   box-sizing: border-box;
 }
 
+/* Атрибут hidden проигрывает любому своему display — возвращаем ему силу */
+[hidden] {
+  display: none !important;
+}
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header-height) + 16px);

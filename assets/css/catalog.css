@@ -1,0 +1,600 @@
+/* PROMIX — каталог: фильтры слева, поиск и сортировка сверху, товары сеткой.
+   Медиазапросы стоят рядом со своими правилами, а не общим хвостом. */
+
+.catalog__head {
+  max-width: 720px;
+}
+
+.catalog__head .section__lead {
+  max-width: none;
+  margin-top: 14px;
+}
+
+/* ===== Верхняя панель: поиск, фильтры на мобильном, сортировка ===== */
+
+.catalog__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: clamp(28px, 3vw, 40px);
+}
+
+.search {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 560px;
+}
+
+.search__icon {
+  position: absolute;
+  top: 50%;
+  left: 18px;
+  transform: translateY(-50%);
+  display: flex;
+  color: var(--color-muted);
+  pointer-events: none;
+}
+
+.search__icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.search__input {
+  width: 100%;
+  padding: 15px 48px 15px 50px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--color-ink);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.search__input::placeholder {
+  color: var(--color-muted);
+}
+
+.search__input:focus {
+  outline: none;
+  border-color: var(--color-brand-line);
+  box-shadow: 0 0 0 4px var(--color-brand-soft);
+}
+
+/* Крестик появляется, только когда есть что стирать */
+.search__clear {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  display: flex;
+  padding: 6px;
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.search__clear:hover {
+  color: var(--color-ink);
+  background: var(--color-surface-dim);
+}
+
+.search__clear svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sort {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.sort__label {
+  font-size: 15px;
+  color: var(--color-muted);
+}
+
+.sort__select {
+  padding: 13px 40px 13px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface);
+  /* Стрелка нарисована фоном: системная у select не поддаётся стилю */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 16px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: var(--fw-medium);
+  color: var(--color-ink);
+  cursor: pointer;
+  appearance: none;
+}
+
+.sort__select:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Кнопка «Фильтры» нужна только там, где колонка фильтров спрятана */
+.catalog__filters-btn {
+  display: none;
+  gap: 10px;
+  padding: 13px 22px;
+  font-size: 15px;
+}
+
+.catalog__filters-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== Раскладка ===== */
+
+.catalog__layout {
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr);
+  gap: clamp(24px, 2.6vw, 36px);
+  align-items: start;
+  margin-top: 28px;
+}
+
+.catalog__main {
+  min-width: 0;
+}
+
+.catalog__count {
+  margin-bottom: 18px;
+  font-size: 15px;
+  color: var(--color-muted);
+}
+
+/* ===== Фильтры ===== */
+
+.filters {
+  position: sticky;
+  top: calc(var(--header-height) + 16px);
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.filters__head {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.filters__title {
+  font-size: 20px;
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+}
+
+.filters__close {
+  display: flex;
+  padding: 8px;
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.filters__close:hover {
+  color: var(--color-ink);
+  background: var(--color-surface-dim);
+}
+
+.filters__close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.filter {
+  padding: 0 0 20px;
+  margin: 0 0 20px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.filter:last-of-type {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+
+.filter__title {
+  margin-bottom: 14px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.filter__list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+/* Длинный список брендов подрезан, пока не нажали «Показать все» */
+.filter__list--short .check:nth-child(n + 6) {
+  display: none;
+}
+
+.filter__list--short.is-open .check {
+  display: flex;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+}
+
+.check input {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--color-brand);
+  cursor: pointer;
+}
+
+.check__text {
+  flex: 1 1 auto;
+}
+
+.check:hover .check__text {
+  color: var(--color-brand);
+}
+
+.check__count {
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--color-border-strong);
+}
+
+.filter__more {
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: var(--fw-medium);
+  color: var(--color-brand);
+  cursor: pointer;
+}
+
+.filter__more:hover {
+  color: var(--color-brand-dark);
+}
+
+.filter__price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter__input {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--color-ink);
+}
+
+.filter__input:focus {
+  outline: none;
+  border-color: var(--color-brand-line);
+  box-shadow: 0 0 0 3px var(--color-brand-soft);
+}
+
+.filter__dash {
+  color: var(--color-border-strong);
+}
+
+.filters__foot {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.filters__reset {
+  flex: 1 1 auto;
+  padding: 12px 20px;
+  font-size: 15px;
+}
+
+/* Кнопка «Показать» осмысленна только в выехавшей панели */
+.filters__apply {
+  display: none;
+  flex: 1 1 auto;
+  padding: 12px 20px;
+  font-size: 15px;
+}
+
+.filters-overlay {
+  display: none;
+}
+
+/* ===== Сетка товаров ===== */
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(224px, 1fr));
+  gap: 20px;
+}
+
+.product {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+
+.product:hover {
+  transform: translateY(-3px);
+  border-color: transparent;
+  box-shadow: var(--shadow-card);
+}
+
+/* Фотографий товаров пока нет: место под них держит иконка раздела */
+.product__media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 3;
+  background: var(--color-surface-alt);
+  color: var(--color-border-strong);
+  transition: color var(--transition);
+}
+
+.product:hover .product__media {
+  color: var(--color-brand-line);
+}
+
+.product__icon {
+  width: 34%;
+  height: auto;
+}
+
+.product__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  padding: 18px;
+}
+
+.product__brand {
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-brand);
+}
+
+.product__title {
+  font-size: 15px;
+  font-weight: var(--fw-medium);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.product__title a {
+  /* Длинные названия из 1С обрезаем, чтобы карточки не разъезжались */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color var(--transition-fast);
+}
+
+.product__title a:hover {
+  color: var(--color-brand);
+}
+
+.product__sku {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.product__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.product__price {
+  font-size: 19px;
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.product__rub {
+  font-weight: var(--fw-medium);
+  color: var(--color-muted);
+}
+
+.product__buy {
+  gap: 0;
+  padding: 11px;
+  border-radius: var(--radius-pill);
+}
+
+.product__buy svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Подпись у кнопки появляется, когда карточке хватает ширины */
+.product__buy span {
+  display: none;
+}
+
+.products__empty {
+  max-width: 520px;
+  padding: 40px 0;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+.catalog__more {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(28px, 3vw, 40px);
+}
+
+/* ===== Адаптив ===== */
+
+@media (min-width: 1280px) {
+  .products {
+    grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
+  }
+
+  .product__buy {
+    gap: 8px;
+    padding: 11px 18px;
+  }
+
+  .product__buy span {
+    display: inline;
+  }
+}
+
+@media (max-width: 980px) {
+  .catalog__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .catalog__filters-btn {
+    display: inline-flex;
+  }
+
+  .sort__label {
+    display: none;
+  }
+
+  /* Фильтры уезжают в панель, которая выдвигается слева */
+  .filters {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: var(--z-menu);
+    width: min(340px, 88vw);
+    padding: 22px;
+    border: 0;
+    border-radius: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(-100%);
+    box-shadow: 24px 0 60px rgba(0, 0, 0, 0.14);
+    transition: transform var(--transition);
+  }
+
+  .filters.is-open {
+    transform: none;
+  }
+
+  .filters__head {
+    display: flex;
+  }
+
+  .filters__apply {
+    display: inline-flex;
+  }
+
+  .filters-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    background: var(--color-overlay);
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+
+  .filters-overlay.is-open {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .catalog__toolbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .search {
+    order: -1;
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  .sort {
+    margin-left: 0;
+    flex: 1 1 auto;
+  }
+
+  .sort__select {
+    width: 100%;
+  }
+
+  .catalog__filters-btn {
+    flex: 0 0 auto;
+  }
+
+  .products {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .product__body {
+    padding: 14px;
+  }
+
+  .product__title {
+    font-size: 14px;
+  }
+
+  .product__price {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 420px) {
+  .product__foot {
+    padding-top: 12px;
+  }
+
+  .product__buy {
+    padding: 9px;
+  }
+}

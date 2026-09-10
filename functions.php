@@ -19,6 +19,33 @@ function promix_asset_version( string $relative_path ): string {
 }
 
 /**
+ * Слово в нужной форме: 1 товар, 2 товара, 5 товаров.
+ *
+ * Собственный помощник, потому что _n() без файла перевода считает
+ * по английским правилам и на 21 даёт множественное число.
+ *
+ * @param int    $number Количество.
+ * @param string $one    Форма для 1.
+ * @param string $few    Форма для 2-4.
+ * @param string $many   Форма для 5 и больше.
+ * @return string
+ */
+function promix_plural( int $number, string $one, string $few, string $many ): string {
+    $ten     = $number % 10;
+    $hundred = $number % 100;
+
+    if ( 1 === $ten && 11 !== $hundred ) {
+        return $one;
+    }
+
+    if ( $ten >= 2 && $ten <= 4 && ( $hundred < 10 || $hundred >= 20 ) ) {
+        return $few;
+    }
+
+    return $many;
+}
+
+/**
  * Возможности темы.
  */
 function promix_setup(): void {
@@ -38,6 +65,9 @@ function promix_setup(): void {
     );
 }
 add_action( 'after_setup_theme', 'promix_setup' );
+
+// Товары для вёрстки каталога, пока нет WooCommerce.
+require_once get_theme_file_path( 'inc/catalog-demo.php' );
 
 // Мета-теги: описание и Open Graph.
 require_once get_theme_file_path( 'inc/meta.php' );
@@ -67,10 +97,15 @@ function promix_assets(): void {
      * остальные — только там, где эти блоки есть: незачем возить стили
      * главной на страницу политики.
      */
-    $sheets = array( 'base', 'header', 'footer', 'modal' );
+    $is_catalog = is_page_template( 'templates/catalog.php' );
+    $sheets     = array( 'base', 'header', 'footer', 'modal' );
 
     if ( is_front_page() ) {
         $sheets[] = 'home';
+    }
+
+    if ( $is_catalog ) {
+        $sheets[] = 'catalog';
     }
 
     if ( is_404() ) {
@@ -111,11 +146,17 @@ function promix_assets(): void {
         'brands'  => array(),
         'reviews' => array(),
         'cookie'  => array(),
+        'catalog' => array( 'promix-main' ),
     );
 
     foreach ( $scripts as $handle => $deps ) {
         // Ленты брендов и отзывов есть только на главной.
         if ( ! is_front_page() && in_array( $handle, array( 'brands', 'reviews' ), true ) ) {
+            continue;
+        }
+
+        // Поиск, фильтры и сортировка — только на странице каталога.
+        if ( 'catalog' === $handle && ! $is_catalog ) {
             continue;
         }
 
