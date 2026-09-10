@@ -1,6 +1,12 @@
 /* PROMIX — каталог: фильтры слева, поиск и сортировка сверху, товары сеткой.
    Медиазапросы стоят рядом со своими правилами, а не общим хвостом. */
 
+/* Отступ сверху меньше общего для секций: каталог начинается сразу под шапкой */
+.section.catalog {
+  padding-top: clamp(28px, 3vw, 44px);
+  padding-bottom: clamp(56px, 6vw, 96px);
+}
+
 .catalog__head {
   max-width: 720px;
 }
@@ -23,7 +29,6 @@
   position: relative;
   flex: 1 1 auto;
   min-width: 0;
-  max-width: 560px;
 }
 
 .search__icon {
@@ -45,7 +50,7 @@
   width: 100%;
   padding: 15px 48px 15px 50px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background: var(--color-surface);
   font-family: inherit;
   font-size: 16px;
@@ -87,47 +92,115 @@
   height: 16px;
 }
 
+/* ===== Сортировка: свой список вместо системного select ===== */
+
 .sort {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: auto;
+  position: relative;
+  flex-shrink: 0;
   white-space: nowrap;
 }
 
-.sort__label {
-  font-size: 15px;
-  color: var(--color-muted);
-}
-
-.sort__select {
-  padding: 13px 40px 13px 18px;
+.sort__btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  background-color: var(--color-surface);
-  /* Стрелка нарисована фоном: системная у select не поддаётся стилю */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 15px center;
-  background-size: 16px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
   font-family: inherit;
   font-size: 15px;
   font-weight: var(--fw-medium);
   color: var(--color-ink);
   cursor: pointer;
-  appearance: none;
+  transition: border-color var(--transition-fast);
 }
 
-.sort__select:focus-visible {
+.sort__btn:hover,
+.sort__btn[aria-expanded='true'] {
+  border-color: var(--color-border-strong);
+}
+
+.sort__btn:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+.sort__arrow {
+  width: 16px;
+  height: 16px;
+  color: var(--color-muted);
+  transition: transform var(--transition-fast);
+}
+
+.sort__btn[aria-expanded='true'] .sort__arrow {
+  transform: rotate(180deg);
+}
+
+.sort__list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: var(--z-header);
+  min-width: 100%;
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+
+  /* Появление короткое: список открывают часто, длинная анимация надоедает */
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.14s var(--ease), transform 0.14s var(--ease);
+}
+
+.sort__list.is-open {
+  opacity: 1;
+  transform: none;
+}
+
+.sort__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px;
+  border-radius: var(--radius-xs);
+  font-size: 15px;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.sort__option:hover,
+.sort__option.is-active {
+  background: var(--color-surface-alt);
+  color: var(--color-ink);
+}
+
+.sort__option[aria-selected='true'] {
+  font-weight: var(--fw-medium);
+  color: var(--color-brand);
+}
+
+.sort__check {
+  width: 15px;
+  height: 15px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.sort__option[aria-selected='true'] .sort__check {
+  opacity: 1;
 }
 
 /* Кнопка «Фильтры» нужна только там, где колонка фильтров спрятана */
 .catalog__filters-btn {
   display: none;
   gap: 10px;
-  padding: 13px 22px;
+  padding: 14px 22px;
+  border-radius: var(--radius-sm);
   font-size: 15px;
 }
 
@@ -158,13 +231,31 @@
 
 /* ===== Фильтры ===== */
 
+/*
+ * Колонка фильтров длиннее экрана: без своей высоты и прокрутки sticky
+ * прижимает её верх и нижние фильтры остаются недоступны, пока страница
+ * не докрутится до конца колонки.
+ */
 .filters {
   position: sticky;
   top: calc(var(--header-height) + 16px);
-  padding: 24px;
+  max-height: calc(100vh - var(--header-height) - 32px);
+  padding: 22px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--color-surface);
+}
+
+/* Тонкая полоса прокрутки, чтобы не спорила с рамкой */
+.filters::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filters::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--color-border);
 }
 
 .filters__head {
@@ -228,8 +319,8 @@
   gap: 11px;
 }
 
-/* Длинный список брендов подрезан, пока не нажали «Показать все» */
-.filter__list--short .check:nth-child(n + 6) {
+/* Длинные списки подрезаны, пока не нажали «Показать все» */
+.filter__list--short .check:nth-child(n + 7) {
   display: none;
 }
 
@@ -310,24 +401,45 @@
   color: var(--color-border-strong);
 }
 
+/* Кнопки держатся у нижнего края колонки: иначе, когда список фильтров
+   длиннее экрана, «Применить» уезжает за границу своей прокрутки */
 .filters__foot {
+  position: sticky;
+  bottom: -22px;
+  z-index: 1;
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 22px;
+  padding: 14px 0 22px;
+  background: var(--color-surface);
+  box-shadow: 0 -12px 14px -10px rgba(0, 0, 0, 0.08);
 }
 
 .filters__reset {
-  flex: 1 1 auto;
-  padding: 12px 20px;
-  font-size: 15px;
+  flex: 1 1 96px;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
 }
 
-/* Кнопка «Показать» осмысленна только в выехавшей панели */
 .filters__apply {
-  display: none;
-  flex: 1 1 auto;
-  padding: 12px 20px;
-  font-size: 15px;
+  flex: 1 1 110px;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+/* Пока фильтры меняли, но не применили — кнопка подсказывает, что ждёт нажатия */
+.filters__apply.is-waiting {
+  animation: filters-apply-pulse 1.6s var(--ease) infinite;
+}
+
+@keyframes filters-apply-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--color-brand-line); }
+  50%      { box-shadow: 0 0 0 6px transparent; }
 }
 
 .filters-overlay {
@@ -347,7 +459,7 @@
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--color-surface);
   transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
 }
@@ -497,16 +609,13 @@
     display: inline-flex;
   }
 
-  .sort__label {
-    display: none;
-  }
-
   /* Фильтры уезжают в панель, которая выдвигается слева */
   .filters {
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
+    max-height: none;
     z-index: var(--z-menu);
     width: min(340px, 88vw);
     padding: 22px;
@@ -525,10 +634,6 @@
 
   .filters__head {
     display: flex;
-  }
-
-  .filters__apply {
-    display: inline-flex;
   }
 
   .filters-overlay {
@@ -559,12 +664,12 @@
   }
 
   .sort {
-    margin-left: 0;
     flex: 1 1 auto;
   }
 
-  .sort__select {
+  .sort__btn {
     width: 100%;
+    justify-content: space-between;
   }
 
   .catalog__filters-btn {

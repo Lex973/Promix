@@ -3,6 +3,9 @@
    Пока всё считается на клиенте по данным в разметке: товаров немного,
    и так вёрстку видно живьём. С WooCommerce фильтрация уедет на сервер,
    а разметка и классы останутся теми же.
+
+   Поиск и сортировка срабатывают сразу, фильтры — по кнопке «Применить»:
+   отмечать три категории и ждать перерисовку после каждой галочки незачем.
 */
 
 (function () {
@@ -18,11 +21,11 @@
   var order = items.slice();
   var search = document.querySelector('[data-catalog-search]');
   var clearBtn = document.querySelector('[data-search-clear]');
-  var sortSelect = document.querySelector('[data-catalog-sort]');
   var counter = document.querySelector('[data-catalog-count]');
   var empty = document.querySelector('[data-products-empty]');
   var minInput = document.querySelector('[data-filter-min]');
   var maxInput = document.querySelector('[data-filter-max]');
+  var applyBtn = document.querySelector('[data-filters-apply]');
 
   function checkedValues(selector) {
     return Array.prototype.slice
@@ -77,6 +80,10 @@
     if (clearBtn) {
       clearBtn.hidden = !query;
     }
+
+    if (applyBtn) {
+      applyBtn.classList.remove('is-waiting');
+    }
   }
 
   function sort(mode) {
@@ -99,6 +106,13 @@
     root.appendChild(frag);
   }
 
+  /* Фильтры изменили, но не применили — подсвечиваем кнопку */
+  function pending() {
+    if (applyBtn) {
+      applyBtn.classList.add('is-waiting');
+    }
+  }
+
   if (search) {
     search.addEventListener('input', apply);
   }
@@ -112,19 +126,125 @@
   }
 
   document.querySelectorAll('[data-filter-cat], [data-filter-brand]').forEach(function (el) {
-    el.addEventListener('change', apply);
+    el.addEventListener('change', pending);
   });
 
   [minInput, maxInput].forEach(function (el) {
     if (el) {
-      el.addEventListener('input', apply);
+      el.addEventListener('input', pending);
     }
   });
 
-  if (sortSelect) {
-    sortSelect.addEventListener('change', function () {
-      sort(sortSelect.value);
+  /* ===== Сортировка ===== */
+
+  var sortBox = document.querySelector('[data-sort]');
+
+  if (sortBox) {
+    var sortBtn = sortBox.querySelector('[data-sort-toggle]');
+    var sortList = sortBox.querySelector('[data-sort-list]');
+    var sortValue = sortBox.querySelector('[data-sort-value]');
+    var options = Array.prototype.slice.call(sortBox.querySelectorAll('[data-sort-option]'));
+    var hideTimer = null;
+
+    var openSort = function () {
+      clearTimeout(hideTimer);
+      sortList.hidden = false;
+
+      /* Кадр между показом и классом — иначе появление не анимируется */
+      requestAnimationFrame(function () {
+        sortList.classList.add('is-open');
+      });
+
+      sortBtn.setAttribute('aria-expanded', 'true');
+    };
+
+    var closeSort = function () {
+      sortList.classList.remove('is-open');
+      sortBtn.setAttribute('aria-expanded', 'false');
+
+      options.forEach(function (o) { o.classList.remove('is-active'); });
+
+      /* Прячем после анимации, чтобы список не исчезал рывком */
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(function () { sortList.hidden = true; }, 180);
+    };
+
+    var isOpen = function () {
+      return sortBtn.getAttribute('aria-expanded') === 'true';
+    };
+
+    var choose = function (option) {
+      options.forEach(function (o) {
+        o.setAttribute('aria-selected', o === option ? 'true' : 'false');
+      });
+
+      sortValue.textContent = option.textContent.trim();
+      sort(option.getAttribute('data-sort-option'));
+      closeSort();
+      sortBtn.focus();
+    };
+
+    sortBtn.addEventListener('click', function () {
+      if (isOpen()) {
+        closeSort();
+      } else {
+        openSort();
+      }
     });
+
+    options.forEach(function (option) {
+      option.addEventListener('click', function () { choose(option); });
+    });
+
+    /* Клавиатура: стрелки ведут по списку, Enter выбирает, Esc закрывает */
+    sortBox.addEventListener('keydown', function (event) {
+      var current = options.indexOf(document.activeElement);
+
+      if (event.key === 'Escape' && isOpen()) {
+        closeSort();
+        sortBtn.focus();
+        return;
+      }
+
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+
+        if (!isOpen()) {
+          openSort();
+        }
+
+        var next = event.key === 'ArrowDown' ? current + 1 : current - 1;
+
+        if (next < 0) {
+          next = options.length - 1;
+        }
+        if (next >= options.length) {
+          next = 0;
+        }
+
+        options.forEach(function (o) { o.classList.remove('is-active'); });
+        options[next].classList.add('is-active');
+        options[next].focus();
+        return;
+      }
+
+      if ((event.key === 'Enter' || event.key === ' ') && current !== -1) {
+        event.preventDefault();
+        choose(options[current]);
+      }
+    });
+
+    document.addEventListener('click', function (event) {
+      if (isOpen() && !sortBox.contains(event.target)) {
+        closeSort();
+      }
+    });
+  }
+
+  /* ===== Кнопки «Применить» и «Сбросить» ===== */
+
+  if (applyBtn) {
+    applyBtn.addEventListener('click', apply);
   }
 
   var reset = document.querySelector('[data-filters-reset]');
@@ -145,27 +265,50 @@
         search.value = '';
       }
 
-      if (sortSelect) {
-        sortSelect.value = 'default';
-        sort('default');
-      }
-
       apply();
     });
   }
 
-  /* ===== Длинный список брендов ===== */
+  /* ===== Списки, подрезанные до нескольких пунктов ===== */
 
-  var more = document.querySelector('[data-filter-more]');
-  var moreList = document.querySelector('[data-filter-more-list]');
+  document.querySelectorAll('[data-filter-more]').forEach(function (btn) {
+    var list = btn.parentNode.querySelector('[data-filter-more-list]');
 
-  if (more && moreList) {
-    more.addEventListener('click', function () {
-      var open = moreList.classList.toggle('is-open');
+    if (!list) {
+      return;
+    }
 
-      more.setAttribute('aria-expanded', open ? 'true' : 'false');
-      more.textContent = open ? 'Свернуть' : 'Показать все';
+    btn.addEventListener('click', function () {
+      var open = list.classList.toggle('is-open');
+
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.textContent = open ? 'Свернуть' : 'Показать все';
     });
+  });
+
+  /* ===== Категория из ссылки: /katalog/?cat=Валики и ручки ===== */
+
+  var fromUrl = new URLSearchParams(window.location.search).get('cat');
+
+  if (fromUrl) {
+    var target = document.querySelector('[data-filter-cat][value="' + fromUrl.replace(/"/g, '\\"') + '"]');
+
+    if (target) {
+      target.checked = true;
+
+      /* Отмеченный пункт может быть в скрытой части списка — раскрываем её */
+      var list = target.closest('[data-filter-more-list]');
+
+      if (list && !list.classList.contains('is-open')) {
+        var moreBtn = list.parentNode.querySelector('[data-filter-more]');
+
+        if (moreBtn) {
+          moreBtn.click();
+        }
+      }
+
+      apply();
+    }
   }
 
   /* ===== Панель фильтров на узких экранах ===== */
@@ -185,7 +328,6 @@
     lastFocused = document.activeElement;
     overlay.hidden = false;
 
-    /* Кадр между показом и классом — иначе подложка не проявляется */
     requestAnimationFrame(function () {
       panel.classList.add('is-open');
       overlay.classList.add('is-open');
@@ -227,12 +369,25 @@
     }
   }
 
+  var isPanel = function () {
+    return window.matchMedia('(max-width: 980px)').matches;
+  };
+
   openBtn.addEventListener('click', openFilters);
   overlay.addEventListener('click', closeFilters);
 
   document.querySelectorAll('[data-filters-close]').forEach(function (el) {
     el.addEventListener('click', closeFilters);
   });
+
+  /* В выехавшей панели «Применить» заодно её закрывает */
+  if (applyBtn) {
+    applyBtn.addEventListener('click', function () {
+      if (isPanel()) {
+        closeFilters();
+      }
+    });
+  }
 
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && panel.classList.contains('is-open')) {

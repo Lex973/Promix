@@ -56,14 +56,33 @@ $total      = array_sum( $categories );
                 <span><?php esc_html_e( 'Фильтры', 'promix' ); ?></span>
             </button>
 
-            <div class="sort">
-                <label class="sort__label" for="catalog-sort"><?php esc_html_e( 'Сортировка', 'promix' ); ?></label>
-                <select class="sort__select" id="catalog-sort" data-catalog-sort>
-                    <option value="default"><?php esc_html_e( 'по умолчанию', 'promix' ); ?></option>
-                    <option value="price-asc"><?php esc_html_e( 'сначала дешевле', 'promix' ); ?></option>
-                    <option value="price-desc"><?php esc_html_e( 'сначала дороже', 'promix' ); ?></option>
-                    <option value="name"><?php esc_html_e( 'по названию', 'promix' ); ?></option>
-                </select>
+            <?php
+            $sort_options = array(
+                'default'    => __( 'по умолчанию', 'promix' ),
+                'price-asc'  => __( 'сначала дешевле', 'promix' ),
+                'price-desc' => __( 'сначала дороже', 'promix' ),
+                'name'       => __( 'по названию', 'promix' ),
+            );
+            ?>
+            <div class="sort" data-sort>
+                <button class="sort__btn" type="button" data-sort-toggle
+                        aria-haspopup="listbox" aria-expanded="false"
+                        aria-label="<?php esc_attr_e( 'Сортировка', 'promix' ); ?>">
+                    <span class="sort__value" data-sort-value><?php echo esc_html( reset( $sort_options ) ); ?></span>
+                    <?php echo promix_icon( 'chevron-down', 2, 'sort__arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                </button>
+
+                <ul class="sort__list" role="listbox" data-sort-list hidden
+                    aria-label="<?php esc_attr_e( 'Способ сортировки', 'promix' ); ?>">
+                    <?php foreach ( $sort_options as $value => $label ) : ?>
+                        <li class="sort__option" role="option" tabindex="-1"
+                            data-sort-option="<?php echo esc_attr( $value ); ?>"
+                            aria-selected="<?php echo 'default' === $value ? 'true' : 'false'; ?>">
+                            <span><?php echo esc_html( $label ); ?></span>
+                            <?php echo promix_icon( 'check', 2.2, 'sort__check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
         </div>
 
@@ -71,7 +90,7 @@ $total      = array_sum( $categories );
 
             <div class="filters-overlay" data-filters-overlay hidden></div>
 
-            <aside class="filters" id="catalog-filters" data-filters aria-label="<?php esc_attr_e( 'Фильтры каталога', 'promix' ); ?>">
+            <aside class="filters" id="catalog-filters" data-filters data-lenis-prevent aria-label="<?php esc_attr_e( 'Фильтры каталога', 'promix' ); ?>">
 
                 <div class="filters__head">
                     <p class="filters__title"><?php esc_html_e( 'Фильтры', 'promix' ); ?></p>
@@ -83,7 +102,7 @@ $total      = array_sum( $categories );
 
                 <fieldset class="filter">
                     <legend class="filter__title"><?php esc_html_e( 'Категория', 'promix' ); ?></legend>
-                    <div class="filter__list">
+                    <div class="filter__list filter__list--short" data-filter-more-list>
                         <?php foreach ( $categories as $name => $count ) : ?>
                             <label class="check">
                                 <input type="checkbox" name="cat" value="<?php echo esc_attr( $name ); ?>" data-filter-cat>
@@ -92,6 +111,9 @@ $total      = array_sum( $categories );
                             </label>
                         <?php endforeach; ?>
                     </div>
+                    <button class="filter__more" type="button" data-filter-more aria-expanded="false">
+                        <?php esc_html_e( 'Показать все', 'promix' ); ?>
+                    </button>
                 </fieldset>
 
                 <fieldset class="filter">
@@ -124,11 +146,11 @@ $total      = array_sum( $categories );
                 </fieldset>
 
                 <div class="filters__foot">
+                    <button class="btn btn--primary filters__apply" type="button" data-filters-apply>
+                        <?php esc_html_e( 'Применить', 'promix' ); ?>
+                    </button>
                     <button class="btn btn--outline filters__reset" type="button" data-filters-reset>
                         <?php esc_html_e( 'Сбросить', 'promix' ); ?>
-                    </button>
-                    <button class="btn btn--primary filters__apply" type="button" data-filters-close>
-                        <?php esc_html_e( 'Показать', 'promix' ); ?>
                     </button>
                 </div>
             </aside>

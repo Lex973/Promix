@@ -12,6 +12,18 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Адрес каталога с выбранной категорией.
+ *
+ * @param string $category Название категории или пустая строка.
+ * @return string
+ */
+function promix_catalog_url( string $category = '' ): string {
+    $url = home_url( '/katalog/' );
+
+    return $category ? add_query_arg( 'cat', rawurlencode( $category ), $url ) : $url;
+}
+
+/**
  * Набор ссылок по умолчанию для области меню.
  *
  * Якоря пишутся вместе с адресом главной, чтобы «Каталог» работал
@@ -23,16 +35,18 @@ defined( 'ABSPATH' ) || exit;
 function promix_default_menu( string $location ): array {
     $home = home_url( '/' );
 
+    $catalog = home_url( '/katalog/' );
+
     $menus = array(
         'primary' => array(
-            $home . '#catalog'  => __( 'Каталог', 'promix' ),
+            $catalog            => __( 'Каталог', 'promix' ),
             $home . '#brands'   => __( 'Бренды', 'promix' ),
             $home . '#about'    => __( 'О компании', 'promix' ),
             $home . '#reviews'  => __( 'Отзывы', 'promix' ),
             $home . '#contacts' => __( 'Контакты', 'promix' ),
         ),
         'footer' => array(
-            $home . '#catalog'  => __( 'Каталог', 'promix' ),
+            $catalog            => __( 'Каталог', 'promix' ),
             $home . '#brands'   => __( 'Бренды', 'promix' ),
             $home . '#about'    => __( 'О компании', 'promix' ),
             $home . '#why'      => __( 'Почему PROMIX', 'promix' ),
@@ -40,16 +54,17 @@ function promix_default_menu( string $location ): array {
             $home . '#contacts' => __( 'Контакты', 'promix' ),
         ),
         /*
-         * Разделы каталога ведут в никуда, пока нет WooCommerce: настоящие
-         * адреса появятся вместе с категориями товаров.
+         * Шесть самых больших разделов прайса. Ссылка открывает каталог
+         * с уже отмеченным фильтром; с WooCommerce тут будут настоящие
+         * адреса категорий товаров.
          */
         'footer_catalog' => array(
-            '#paints'    => __( 'Краски', 'promix' ),
-            '#putty'     => __( 'Шпаклёвки и клеи', 'promix' ),
-            '#primers'   => __( 'Грунты', 'promix' ),
-            '#tools'     => __( 'Инструмент', 'promix' ),
-            '#equipment' => __( 'Оборудование', 'promix' ),
-            '#supplies'  => __( 'Расходники', 'promix' ),
+            promix_catalog_url( 'Шпатели и лезвия' )           => __( 'Шпатели и лезвия', 'promix' ),
+            promix_catalog_url( 'Ленты и укрывные материалы' ) => __( 'Ленты и укрывные материалы', 'promix' ),
+            promix_catalog_url( 'Валики и ручки' )             => __( 'Валики и ручки', 'promix' ),
+            promix_catalog_url( 'Окрасочное оборудование' )    => __( 'Окрасочное оборудование', 'promix' ),
+            promix_catalog_url( 'Шлифование и абразивы' )      => __( 'Шлифование и абразивы', 'promix' ),
+            promix_catalog_url( 'Краски, грунты, лаки' )       => __( 'Краски, грунты, лаки', 'promix' ),
         ),
     );
 
