@@ -11,22 +11,50 @@ $kicker = promix_field( 'catalog_kicker', 'Каталог' );
 $title  = promix_field( 'catalog_title', "Всё для полного\nцикла работ" );
 $lead   = promix_field( 'catalog_lead', 'Материалы, инструмент и оборудование для всех этапов работы — от подготовки поверхности до финишного покрытия. Подскажем, что подойдёт под ваш объект.' );
 
+/*
+ * Шесть самых больших разделов прайса. Названия и порядок совпадают
+ * с фильтром в каталоге, ссылка открывает его с отмеченной категорией.
+ */
 $items = promix_field(
     'catalog_items',
     array(
-        array( 'cat_title' => 'Краски',           'cat_text' => 'Интерьерные, фасадные и декоративные покрытия',    'cat_url' => '#' ),
-        array( 'cat_title' => 'Шпаклёвки и клеи', 'cat_text' => 'Составы для выравнивания и подготовки поверхностей', 'cat_url' => '#' ),
-        array( 'cat_title' => 'Грунты',           'cat_text' => 'Системы под разные основания и условия нанесения',   'cat_url' => '#' ),
-        array( 'cat_title' => 'Инструмент',       'cat_text' => 'Валики, кисти, шпатели и малярная оснастка',         'cat_url' => '#' ),
-        array( 'cat_title' => 'Оборудование',     'cat_text' => 'Краскопульты и техника для профессиональных работ',  'cat_url' => '#' ),
-        array( 'cat_title' => 'Расходники',       'cat_text' => 'Ленты, плёнка, абразивы, средства для очистки',      'cat_url' => '#' ),
+        array(
+            'cat_title' => 'Шпатели и лезвия',
+            'cat_text'  => 'Японские и фасадные шпатели, сменные лезвия, кельмы. STORCH, OLEJNIK, GOLDBLATT',
+            'cat_url'   => promix_catalog_url( 'Шпатели и лезвия' ),
+        ),
+        array(
+            'cat_title' => 'Ленты и укрывные материалы',
+            'cat_text'  => 'Малярные ленты, плёнка, флис и укрывная бумага для защиты помещения',
+            'cat_url'   => promix_catalog_url( 'Ленты и укрывные материалы' ),
+        ),
+        array(
+            'cat_title' => 'Валики и ручки',
+            'cat_text'  => 'Валики под любую фактуру, бюгели, телескопические ручки и удлинители',
+            'cat_url'   => promix_catalog_url( 'Валики и ручки' ),
+        ),
+        array(
+            'cat_title' => 'Окрасочное оборудование',
+            'cat_text'  => 'Краскораспылители, сопла, фильтры и запчасти. TECMASTER, Graco, Wagner',
+            'cat_url'   => promix_catalog_url( 'Окрасочное оборудование' ),
+        ),
+        array(
+            'cat_title' => 'Шлифование и абразивы',
+            'cat_text'  => 'Круги, сетки и шлифблоки, зерно от P24 до P800. SUNMIGHT, RoxelPro, DLT',
+            'cat_url'   => promix_catalog_url( 'Шлифование и абразивы' ),
+        ),
+        array(
+            'cat_title' => 'Краски, грунты, лаки',
+            'cat_text'  => 'Интерьерные и фасадные краски, грунты и лазури. Ottinger, PROMIX',
+            'cat_url'   => promix_catalog_url( 'Краски, грунты, лаки' ),
+        ),
     )
 );
 
 $wide_image = promix_field( 'catalog_wide_image' );
 $wide_title = promix_field( 'catalog_wide_title', 'Весь каталог' );
-$wide_note  = promix_field( 'catalog_wide_note', 'Более 1 800 позиций с ценами и наличием' );
-$wide_url   = promix_field( 'catalog_wide_url', '#' );
+$wide_note  = promix_field( 'catalog_wide_note', '1 451 позиция с ценами' );
+$wide_url   = promix_field( 'catalog_wide_url', promix_catalog_url() );
 
 ?>
 <section class="section section--alt" id="catalog">
