@@ -403,17 +403,23 @@
 
 /* Кнопки держатся у нижнего края колонки: иначе, когда список фильтров
    длиннее экрана, «Применить» уезжает за границу своей прокрутки */
-.filters__foot {
+/*
+ * Кнопки стоят над фильтрами и прилипают к верху колонки: их видно
+ * сразу, без прокрутки до конца списка. Отрицательный top и padding
+ * перекрывают внутренний отступ колонки, чтобы под кнопками не
+ * просвечивали уезжающие вверх пункты.
+ */
+.filters__actions {
   position: sticky;
-  bottom: -22px;
+  top: -22px;
   z-index: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 22px;
-  padding: 14px 0 22px;
+  margin: -22px 0 18px;
+  padding: 22px 0 14px;
   background: var(--color-surface);
-  box-shadow: 0 -12px 14px -10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 14px -10px rgba(0, 0, 0, 0.08);
 }
 
 .filters__reset {
@@ -700,6 +706,11 @@
 
   .filters__head {
     display: flex;
+  }
+
+  /* В панели над кнопками есть заголовок — отрицательный отступ не нужен */
+  .filters__actions {
+    margin-top: 0;
   }
 
   .filters-overlay {

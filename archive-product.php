@@ -110,6 +110,15 @@ $lead     = $category instanceof WP_Term && $category->description
                         </button>
                     </div>
 
+                    <div class="filters__actions">
+                        <button class="btn btn--primary filters__apply" type="submit" data-filters-apply>
+                            <?php esc_html_e( 'Применить', 'promix' ); ?>
+                        </button>
+                        <a class="btn btn--outline filters__reset" href="<?php echo esc_url( $shop_url ); ?>" data-filters-reset>
+                            <?php esc_html_e( 'Сбросить', 'promix' ); ?>
+                        </a>
+                    </div>
+
                     <?php
                     $groups = array(
                         'cat'   => array( __( 'Категория', 'promix' ), $categories ),
@@ -161,15 +170,6 @@ $lead     = $category instanceof WP_Term && $category->description
                                    placeholder="<?php esc_attr_e( 'до', 'promix' ); ?>" data-filter-max>
                         </div>
                     </fieldset>
-
-                    <div class="filters__foot">
-                        <button class="btn btn--primary filters__apply" type="submit" data-filters-apply>
-                            <?php esc_html_e( 'Применить', 'promix' ); ?>
-                        </button>
-                        <a class="btn btn--outline filters__reset" href="<?php echo esc_url( $shop_url ); ?>" data-filters-reset>
-                            <?php esc_html_e( 'Сбросить', 'promix' ); ?>
-                        </a>
-                    </div>
                 </aside>
 
                 <div class="catalog__main" data-catalog-results aria-live="polite">
