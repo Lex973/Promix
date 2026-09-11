@@ -2,9 +2,9 @@
 /**
  * Карточка товара в каталоге.
  *
- * Порядок как в привычных магазинах инструмента: сверху бейдж и избранное,
- * потом фото, дальше цена, название, артикул и кнопка. Цена стоит выше
- * названия намеренно — по ней в списке ведут глазами.
+ * Порядок как в привычных магазинах инструмента: фото, под ним цена,
+ * название, артикул и кнопка; пометка «Своя марка» лежит поверх фото.
+ * Цена стоит выше названия намеренно — по ней в списке ведут глазами.
  *
  * Фотографий у большинства товаров нет: вместо них — иконка по разделу.
  * Когда фото загрузят в админке, на её место встанет миниатюра.
@@ -36,17 +36,9 @@ $stock = '';
 ?>
 <article class="product" data-product data-id="<?php echo esc_attr( (string) $product->get_id() ); ?>">
 
-    <div class="product__top">
-        <?php if ( $badge ) : ?>
-            <span class="product__badge"><?php echo esc_html( $badge ); ?></span>
-        <?php endif; ?>
-
-        <button class="product__fav" type="button" data-fav="<?php echo esc_attr( $sku ); ?>"
-                aria-pressed="false"
-                aria-label="<?php echo esc_attr( sprintf( /* translators: %s — название товара. */ __( 'Отложить: %s', 'promix' ), $name ) ); ?>">
-            <?php echo promix_icon( 'heart', 1.8 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-        </button>
-    </div>
+    <?php if ( $badge ) : ?>
+        <span class="product__badge"><?php echo esc_html( $badge ); ?></span>
+    <?php endif; ?>
 
     <a class="product__media" href="<?php echo esc_url( $url ); ?>" aria-hidden="true" tabindex="-1">
         <?php if ( $product->get_image_id() ) : ?>

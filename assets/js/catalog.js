@@ -164,7 +164,6 @@
       swap('[data-catalog-results]', doc);
       swap('[data-catalog-head]', doc);
       document.title = doc.title;
-      markFavourites(results());
 
       if (push) {
         window.history.pushState({ promixCatalog: true }, '', url);
@@ -312,7 +311,6 @@
         });
 
         grid.appendChild(frag);
-        markFavourites(grid);
       }
 
       var block = more.closest('.catalog__more');
@@ -508,61 +506,6 @@
     }
 
     document.body.removeChild(tmp);
-  });
-
-  /* ===== Отложенные товары =====
-     Пока живут в браузере: список избранного появится вместе с личным
-     кабинетом WooCommerce. */
-
-  var FAV_KEY = 'promix-favourites';
-
-  function readFavourites() {
-    try {
-      return JSON.parse(localStorage.getItem(FAV_KEY)) || [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  var favourites = readFavourites();
-
-  function markFavourites(scope) {
-    if (!scope) {
-      return;
-    }
-
-    Array.prototype.forEach.call(scope.querySelectorAll('[data-fav]'), function (btn) {
-      btn.setAttribute('aria-pressed', favourites.indexOf(btn.getAttribute('data-fav')) !== -1 ? 'true' : 'false');
-    });
-  }
-
-  markFavourites(section);
-
-  section.addEventListener('click', function (event) {
-    var btn = event.target.closest('[data-fav]');
-
-    if (!btn) {
-      return;
-    }
-
-    var sku = btn.getAttribute('data-fav');
-    var on = btn.getAttribute('aria-pressed') !== 'true';
-
-    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-
-    var index = favourites.indexOf(sku);
-
-    if (on && index === -1) {
-      favourites.push(sku);
-    } else if (!on && index !== -1) {
-      favourites.splice(index, 1);
-    }
-
-    try {
-      localStorage.setItem(FAV_KEY, JSON.stringify(favourites));
-    } catch (e) {
-      /* Приватное окно — отметка живёт до перезагрузки */
-    }
   });
 
   /* ===== Панель фильтров на узких экранах ===== */

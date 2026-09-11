@@ -159,7 +159,6 @@ html.lenis body {
 
 .btn--primary:hover {
   background: var(--color-brand-dark);
-  transform: translateY(-2px);
 }
 
 .btn--outline {
