@@ -286,7 +286,7 @@
     });
   });
 
-  /* ===== Категория из ссылки: /katalog/?cat=Валики и ручки ===== */
+  /* ===== Категория из ссылки: /catalog/?cat=Валики и ручки ===== */
 
   var fromUrl = new URLSearchParams(window.location.search).get('cat');
 

@@ -75,6 +75,9 @@ require_once get_theme_file_path( 'inc/meta.php' );
 // Меню сайта.
 require_once get_theme_file_path( 'inc/nav.php' );
 
+// WooCommerce: поддержка темой и транслит адресов.
+require_once get_theme_file_path( 'inc/woocommerce.php' );
+
 // Поля админки на Carbon Fields.
 require_once get_theme_file_path( 'inc/fields.php' );
 

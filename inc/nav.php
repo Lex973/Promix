@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * @return string
  */
 function promix_catalog_url( string $category = '' ): string {
-    $url = home_url( '/katalog/' );
+    $url = home_url( '/catalog/' );
 
     return $category ? add_query_arg( 'cat', rawurlencode( $category ), $url ) : $url;
 }
@@ -35,7 +35,7 @@ function promix_catalog_url( string $category = '' ): string {
 function promix_default_menu( string $location ): array {
     $home = home_url( '/' );
 
-    $catalog = home_url( '/katalog/' );
+    $catalog = home_url( '/catalog/' );
 
     $menus = array(
         'primary' => array(
