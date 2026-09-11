@@ -724,20 +724,21 @@
 .products--list .product {
   flex-direction: row;
   align-items: center;
-  gap: 20px;
-  padding: 12px 18px 12px 12px;
+  gap: 18px;
+  padding: 8px 16px 8px 8px;
 }
 
 .products--list .product__badge {
   top: auto;
-  bottom: 12px;
-  left: 12px;
+  bottom: 8px;
+  left: 8px;
+  padding: 3px 6px;
   font-size: 10px;
 }
 
-/* В списке фото заметно выше: строка это позволяет */
+/* В списке фото той же пропорции, но строка невысокая — ~90px */
 .products--list .product__media {
-  flex: 0 0 104px;
+  flex: 0 0 62px;
   aspect-ratio: 5 / 6;
 }
 
@@ -750,11 +751,11 @@
 }
 
 .products--list .product__title {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .products--list .product__title a {
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
 }
 
 .products--list .product__foot {
@@ -766,8 +767,8 @@
 }
 
 .products--list .product__price {
-  min-width: 100px;
-  font-size: 22px;
+  min-width: 96px;
+  font-size: 20px;
   text-align: right;
 }
 
