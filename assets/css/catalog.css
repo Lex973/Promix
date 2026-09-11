@@ -306,17 +306,17 @@
 .filter__title {
   margin-bottom: 14px;
   padding: 0;
-  font-size: 13px;
-  font-weight: var(--fw-bold);
+  font-size: 12px;
+  font-weight: var(--fw-semi);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-ink);
+  color: var(--color-muted);
 }
 
 .filter__list {
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 1px;
 }
 
 /* Длинные списки подрезаны, пока не нажали «Показать все» */
@@ -332,27 +332,51 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  margin: 0 -8px;
+  padding: 5px 8px;
+  border-radius: var(--radius-xs);
   font-size: 15px;
   line-height: 1.35;
   color: var(--color-ink-soft);
   cursor: pointer;
+  transition: background var(--transition-fast);
 }
 
+/* Отмеченный пункт подложен серым — видно, что выбрано, без лишнего цвета */
+.check:has(input:checked) {
+  background: var(--color-surface-alt);
+}
+
+/* Свой квадратик: у системного слишком тонкая рамка */
 .check input {
   flex-shrink: 0;
   width: 18px;
   height: 18px;
   margin: 0;
-  accent-color: var(--color-brand);
+  appearance: none;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 4px;
+  background: var(--color-surface);
   cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.check:hover input {
+  border-color: var(--color-ink-soft);
+}
+
+.check input:checked {
+  border-color: var(--color-brand);
+  background: var(--color-brand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 12px no-repeat;
+}
+
+.check input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .check__text {
   flex: 1 1 auto;
-}
-
-.check:hover .check__text {
-  color: var(--color-brand);
 }
 
 .check__count {
@@ -496,6 +520,8 @@
   align-items: center;
   justify-content: center;
   aspect-ratio: 4 / 3;
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-alt);
   color: var(--color-border-strong);
 }
 
@@ -556,8 +582,8 @@
 
 .product__brand {
   font-size: 12px;
-  font-weight: var(--fw-bold);
-  letter-spacing: 0.06em;
+  font-weight: var(--fw-semi);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--color-brand);
 }

@@ -11,10 +11,10 @@
   --color-on-brand:         #FFFFFF;
 
   /* Нейтральные */
-  --color-bg:               #FCFBF9;
+  --color-bg:               #FFFFFF;
   --color-surface:          #FFFFFF;
-  --color-surface-alt:      #F6F4F1;
-  --color-surface-dim:      #ECEAE6;
+  --color-surface-alt:      #F4F5F6;
+  --color-surface-dim:      #E9EBEE;
   --color-graphite:         #16181B;
   --color-graphite-soft:    #1E2126;
   --color-graphite-lift:    #262A31;
