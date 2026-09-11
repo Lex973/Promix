@@ -127,15 +127,29 @@
      она закрывает панель, а inert съел бы этот клик). */
   window.promixTrap = function (container, keep) {
     var disabled = [];
+    var alive = keep ? [container, keep] : [container];
 
-    Array.prototype.forEach.call(document.body.children, function (el) {
-      if (el === container || el === keep || el.tagName === 'SCRIPT' || el.hasAttribute('inert')) {
-        return;
-      }
+    var isAlive = function (el) {
+      return alive.some(function (a) { return el === a || el.contains(a); });
+    };
 
-      el.setAttribute('inert', '');
-      disabled.push(el);
-    });
+    /* Панель может лежать глубоко в разметке (фильтры каталога — внутри
+       main), поэтому выключаются соседи на каждом уровне вверх до body,
+       а не только прямые дети body. */
+    var node = container;
+
+    while (node && node.parentNode && node !== document.body) {
+      Array.prototype.forEach.call(node.parentNode.children, function (el) {
+        if (isAlive(el) || el.tagName === 'SCRIPT' || el.hasAttribute('inert')) {
+          return;
+        }
+
+        el.setAttribute('inert', '');
+        disabled.push(el);
+      });
+
+      node = node.parentNode;
+    }
 
     /* Tab по кругу — для браузеров без inert */
     function onKeydown(event) {

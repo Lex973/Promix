@@ -48,3 +48,37 @@ function promix_woocommerce_setup(): void {
     add_theme_support( 'woocommerce' );
 }
 add_action( 'after_setup_theme', 'promix_woocommerce_setup' );
+
+/**
+ * Стили и скрипты Woo на фронте не нужны: у каталога, карточки и корзины
+ * своя разметка, а вместе с ними уезжает и jQuery.
+ */
+function promix_woocommerce_assets(): void {
+    foreach ( array( 'woocommerce', 'wc-add-to-cart', 'wc-cart-fragments', 'wc-single-product', 'wc-jquery-blockui', 'wc-js-cookie', 'wc-order-attribution', 'sourcebuster-js' ) as $handle ) {
+        wp_dequeue_script( $handle );
+    }
+
+    foreach ( array( 'woocommerce-inline', 'wc-blocks-style', 'wc-blocks-vendors-style' ) as $handle ) {
+        wp_dequeue_style( $handle );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'promix_woocommerce_assets', 100 );
+add_filter( 'woocommerce_enqueue_styles', '__return_empty_array' );
+
+/**
+ * Скрипт «есть ли JS» и класс woocommerce-no-js на body — от стилей Woo,
+ * которых у нас нет.
+ */
+function promix_woocommerce_no_js(): void {
+    remove_action( 'wp_footer', 'wc_no_js' );
+}
+add_action( 'wp_footer', 'promix_woocommerce_no_js', 0 );
+
+/**
+ * @param string[] $classes Классы body.
+ * @return string[]
+ */
+function promix_woocommerce_body_class( array $classes ): array {
+    return array_values( array_diff( $classes, array( 'woocommerce-no-js' ) ) );
+}
+add_filter( 'body_class', 'promix_woocommerce_body_class', 11 );

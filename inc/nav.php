@@ -12,18 +12,6 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Адрес каталога с выбранной категорией.
- *
- * @param string $category Название категории или пустая строка.
- * @return string
- */
-function promix_catalog_url( string $category = '' ): string {
-    $url = home_url( '/catalog/' );
-
-    return $category ? add_query_arg( 'cat', rawurlencode( $category ), $url ) : $url;
-}
-
-/**
  * Набор ссылок по умолчанию для области меню.
  *
  * Якоря пишутся вместе с адресом главной, чтобы «Каталог» работал
@@ -35,7 +23,7 @@ function promix_catalog_url( string $category = '' ): string {
 function promix_default_menu( string $location ): array {
     $home = home_url( '/' );
 
-    $catalog = home_url( '/catalog/' );
+    $catalog = promix_catalog_url();
 
     $menus = array(
         'primary' => array(
@@ -53,11 +41,7 @@ function promix_default_menu( string $location ): array {
             $home . '#reviews'  => __( 'Отзывы', 'promix' ),
             $home . '#contacts' => __( 'Контакты', 'promix' ),
         ),
-        /*
-         * Шесть самых больших разделов прайса. Ссылка открывает каталог
-         * с уже отмеченным фильтром; с WooCommerce тут будут настоящие
-         * адреса категорий товаров.
-         */
+        // Шесть самых больших разделов прайса — адреса разделов каталога.
         'footer_catalog' => array(
             promix_catalog_url( 'Шпатели и лезвия' )           => __( 'Шпатели и лезвия', 'promix' ),
             promix_catalog_url( 'Ленты и укрывные материалы' ) => __( 'Ленты и укрывные материалы', 'promix' ),

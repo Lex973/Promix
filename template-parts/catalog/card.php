@@ -6,39 +6,35 @@
  * потом фото, дальше цена, название, артикул и кнопка. Цена стоит выше
  * названия намеренно — по ней в списке ведут глазами.
  *
- * Фотографий товаров пока нет: вместо них — иконка по категории. Когда
- * приедет WooCommerce, на её место встанет миниатюра.
+ * Фотографий у большинства товаров нет: вместо них — иконка по разделу.
+ * Когда фото загрузят в админке, на её место встанет миниатюра.
  *
  * @package promix
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$product = $args['product'] ?? array();
+$product = $args['product'] ?? null;
 
-if ( ! $product ) {
+if ( ! $product instanceof WC_Product ) {
     return;
 }
 
-$name  = (string) ( $product['name'] ?? '' );
-$brand = (string) ( $product['brand'] ?? '' );
-$sku   = (string) ( $product['sku'] ?? '' );
-$price = (float) ( $product['price'] ?? 0 );
-$cat   = (string) ( $product['cat'] ?? '' );
+$name  = $product->get_name();
+$brand = promix_product_brand( $product );
+$sku   = $product->get_sku();
+$price = (float) $product->get_price();
+$cat   = promix_product_category( $product );
+$url   = $product->get_permalink();
 
 // Товары под своей маркой стоит отмечать: их больше нигде не купить.
 $badge = ( 'PROMIX' === $brand ) ? __( 'Своя марка', 'promix' ) : '';
 
 // Наличие приедет из 1С вместе с остатками; пока строка не выводится.
-$stock = (string) ( $product['stock'] ?? '' );
+$stock = '';
 
 ?>
-<article class="product"
-         data-product
-         data-cat="<?php echo esc_attr( $cat ); ?>"
-         data-brand="<?php echo esc_attr( $brand ); ?>"
-         data-price="<?php echo esc_attr( (string) $price ); ?>"
-         data-search="<?php echo esc_attr( mb_strtolower( $name . ' ' . $sku . ' ' . $brand ) ); ?>">
+<article class="product" data-product data-id="<?php echo esc_attr( (string) $product->get_id() ); ?>">
 
     <div class="product__top">
         <?php if ( $badge ) : ?>
@@ -52,8 +48,12 @@ $stock = (string) ( $product['stock'] ?? '' );
         </button>
     </div>
 
-    <a class="product__media" href="#" aria-hidden="true" tabindex="-1">
-        <?php echo promix_icon( promix_category_icon( $cat ), 1.2, 'product__icon' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+    <a class="product__media" href="<?php echo esc_url( $url ); ?>" aria-hidden="true" tabindex="-1">
+        <?php if ( $product->get_image_id() ) : ?>
+            <?php echo $product->get_image( 'woocommerce_thumbnail', array( 'class' => 'product__img', 'loading' => 'lazy' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка картинки. ?>
+        <?php else : ?>
+            <?php echo promix_icon( promix_category_icon( $cat ), 1.2, 'product__icon' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+        <?php endif; ?>
     </a>
 
     <div class="product__body">
@@ -62,7 +62,7 @@ $stock = (string) ( $product['stock'] ?? '' );
         </p>
 
         <h2 class="product__title">
-            <a href="#"><?php echo esc_html( $name ); ?></a>
+            <a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $name ); ?></a>
         </h2>
 
         <div class="product__foot">
@@ -85,6 +85,7 @@ $stock = (string) ( $product['stock'] ?? '' );
             <?php endif; ?>
 
             <button class="btn btn--primary product__buy" type="button"
+                    data-add="<?php echo esc_attr( (string) $product->get_id() ); ?>"
                     aria-label="<?php echo esc_attr( sprintf( /* translators: %s — название товара. */ __( 'В корзину: %s', 'promix' ), $name ) ); ?>">
                 <?php esc_html_e( 'В корзину', 'promix' ); ?>
             </button>

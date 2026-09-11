@@ -1,8 +1,10 @@
 /* PROMIX — каталог: поиск, фильтры и сортировка.
 
-   Пока всё считается на клиенте по данным в разметке: товаров немного,
-   и так вёрстку видно живьём. С WooCommerce фильтрация уедет на сервер,
-   а разметка и классы останутся теми же.
+   Товары выбирает сервер по параметрам адреса. Скрипт собирает адрес
+   из состояния формы, забирает по нему страницу и подменяет на месте
+   только результаты и заголовок — без перезагрузки и потери фокуса
+   в поиске. Адрес при этом попадает в историю: его можно скопировать,
+   а «назад» возвращает прошлую выдачу. Без скрипта форма работает сама.
 
    Поиск и сортировка срабатывают сразу, фильтры — по кнопке «Применить»:
    отмечать три категории и ждать перерисовку после каждой галочки незачем.
@@ -11,99 +13,189 @@
 (function () {
   'use strict';
 
-  var root = document.querySelector('[data-products]');
+  var section = document.querySelector('[data-catalog]');
 
-  if (!root) {
+  if (!section) {
     return;
   }
 
-  var items = Array.prototype.slice.call(root.querySelectorAll('[data-product]'));
-  var order = items.slice();
-  var search = document.querySelector('[data-catalog-search]');
-  var clearBtn = document.querySelector('[data-search-clear]');
-  var counter = document.querySelector('[data-catalog-count]');
-  var empty = document.querySelector('[data-products-empty]');
-  var minInput = document.querySelector('[data-filter-min]');
-  var maxInput = document.querySelector('[data-filter-max]');
-  var applyBtn = document.querySelector('[data-filters-apply]');
+  var form = section.querySelector('[data-catalog-form]');
+  var shopUrl = section.getAttribute('data-catalog-url') || window.location.pathname;
+  var search = section.querySelector('[data-catalog-search]');
+  var clearBtn = section.querySelector('[data-search-clear]');
+  var minInput = section.querySelector('[data-filter-min]');
+  var maxInput = section.querySelector('[data-filter-max]');
+  var applyBtn = section.querySelector('[data-filters-apply]');
+  var sortInput = section.querySelector('[data-sort-input]');
 
-  function checkedValues(selector) {
-    return Array.prototype.slice
-      .call(document.querySelectorAll(selector + ':checked'))
-      .map(function (el) { return el.value; });
+  function checkedInputs(selector) {
+    return Array.prototype.slice.call(section.querySelectorAll(selector + ':checked'));
   }
 
-  function plural(n) {
-    var ten = n % 10;
-    var hundred = n % 100;
-
-    if (ten === 1 && hundred !== 11) {
-      return 'товар';
-    }
-    if (ten >= 2 && ten <= 4 && (hundred < 10 || hundred >= 20)) {
-      return 'товара';
-    }
-    return 'товаров';
+  function values(inputs) {
+    return inputs.map(function (el) { return el.value; });
   }
 
-  function apply() {
-    var query = (search && search.value || '').trim().toLowerCase();
-    var cats = checkedValues('[data-filter-cat]');
-    var brands = checkedValues('[data-filter-brand]');
-    var min = parseFloat(minInput && minInput.value) || 0;
-    var max = parseFloat(maxInput && maxInput.value) || Infinity;
-    var shown = 0;
+  /* ===== Адрес из состояния формы =====
+     Один раздел — его собственный адрес вида /catalog/valiki-i-ruchki/,
+     несколько — общий каталог с параметром cat. */
+  function buildUrl() {
+    var cats = checkedInputs('[data-filter-cat]');
+    var brands = checkedInputs('[data-filter-brand]');
+    var base = shopUrl;
+    var params = new URLSearchParams();
 
-    items.forEach(function (item) {
-      var price = parseFloat(item.getAttribute('data-price')) || 0;
-      var ok =
-        (!query || item.getAttribute('data-search').indexOf(query) !== -1) &&
-        (!cats.length || cats.indexOf(item.getAttribute('data-cat')) !== -1) &&
-        (!brands.length || brands.indexOf(item.getAttribute('data-brand')) !== -1) &&
-        price >= min && price <= max;
+    if (cats.length === 1 && cats[0].getAttribute('data-url')) {
+      base = cats[0].getAttribute('data-url');
+    } else if (cats.length > 1) {
+      params.set('cat', values(cats).join(','));
+    }
 
-      item.hidden = !ok;
+    if (brands.length) {
+      params.set('brand', values(brands).join(','));
+    }
 
-      if (ok) {
-        shown += 1;
+    var q = (search && search.value || '').trim();
+    var min = minInput && minInput.value;
+    var max = maxInput && maxInput.value;
+    var orderby = sortInput && sortInput.value;
+
+    if (q) {
+      params.set('q', q);
+    }
+    if (min) {
+      params.set('min_price', min);
+    }
+    if (max) {
+      params.set('max_price', max);
+    }
+    if (orderby) {
+      params.set('orderby', orderby);
+    }
+
+    var query = params.toString().replace(/%2C/g, ',');
+
+    return base + (query ? '?' + query : '');
+  }
+
+  /* ===== Загрузка выдачи ===== */
+
+  var controller = null;
+
+  function results() {
+    return section.querySelector('[data-catalog-results]');
+  }
+
+  function fetchPage(url) {
+    if (controller) {
+      controller.abort();
+    }
+
+    controller = new AbortController();
+
+    return fetch(url, {
+      signal: controller.signal,
+      headers: { 'X-Requested-With': 'fetch' }
+    }).then(function (response) {
+      if (!response.ok) {
+        throw new Error(response.status);
       }
+      return response.text();
+    }).then(function (html) {
+      return new DOMParser().parseFromString(html, 'text/html');
+    });
+  }
+
+  function swap(selector, doc) {
+    var current = section.querySelector(selector);
+    var next = doc.querySelector(selector);
+
+    if (current && next) {
+      current.replaceWith(next);
+    }
+  }
+
+  /* При «назад» форма должна показывать то, что было в том адресе */
+  function syncForm(doc) {
+    var other = doc.querySelector('[data-catalog-form]');
+
+    if (!other || !form) {
+      return;
+    }
+
+    Array.prototype.forEach.call(form.querySelectorAll('input[type="checkbox"]'), function (el) {
+      var twin = other.querySelector('input[name="' + el.name + '"][value="' + el.value + '"]');
+      el.checked = !!(twin && twin.checked);
     });
 
-    if (counter) {
-      counter.textContent = 'Показано ' + shown + ' ' + plural(shown);
+    Array.prototype.forEach.call(form.querySelectorAll('input[type="search"], input[type="number"], input[type="hidden"]'), function (el) {
+      var twin = other.querySelector('input[name="' + el.name + '"]');
+      el.value = twin ? twin.value : '';
+    });
+
+    var label = section.querySelector('[data-sort-value]');
+    var otherLabel = other.querySelector('[data-sort-value]');
+
+    if (label && otherLabel) {
+      label.textContent = otherLabel.textContent;
     }
 
-    if (empty) {
-      empty.hidden = shown !== 0;
-    }
+    Array.prototype.forEach.call(section.querySelectorAll('[data-sort-option]'), function (o) {
+      o.setAttribute('aria-selected', o.getAttribute('data-sort-option') === (sortInput && sortInput.value) ? 'true' : 'false');
+    });
 
     if (clearBtn) {
-      clearBtn.hidden = !query;
+      clearBtn.hidden = !(search && search.value);
+    }
+  }
+
+  function load(url, push) {
+    var box = results();
+
+    if (box) {
+      box.classList.add('is-loading');
     }
 
     if (applyBtn) {
       applyBtn.classList.remove('is-waiting');
     }
+
+    fetchPage(url).then(function (doc) {
+      swap('[data-catalog-results]', doc);
+      swap('[data-catalog-head]', doc);
+      document.title = doc.title;
+      markFavourites(results());
+
+      if (push) {
+        window.history.pushState({ promixCatalog: true }, '', url);
+      } else {
+        syncForm(doc);
+      }
+    }).catch(function (error) {
+      /* Сеть отвалилась или отменили сами — при ошибке идём обычным переходом */
+      if (error.name !== 'AbortError') {
+        window.location.href = url;
+      }
+    });
   }
 
-  function sort(mode) {
-    var sorted = order.slice();
+  function refresh() {
+    load(buildUrl(), true);
+  }
 
-    if (mode === 'price-asc' || mode === 'price-desc') {
-      sorted.sort(function (a, b) {
-        var diff = parseFloat(a.getAttribute('data-price')) - parseFloat(b.getAttribute('data-price'));
-        return mode === 'price-asc' ? diff : -diff;
-      });
-    } else if (mode === 'name') {
-      sorted.sort(function (a, b) {
-        return a.getAttribute('data-search').localeCompare(b.getAttribute('data-search'), 'ru');
-      });
+  window.addEventListener('popstate', function () {
+    if (window.location.pathname.indexOf(shopUrl.replace(/^https?:\/\/[^/]+/, '')) === 0) {
+      load(window.location.href, false);
     }
+  });
 
-    /* Переставляем разом, чтобы браузер не пересчитывал сетку на каждой карточке */
-    var frag = document.createDocumentFragment();
-    sorted.forEach(function (el) { frag.appendChild(el); });
-    root.appendChild(frag);
+  /* ===== Форма: «Применить», Enter в поиске ===== */
+
+  if (form) {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      refresh();
+    });
   }
 
   /* Фильтры изменили, но не применили — подсвечиваем кнопку */
@@ -113,20 +205,10 @@
     }
   }
 
-  if (search) {
-    search.addEventListener('input', apply);
-  }
-
-  if (clearBtn) {
-    clearBtn.addEventListener('click', function () {
-      search.value = '';
-      search.focus();
-      apply();
-    });
-  }
-
-  document.querySelectorAll('[data-filter-cat], [data-filter-brand]').forEach(function (el) {
-    el.addEventListener('change', pending);
+  section.addEventListener('change', function (event) {
+    if (event.target.matches('[data-filter-cat], [data-filter-brand]')) {
+      pending();
+    }
   });
 
   [minInput, maxInput].forEach(function (el) {
@@ -135,9 +217,110 @@
     }
   });
 
+  /* ===== Поиск: с задержкой, чтобы не дёргать сервер на каждую букву ===== */
+
+  var searchTimer = null;
+
+  if (search) {
+    search.addEventListener('input', function () {
+      if (clearBtn) {
+        clearBtn.hidden = !search.value;
+      }
+
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(refresh, 350);
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function () {
+      search.value = '';
+      search.focus();
+      clearBtn.hidden = true;
+      clearTimeout(searchTimer);
+      refresh();
+    });
+  }
+
+  /* ===== Сброс ===== */
+
+  var reset = section.querySelector('[data-filters-reset]');
+
+  if (reset) {
+    reset.addEventListener('click', function (event) {
+      event.preventDefault();
+
+      Array.prototype.forEach.call(section.querySelectorAll('[data-filter-cat], [data-filter-brand]'), function (el) {
+        el.checked = false;
+      });
+
+      [minInput, maxInput, search, sortInput].forEach(function (el) {
+        if (el) {
+          el.value = '';
+        }
+      });
+
+      var label = section.querySelector('[data-sort-value]');
+      var first = section.querySelector('[data-sort-option]');
+
+      if (label && first) {
+        label.textContent = first.textContent.trim();
+      }
+
+      if (clearBtn) {
+        clearBtn.hidden = true;
+      }
+
+      load(shopUrl, true);
+    });
+  }
+
+  /* ===== «Показать ещё»: следующая страница доклеивается снизу ===== */
+
+  section.addEventListener('click', function (event) {
+    var more = event.target.closest('[data-more]');
+
+    if (!more) {
+      return;
+    }
+
+    event.preventDefault();
+    more.classList.add('is-loading');
+    more.setAttribute('aria-disabled', 'true');
+
+    fetchPage(more.href).then(function (doc) {
+      var grid = section.querySelector('[data-products]');
+      var nextGrid = doc.querySelector('[data-products]');
+      var nextMore = doc.querySelector('.catalog__more');
+
+      if (grid && nextGrid) {
+        var frag = document.createDocumentFragment();
+
+        Array.prototype.forEach.call(nextGrid.children, function (card) {
+          frag.appendChild(card);
+        });
+
+        grid.appendChild(frag);
+        markFavourites(grid);
+      }
+
+      var block = more.closest('.catalog__more');
+
+      if (nextMore) {
+        block.replaceWith(nextMore);
+      } else {
+        block.remove();
+      }
+    }).catch(function (error) {
+      if (error.name !== 'AbortError') {
+        window.location.href = more.href;
+      }
+    });
+  });
+
   /* ===== Сортировка ===== */
 
-  var sortBox = document.querySelector('[data-sort]');
+  var sortBox = section.querySelector('[data-sort]');
 
   if (sortBox) {
     var sortBtn = sortBox.querySelector('[data-sort-toggle]');
@@ -179,9 +362,14 @@
       });
 
       sortValue.textContent = option.textContent.trim();
-      sort(option.getAttribute('data-sort-option'));
+
+      if (sortInput) {
+        sortInput.value = option.getAttribute('data-sort-option');
+      }
+
       closeSort();
       sortBtn.focus();
+      refresh();
     };
 
     sortBtn.addEventListener('click', function () {
@@ -241,37 +429,9 @@
     });
   }
 
-  /* ===== Кнопки «Применить» и «Сбросить» ===== */
-
-  if (applyBtn) {
-    applyBtn.addEventListener('click', apply);
-  }
-
-  var reset = document.querySelector('[data-filters-reset]');
-
-  if (reset) {
-    reset.addEventListener('click', function () {
-      document.querySelectorAll('[data-filter-cat], [data-filter-brand]').forEach(function (el) {
-        el.checked = false;
-      });
-
-      [minInput, maxInput].forEach(function (el) {
-        if (el) {
-          el.value = '';
-        }
-      });
-
-      if (search) {
-        search.value = '';
-      }
-
-      apply();
-    });
-  }
-
   /* ===== Списки, подрезанные до нескольких пунктов ===== */
 
-  document.querySelectorAll('[data-filter-more]').forEach(function (btn) {
+  Array.prototype.forEach.call(section.querySelectorAll('[data-filter-more]'), function (btn) {
     var list = btn.parentNode.querySelector('[data-filter-more-list]');
 
     if (!list) {
@@ -286,77 +446,57 @@
     });
   });
 
-  /* ===== Категория из ссылки: /catalog/?cat=Валики и ручки ===== */
+  /* ===== Артикул по клику копируется =====
+     Обработчик на секции: карточки приходят и уходят при каждой загрузке. */
 
-  var fromUrl = new URLSearchParams(window.location.search).get('cat');
+  section.addEventListener('click', function (event) {
+    var btn = event.target.closest('[data-copy]');
 
-  if (fromUrl) {
-    var target = document.querySelector('[data-filter-cat][value="' + fromUrl.replace(/"/g, '\\"') + '"]');
-
-    if (target) {
-      target.checked = true;
-
-      /* Отмеченный пункт может быть в скрытой части списка — раскрываем её */
-      var list = target.closest('[data-filter-more-list]');
-
-      if (list && !list.classList.contains('is-open')) {
-        var moreBtn = list.parentNode.querySelector('[data-filter-more]');
-
-        if (moreBtn) {
-          moreBtn.click();
-        }
-      }
-
-      apply();
+    if (!btn) {
+      return;
     }
-  }
 
-  /* ===== Артикул по клику копируется ===== */
+    var value = btn.getAttribute('data-copy');
+    var label = btn.querySelector('span');
 
-  document.querySelectorAll('[data-copy]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var value = btn.getAttribute('data-copy');
-      var label = btn.querySelector('span');
-
-      var done = function () {
-        if (!label) {
-          return;
-        }
-
-        var was = label.textContent;
-
-        btn.classList.add('is-copied');
-        label.textContent = 'скопирован';
-
-        setTimeout(function () {
-          btn.classList.remove('is-copied');
-          label.textContent = was;
-        }, 1400);
-      };
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(value).then(done, function () {});
+    var done = function () {
+      if (!label) {
         return;
       }
 
-      /* Без защищённого соединения clipboard недоступен — старый способ */
-      var tmp = document.createElement('textarea');
-      tmp.value = value;
-      tmp.setAttribute('readonly', '');
-      tmp.style.position = 'absolute';
-      tmp.style.left = '-9999px';
-      document.body.appendChild(tmp);
-      tmp.select();
+      var was = label.textContent;
 
-      try {
-        document.execCommand('copy');
-        done();
-      } catch (e) {
-        /* Не скопировалось — артикул всё равно виден на карточке */
-      }
+      btn.classList.add('is-copied');
+      label.textContent = 'скопирован';
 
-      document.body.removeChild(tmp);
-    });
+      setTimeout(function () {
+        btn.classList.remove('is-copied');
+        label.textContent = was;
+      }, 1400);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(value).then(done, function () {});
+      return;
+    }
+
+    /* Без защищённого соединения clipboard недоступен — старый способ */
+    var tmp = document.createElement('textarea');
+    tmp.value = value;
+    tmp.setAttribute('readonly', '');
+    tmp.style.position = 'absolute';
+    tmp.style.left = '-9999px';
+    document.body.appendChild(tmp);
+    tmp.select();
+
+    try {
+      document.execCommand('copy');
+      done();
+    } catch (e) {
+      /* Не скопировалось — артикул всё равно виден на карточке */
+    }
+
+    document.body.removeChild(tmp);
   });
 
   /* ===== Отложенные товары =====
@@ -375,39 +515,50 @@
 
   var favourites = readFavourites();
 
-  document.querySelectorAll('[data-fav]').forEach(function (btn) {
-    var sku = btn.getAttribute('data-fav');
-
-    if (favourites.indexOf(sku) !== -1) {
-      btn.setAttribute('aria-pressed', 'true');
+  function markFavourites(scope) {
+    if (!scope) {
+      return;
     }
 
-    btn.addEventListener('click', function () {
-      var on = btn.getAttribute('aria-pressed') !== 'true';
-
-      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-
-      var index = favourites.indexOf(sku);
-
-      if (on && index === -1) {
-        favourites.push(sku);
-      } else if (!on && index !== -1) {
-        favourites.splice(index, 1);
-      }
-
-      try {
-        localStorage.setItem(FAV_KEY, JSON.stringify(favourites));
-      } catch (e) {
-        /* Приватное окно — отметка живёт до перезагрузки */
-      }
+    Array.prototype.forEach.call(scope.querySelectorAll('[data-fav]'), function (btn) {
+      btn.setAttribute('aria-pressed', favourites.indexOf(btn.getAttribute('data-fav')) !== -1 ? 'true' : 'false');
     });
+  }
+
+  markFavourites(section);
+
+  section.addEventListener('click', function (event) {
+    var btn = event.target.closest('[data-fav]');
+
+    if (!btn) {
+      return;
+    }
+
+    var sku = btn.getAttribute('data-fav');
+    var on = btn.getAttribute('aria-pressed') !== 'true';
+
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+
+    var index = favourites.indexOf(sku);
+
+    if (on && index === -1) {
+      favourites.push(sku);
+    } else if (!on && index !== -1) {
+      favourites.splice(index, 1);
+    }
+
+    try {
+      localStorage.setItem(FAV_KEY, JSON.stringify(favourites));
+    } catch (e) {
+      /* Приватное окно — отметка живёт до перезагрузки */
+    }
   });
 
   /* ===== Панель фильтров на узких экранах ===== */
 
-  var panel = document.querySelector('[data-filters]');
-  var overlay = document.querySelector('[data-filters-overlay]');
-  var openBtn = document.querySelector('[data-filters-open]');
+  var panel = section.querySelector('[data-filters]');
+  var overlay = section.querySelector('[data-filters-overlay]');
+  var openBtn = section.querySelector('[data-filters-open]');
 
   if (!panel || !overlay || !openBtn) {
     return;
@@ -468,18 +619,20 @@
   openBtn.addEventListener('click', openFilters);
   overlay.addEventListener('click', closeFilters);
 
-  document.querySelectorAll('[data-filters-close]').forEach(function (el) {
+  Array.prototype.forEach.call(section.querySelectorAll('[data-filters-close]'), function (el) {
     el.addEventListener('click', closeFilters);
   });
 
-  /* В выехавшей панели «Применить» заодно её закрывает */
-  if (applyBtn) {
-    applyBtn.addEventListener('click', function () {
-      if (isPanel()) {
-        closeFilters();
-      }
-    });
-  }
+  /* В выехавшей панели «Применить» и «Сбросить» заодно её закрывают */
+  [applyBtn, reset].forEach(function (btn) {
+    if (btn) {
+      btn.addEventListener('click', function () {
+        if (isPanel()) {
+          closeFilters();
+        }
+      });
+    }
+  });
 
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && panel.classList.contains('is-open')) {

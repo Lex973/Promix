@@ -66,8 +66,8 @@ function promix_setup(): void {
 }
 add_action( 'after_setup_theme', 'promix_setup' );
 
-// Товары для вёрстки каталога, пока нет WooCommerce.
-require_once get_theme_file_path( 'inc/catalog-demo.php' );
+// Каталог: адреса, фильтры и выборка товаров.
+require_once get_theme_file_path( 'inc/catalog.php' );
 
 // Мета-теги: описание и Open Graph.
 require_once get_theme_file_path( 'inc/meta.php' );
@@ -100,7 +100,7 @@ function promix_assets(): void {
      * остальные — только там, где эти блоки есть: незачем возить стили
      * главной на страницу политики.
      */
-    $is_catalog = is_page_template( 'templates/catalog.php' );
+    $is_catalog = promix_is_catalog();
     $sheets     = array( 'base', 'header', 'footer', 'modal' );
 
     if ( is_front_page() ) {
