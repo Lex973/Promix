@@ -162,8 +162,10 @@
 
     fetchPage(url).then(function (doc) {
       swap('[data-catalog-results]', doc);
+      swap('[data-catalog-count]', doc);
       swap('[data-catalog-head]', doc);
       document.title = doc.title;
+      applyView(currentView());
 
       if (push) {
         window.history.pushState({ promixCatalog: true }, '', url);
@@ -466,7 +468,7 @@
     }
 
     var value = btn.getAttribute('data-copy');
-    var label = btn.querySelector('span');
+    var label = btn.querySelector('[data-copy-label]');
 
     var done = function () {
       if (!label) {
@@ -507,6 +509,49 @@
 
     document.body.removeChild(tmp);
   });
+
+  /* ===== Сеткой или списком =====
+     Выбор живёт в браузере: кто смотрит списком, тот и в следующий раз
+     хочет списком. */
+
+  var VIEW_KEY = 'promix-catalog-view';
+  var viewBtns = Array.prototype.slice.call(section.querySelectorAll('[data-view]'));
+
+  function applyView(view) {
+    var grid = section.querySelector('[data-products]');
+
+    if (grid) {
+      grid.classList.toggle('products--list', view === 'list');
+    }
+
+    viewBtns.forEach(function (btn) {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-view') === view ? 'true' : 'false');
+    });
+  }
+
+  function currentView() {
+    try {
+      return localStorage.getItem(VIEW_KEY) === 'list' ? 'list' : 'grid';
+    } catch (e) {
+      return 'grid';
+    }
+  }
+
+  viewBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var view = btn.getAttribute('data-view');
+
+      try {
+        localStorage.setItem(VIEW_KEY, view);
+      } catch (e) {
+        /* Приватное окно — выбор живёт до перезагрузки */
+      }
+
+      applyView(view);
+    });
+  });
+
+  applyView(currentView());
 
   /* ===== Панель фильтров на узких экранах ===== */
 

@@ -2,9 +2,14 @@
 /**
  * Карточка товара в каталоге.
  *
- * Порядок как в привычных магазинах инструмента: фото, под ним цена,
- * название, артикул и кнопка; пометка «Своя марка» лежит поверх фото.
- * Цена стоит выше названия намеренно — по ней в списке ведут глазами.
+ * Главное — название: по нему и по артикулу ищет профессионал, цену
+ * сверяет вторым шагом. Поэтому название стоит первым и тёмным, цена —
+ * ниже, крупнее остального, но не громче названия. Бренд отдельно не
+ * пишется — в прайсе он уже внутри названия. Кнопка «В корзину»
+ * контурная: красной остаётся только кнопка «Применить» и шапка,
+ * иначе красный в сетке из двадцати карточек перестаёт быть акцентом.
+ *
+ * Одна разметка на сетку и список: раскладку меняет класс на .products.
  *
  * Фотографий у большинства товаров нет: вместо них — иконка по разделу.
  * Когда фото загрузят в админке, на её место встанет миниатюра.
@@ -21,17 +26,13 @@ if ( ! $product instanceof WC_Product ) {
 }
 
 $name  = $product->get_name();
-$brand = promix_product_brand( $product );
 $sku   = $product->get_sku();
 $price = (float) $product->get_price();
 $cat   = promix_product_category( $product );
 $url   = $product->get_permalink();
 
 // Товары под своей маркой стоит отмечать: их больше нигде не купить.
-$badge = ( 'PROMIX' === $brand ) ? __( 'Своя марка', 'promix' ) : '';
-
-// Наличие приедет из 1С вместе с остатками; пока строка не выводится.
-$stock = '';
+$badge = ( 'PROMIX' === promix_product_brand( $product ) ) ? __( 'Своя марка', 'promix' ) : '';
 
 ?>
 <article class="product" data-product data-id="<?php echo esc_attr( (string) $product->get_id() ); ?>">
@@ -49,38 +50,31 @@ $stock = '';
     </a>
 
     <div class="product__body">
+        <h2 class="product__title">
+            <a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $name ); ?></a>
+        </h2>
+    </div>
+
+    <div class="product__foot">
         <p class="product__price">
             <?php echo esc_html( number_format_i18n( $price ) ); ?><span class="product__rub"> ₽</span>
         </p>
 
-        <h2 class="product__title">
-            <a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $name ); ?></a>
-        </h2>
-
-        <div class="product__foot">
-            <div class="product__meta">
-                <?php if ( $brand ) : ?>
-                    <span class="product__brand"><?php echo esc_html( $brand ); ?></span>
-                <?php endif; ?>
-
-                <?php if ( $sku ) : ?>
-                    <button class="product__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>"
-                            aria-label="<?php echo esc_attr( sprintf( /* translators: %s — артикул. */ __( 'Скопировать артикул %s', 'promix' ), $sku ) ); ?>">
-                        <span><?php echo esc_html( $sku ); ?></span>
-                        <?php echo promix_icon( 'copy', 1.7 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                    </button>
-                <?php endif; ?>
-            </div>
-
-            <?php if ( $stock ) : ?>
-                <p class="product__stock"><?php echo esc_html( $stock ); ?></p>
-            <?php endif; ?>
-
-            <button class="btn btn--primary product__buy" type="button"
+        <div class="product__actions">
+            <button class="btn btn--outline product__buy" type="button"
                     data-add="<?php echo esc_attr( (string) $product->get_id() ); ?>"
                     aria-label="<?php echo esc_attr( sprintf( /* translators: %s — название товара. */ __( 'В корзину: %s', 'promix' ), $name ) ); ?>">
                 <?php esc_html_e( 'В корзину', 'promix' ); ?>
             </button>
+
+            <?php if ( $sku ) : ?>
+                <button class="product__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>"
+                        aria-label="<?php echo esc_attr( sprintf( /* translators: %s — артикул. */ __( 'Скопировать артикул %s', 'promix' ), $sku ) ); ?>">
+                    <span class="product__sku-label"><?php esc_html_e( 'Арт.', 'promix' ); ?></span>
+                    <span data-copy-label><?php echo esc_html( $sku ); ?></span>
+                    <?php echo promix_icon( 'copy', 1.7 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                </button>
+            <?php endif; ?>
         </div>
     </div>
 </article>

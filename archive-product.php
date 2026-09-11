@@ -28,14 +28,18 @@ $sort_options = array(
     'title'      => __( 'по названию', 'promix' ),
 );
 
-$total    = (int) wp_count_posts( 'product' )->publish;
 $category = is_product_category() ? get_queried_object() : null;
+// В разделе считаем позиции раздела, в общем каталоге — все.
+$total    = $category instanceof WP_Term ? (int) $category->count : (int) wp_count_posts( 'product' )->publish;
 $title    = $category instanceof WP_Term ? $category->name : __( 'Материалы и инструмент', 'promix' );
 $lead     = $category instanceof WP_Term && $category->description
     ? $category->description
     : sprintf(
-        /* translators: 1 — количество позиций, 2 — слово «позиция» в нужной форме. */
-        __( '%1$s %2$s для малярных и отделочных работ. Не нашли нужное — спросите, привезём под заказ.', 'promix' ),
+        $category instanceof WP_Term
+            /* translators: 1 — количество позиций, 2 — слово «позиция» в нужной форме. */
+            ? __( '%1$s %2$s в разделе. Не нашли нужное — спросите, привезём под заказ.', 'promix' )
+            /* translators: 1 — количество позиций, 2 — слово «позиция» в нужной форме. */
+            : __( '%1$s %2$s для малярных и отделочных работ. Не нашли нужное — спросите, привезём под заказ.', 'promix' ),
         number_format_i18n( $total ),
         promix_plural( $total, 'позиция', 'позиции', 'позиций' )
     );
@@ -45,7 +49,17 @@ $lead     = $category instanceof WP_Term && $category->description
     <div class="container">
 
         <div class="catalog__head" data-catalog-head>
-            <p class="kicker"><?php esc_html_e( 'Каталог', 'promix' ); ?></p>
+            <nav class="crumbs" aria-label="<?php esc_attr_e( 'Вы здесь', 'promix' ); ?>">
+                <a class="crumbs__link" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Главная', 'promix' ); ?></a>
+                <?php echo promix_icon( 'chevron-right', 2, 'crumbs__sep' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                <?php if ( $category instanceof WP_Term ) : ?>
+                    <a class="crumbs__link" href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Каталог', 'promix' ); ?></a>
+                    <?php echo promix_icon( 'chevron-right', 2, 'crumbs__sep' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                    <span class="crumbs__current" aria-current="page"><?php echo esc_html( $category->name ); ?></span>
+                <?php else : ?>
+                    <span class="crumbs__current" aria-current="page"><?php esc_html_e( 'Каталог', 'promix' ); ?></span>
+                <?php endif; ?>
+            </nav>
             <h1 class="section__title"><?php echo esc_html( $title ); ?></h1>
             <p class="section__lead"><?php echo esc_html( $lead ); ?></p>
         </div>
@@ -73,27 +87,6 @@ $lead     = $category instanceof WP_Term && $category->description
                     <span><?php esc_html_e( 'Фильтры', 'promix' ); ?></span>
                 </button>
 
-                <div class="sort" data-sort>
-                    <input type="hidden" name="orderby" value="<?php echo esc_attr( $state['orderby'] ); ?>" data-sort-input>
-                    <button class="sort__btn" type="button" data-sort-toggle
-                            aria-haspopup="listbox" aria-expanded="false"
-                            aria-label="<?php esc_attr_e( 'Сортировка', 'promix' ); ?>">
-                        <span class="sort__value" data-sort-value><?php echo esc_html( $sort_options[ $state['orderby'] ] ); ?></span>
-                        <?php echo promix_icon( 'chevron-down', 2, 'sort__arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                    </button>
-
-                    <ul class="sort__list" role="listbox" data-sort-list hidden
-                        aria-label="<?php esc_attr_e( 'Способ сортировки', 'promix' ); ?>">
-                        <?php foreach ( $sort_options as $value => $label ) : ?>
-                            <li class="sort__option" role="option" tabindex="-1"
-                                data-sort-option="<?php echo esc_attr( $value ); ?>"
-                                aria-selected="<?php echo $state['orderby'] === $value ? 'true' : 'false'; ?>">
-                                <span><?php echo esc_html( $label ); ?></span>
-                                <?php echo promix_icon( 'check', 2.2, 'sort__check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
             </div>
 
             <div class="catalog__layout">
@@ -157,7 +150,7 @@ $lead     = $category instanceof WP_Term && $category->description
                     <?php endforeach; ?>
 
                     <fieldset class="filter">
-                        <legend class="filter__title"><?php esc_html_e( 'Цена, ₽', 'promix' ); ?></legend>
+                        <legend class="filter__title"><?php esc_html_e( 'Цена', 'promix' ); ?></legend>
                         <div class="filter__price">
                             <label class="visually-hidden" for="price-min"><?php esc_html_e( 'Цена от', 'promix' ); ?></label>
                             <input class="filter__input" id="price-min" type="text" inputmode="numeric" autocomplete="off" name="min_price"
@@ -172,18 +165,55 @@ $lead     = $category instanceof WP_Term && $category->description
                     </fieldset>
                 </aside>
 
-                <div class="catalog__main" data-catalog-results aria-live="polite">
+                <div class="catalog__main">
 
-                    <p class="catalog__count">
-                        <?php
-                        printf(
-                            /* translators: 1 — количество товаров, 2 — слово «товар» в нужной форме. */
-                            esc_html__( 'Найдено %1$s %2$s', 'promix' ),
-                            esc_html( number_format_i18n( $found ) ),
-                            esc_html( promix_plural( $found, 'товар', 'товара', 'товаров' ) )
-                        );
-                        ?>
-                    </p>
+                    <div class="catalog__bar">
+                        <p class="catalog__count" data-catalog-count aria-live="polite">
+                            <?php
+                            printf(
+                                /* translators: 1 — количество товаров, 2 — слово «товар» в нужной форме. */
+                                esc_html__( 'Найдено %1$s %2$s', 'promix' ),
+                                esc_html( number_format_i18n( $found ) ),
+                                esc_html( promix_plural( $found, 'товар', 'товара', 'товаров' ) )
+                            );
+                            ?>
+                        </p>
+
+                    <div class="sort" data-sort>
+                        <input type="hidden" name="orderby" value="<?php echo esc_attr( $state['orderby'] ); ?>" data-sort-input>
+                        <button class="sort__btn" type="button" data-sort-toggle
+                                aria-haspopup="listbox" aria-expanded="false">
+                            <span class="sort__label"><?php esc_html_e( 'Сортировка:', 'promix' ); ?></span>
+                            <span class="sort__value" data-sort-value><?php echo esc_html( $sort_options[ $state['orderby'] ] ); ?></span>
+                            <?php echo promix_icon( 'chevron-down', 2, 'sort__arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        </button>
+
+                        <ul class="sort__list" role="listbox" data-sort-list hidden
+                            aria-label="<?php esc_attr_e( 'Способ сортировки', 'promix' ); ?>">
+                            <?php foreach ( $sort_options as $value => $label ) : ?>
+                                <li class="sort__option" role="option" tabindex="-1"
+                                    data-sort-option="<?php echo esc_attr( $value ); ?>"
+                                    aria-selected="<?php echo $state['orderby'] === $value ? 'true' : 'false'; ?>">
+                                    <span><?php echo esc_html( $label ); ?></span>
+                                    <?php echo promix_icon( 'check', 2.2, 'sort__check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+
+                        <div class="view" role="group" aria-label="<?php esc_attr_e( 'Вид списка', 'promix' ); ?>">
+                            <button class="view__btn" type="button" data-view="grid" aria-pressed="true"
+                                    aria-label="<?php esc_attr_e( 'Сеткой', 'promix' ); ?>" title="<?php esc_attr_e( 'Сеткой', 'promix' ); ?>">
+                                <?php echo promix_icon( 'layout-grid', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            </button>
+                            <button class="view__btn" type="button" data-view="list" aria-pressed="false"
+                                    aria-label="<?php esc_attr_e( 'Списком', 'promix' ); ?>" title="<?php esc_attr_e( 'Списком', 'promix' ); ?>">
+                                <?php echo promix_icon( 'list', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="catalog__results" data-catalog-results>
 
                     <?php if ( have_posts() ) : ?>
                         <div class="products" data-products>
@@ -207,6 +237,8 @@ $lead     = $category instanceof WP_Term && $category->description
                             </a>
                         </div>
                     <?php endif; ?>
+
+                    </div>
                 </div>
             </div>
 
