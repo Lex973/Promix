@@ -560,18 +560,18 @@
 
 /* ===== Сетка товаров ===== */
 
-/* Плотнее, чем в рознице: покупатель-профи хочет видеть больше позиций разом */
+/* Четыре карточки в ряд на широком экране; плотнее — это уже список */
 .products {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
+  gap: 14px;
 }
 
 .product {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding: 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
@@ -586,8 +586,8 @@
 /* Пометка лежит поверх фото в углу карточки */
 .product__badge {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 14px;
+  left: 14px;
   z-index: 1;
   padding: 4px 8px;
   border-radius: var(--radius-xs);
@@ -626,7 +626,7 @@
 
 /* Название — главное в карточке: по нему ищут */
 .product__title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: var(--fw-medium);
   line-height: 1.4;
 }
@@ -684,7 +684,7 @@
 
 /* Цена — акцент, но после названия */
 .product__price {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: var(--fw-bold);
   line-height: 1.1;
   letter-spacing: -0.01em;
@@ -707,7 +707,7 @@
 /* Контурная: красной в сетке остаётся только «Применить» */
 .product__buy {
   flex-shrink: 0;
-  padding: 9px 14px;
+  padding: 10px 16px;
   border-radius: var(--radius-xs);
   font-size: 14px;
   text-align: center;
@@ -724,40 +724,50 @@
 .products--list .product {
   flex-direction: row;
   align-items: center;
-  gap: 16px;
-  padding: 10px 14px 10px 10px;
+  gap: 20px;
+  padding: 12px 18px 12px 12px;
 }
 
 .products--list .product__badge {
   top: auto;
-  bottom: 10px;
-  left: 10px;
+  bottom: 12px;
+  left: 12px;
   font-size: 10px;
 }
 
+/* В списке фото заметно выше: строка это позволяет */
 .products--list .product__media {
-  flex: 0 0 60px;
-  aspect-ratio: 1;
+  flex: 0 0 104px;
+  aspect-ratio: 5 / 6;
+}
+
+.products--list .product__icon {
+  width: 40%;
 }
 
 .products--list .product__body {
   margin-top: 0;
 }
 
+.products--list .product__title {
+  font-size: 16px;
+}
+
 .products--list .product__title a {
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
 }
 
 .products--list .product__foot {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 18px;
+  gap: 24px;
   margin-top: 0;
 }
 
 .products--list .product__price {
-  min-width: 92px;
+  min-width: 100px;
+  font-size: 22px;
   text-align: right;
 }
 
@@ -890,11 +900,19 @@
   }
 
   .products--list .product__media {
-    flex-basis: 56px;
+    flex-basis: 72px;
+  }
+
+  .products--list .product__title {
+    font-size: 14px;
   }
 
   .products--list .product__body {
-    flex: 1 1 calc(100% - 72px);
+    flex: 1 1 calc(100% - 92px);
+  }
+
+  .products--list .product__price {
+    font-size: 18px;
   }
 
   .products--list .product__foot {
