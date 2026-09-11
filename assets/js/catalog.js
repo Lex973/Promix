@@ -128,7 +128,7 @@
       el.checked = !!(twin && twin.checked);
     });
 
-    Array.prototype.forEach.call(form.querySelectorAll('input[type="search"], input[type="number"], input[type="hidden"]'), function (el) {
+    Array.prototype.forEach.call(form.querySelectorAll('input[type="search"], input[type="text"], input[type="hidden"]'), function (el) {
       var twin = other.querySelector('input[name="' + el.name + '"]');
       el.value = twin ? twin.value : '';
     });
@@ -211,9 +211,20 @@
     }
   });
 
+  /* Поле цены текстовое, а не number: number отбрасывает значение
+     со случайным пробелом целиком и просит «введите число». Здесь
+     всё, кроме цифр, просто убирается. */
   [minInput, maxInput].forEach(function (el) {
     if (el) {
-      el.addEventListener('input', pending);
+      el.addEventListener('input', function () {
+        var clean = el.value.replace(/\D/g, '');
+
+        if (clean !== el.value) {
+          el.value = clean;
+        }
+
+        pending();
+      });
     }
   });
 

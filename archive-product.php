@@ -151,12 +151,12 @@ $lead     = $category instanceof WP_Term && $category->description
                         <legend class="filter__title"><?php esc_html_e( 'Цена, ₽', 'promix' ); ?></legend>
                         <div class="filter__price">
                             <label class="visually-hidden" for="price-min"><?php esc_html_e( 'Цена от', 'promix' ); ?></label>
-                            <input class="filter__input" id="price-min" type="number" inputmode="numeric" min="0" name="min_price"
+                            <input class="filter__input" id="price-min" type="text" inputmode="numeric" autocomplete="off" name="min_price"
                                    value="<?php echo esc_attr( $state['min'] ); ?>"
                                    placeholder="<?php esc_attr_e( 'от', 'promix' ); ?>" data-filter-min>
                             <span class="filter__dash" aria-hidden="true">—</span>
                             <label class="visually-hidden" for="price-max"><?php esc_html_e( 'Цена до', 'promix' ); ?></label>
-                            <input class="filter__input" id="price-max" type="number" inputmode="numeric" min="0" name="max_price"
+                            <input class="filter__input" id="price-max" type="text" inputmode="numeric" autocomplete="off" name="max_price"
                                    value="<?php echo esc_attr( $state['max'] ); ?>"
                                    placeholder="<?php esc_attr_e( 'до', 'promix' ); ?>" data-filter-max>
                         </div>

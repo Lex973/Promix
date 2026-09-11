@@ -148,16 +148,25 @@ function promix_catalog_query( WP_Query $query ): void {
 add_action( 'pre_get_posts', 'promix_catalog_query', 20 );
 
 /**
- * Пустые поля цены из формы без скрипта — как будто их нет.
+ * Поля цены из адреса: только цифры, пустые — как будто их нет.
  *
- * Woo считает max_price= нулём и не находит ничего; убираем до того,
+ * Woo считает max_price= нулём и не находит ничего; чистим до того,
  * как WC_Query::product_query (приоритет 10) прочитает $_GET.
  */
 function promix_catalog_empty_prices(): void {
     // phpcs:disable WordPress.Security.NonceVerification.Recommended
     foreach ( array( 'min_price', 'max_price' ) as $key ) {
-        if ( isset( $_GET[ $key ] ) && '' === $_GET[ $key ] ) {
+        if ( ! isset( $_GET[ $key ] ) ) {
+            continue;
+        }
+
+        // Без скрипта поле приходит как есть — пробелы и прочее убираем здесь.
+        $digits = preg_replace( '/\D+/', '', (string) wp_unslash( $_GET[ $key ] ) );
+
+        if ( '' === $digits ) {
             unset( $_GET[ $key ] );
+        } else {
+            $_GET[ $key ] = $digits;
         }
     }
     // phpcs:enable
