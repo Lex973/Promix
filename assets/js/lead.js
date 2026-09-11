@@ -17,7 +17,6 @@
   var sourceInput = modal.querySelector('[data-lead-source]');
   var openedInput = modal.querySelector('[data-lead-opened]');
   var titleEl = modal.querySelector('[data-lead-title]');
-  var phoneInput = modal.querySelector('input[name="phone"]');
   var submit = form ? form.querySelector('[type="submit"]') : null;
 
   var defaultTitle = titleEl ? titleEl.textContent : '';
@@ -55,14 +54,16 @@
     return out;
   }
 
-  function applyMask() {
-    var digits = digitsOf(phoneInput.value);
-    /* Курсор всегда в конце: набор идёт слева направо, а правка середины
-       ломала бы позицию после переформатирования */
-    phoneInput.value = format(digits);
-  }
+  /* Маска вешается на все телефонные поля страницы: в модалке заявки
+     и в оформлении заказа она одна и та же */
+  function bindMask(phoneInput) {
+    var applyMask = function () {
+      var digits = digitsOf(phoneInput.value);
+      /* Курсор всегда в конце: набор идёт слева направо, а правка середины
+         ломала бы позицию после переформатирования */
+      phoneInput.value = format(digits);
+    };
 
-  if (phoneInput) {
     phoneInput.addEventListener('input', applyMask);
 
     phoneInput.addEventListener('focus', function () {
@@ -82,6 +83,8 @@
       window.setTimeout(applyMask, 0);
     });
   }
+
+  Array.prototype.forEach.call(document.querySelectorAll('input[type="tel"]'), bindMask);
 
   /* ===== Открытие и закрытие ===== */
 

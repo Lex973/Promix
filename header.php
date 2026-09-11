@@ -52,9 +52,12 @@ $promix = promix_contacts();
             );
             ?>
 
-            <a class="icon-btn" href="#cart" data-count="0" aria-label="<?php esc_attr_e( 'Корзина: товаров нет', 'promix' ); ?>">
+            <?php $cart_count = function_exists( 'promix_cart_count' ) ? promix_cart_count() : 0; ?>
+            <a class="icon-btn" href="<?php echo esc_url( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) ); ?>"
+               data-cart-link data-count="<?php echo esc_attr( (string) $cart_count ); ?>"
+               aria-label="<?php echo esc_attr( function_exists( 'promix_cart_label' ) ? promix_cart_label() : __( 'Корзина', 'promix' ) ); ?>">
                 <?php echo promix_icon( 'cart' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                <span class="icon-btn__count">0</span>
+                <span class="icon-btn__count"><?php echo esc_html( (string) $cart_count ); ?></span>
             </a>
 
             <button class="burger" type="button"

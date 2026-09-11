@@ -78,6 +78,9 @@ require_once get_theme_file_path( 'inc/nav.php' );
 // WooCommerce: поддержка темой и транслит адресов.
 require_once get_theme_file_path( 'inc/woocommerce.php' );
 
+// Корзина и оформление заказа.
+require_once get_theme_file_path( 'inc/cart.php' );
+
 // Поля админки на Carbon Fields.
 require_once get_theme_file_path( 'inc/fields.php' );
 
@@ -102,19 +105,24 @@ function promix_assets(): void {
      */
     $is_catalog = promix_is_catalog();
     $is_product = function_exists( 'is_product' ) && is_product();
+    $is_cart    = function_exists( 'is_cart' ) && ( is_cart() || is_checkout() );
     $sheets     = array( 'base', 'header', 'footer', 'modal' );
 
     if ( is_front_page() ) {
         $sheets[] = 'home';
     }
 
-    // Странице товара нужны карточки соседей и крошки из стилей каталога.
-    if ( $is_catalog || $is_product ) {
+    // Странице товара нужны карточки соседей, корзине — крошки из стилей каталога.
+    if ( $is_catalog || $is_product || $is_cart ) {
         $sheets[] = 'catalog';
     }
 
     if ( $is_product ) {
         $sheets[] = 'product';
+    }
+
+    if ( $is_cart ) {
+        $sheets[] = 'cart';
     }
 
     if ( is_404() ) {
@@ -157,6 +165,7 @@ function promix_assets(): void {
         'cookie'  => array(),
         'catalog' => array( 'promix-main' ),
         'product' => array(),
+        'cart'    => array(),
     );
 
     foreach ( $scripts as $handle => $deps ) {

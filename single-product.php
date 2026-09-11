@@ -130,7 +130,7 @@ while ( have_posts() ) :
                         </button>
                     </form>
 
-                    <p class="single__note"><?php esc_html_e( 'Цена с НДС. Наличие и срок поставки подтвердит менеджер после заказа.', 'promix' ); ?></p>
+                    <p class="single__note"><?php esc_html_e( 'Наличие и срок поставки подтвердит менеджер после заказа.', 'promix' ); ?></p>
 
                     <a class="btn btn--outline single__ask" href="#contacts"
                        data-lead-open="<?php echo esc_attr( $lead_source ); ?>"

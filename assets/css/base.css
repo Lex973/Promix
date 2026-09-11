@@ -392,3 +392,104 @@ body.is-menu-open {
       border-radius: 50%;
     }
 }
+
+/* ===== Счётчик количества: на странице товара и в корзине ===== */
+
+.qty {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.qty__btn {
+  width: 44px;
+  font-size: 20px;
+  font-weight: var(--fw-medium);
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.qty__btn:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-ink);
+}
+
+.qty__btn:first-child {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.qty__btn:last-child {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.qty__input {
+  width: 56px;
+  border: 0;
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: var(--fw-medium);
+  text-align: center;
+  color: var(--color-ink);
+}
+
+.qty__input:focus {
+  outline: none;
+  background: var(--color-surface-alt);
+}
+
+/* ===== Плашка внизу экрана: «Товар в корзине» ===== */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: var(--z-menu);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: calc(100vw - 32px);
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  background: var(--color-graphite);
+  color: #fff;
+  font-size: 15px;
+  opacity: 0;
+  transform: translate(-50%, 12px);
+  pointer-events: none;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+.toast--error {
+  background: var(--color-brand-dark);
+}
+
+.toast__link {
+  flex-shrink: 0;
+  font-weight: var(--fw-semi);
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Кнопка «В корзину», пока идёт запрос и сразу после */
+.btn.is-busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.btn.is-added {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
