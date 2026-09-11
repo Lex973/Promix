@@ -895,6 +895,12 @@
     font-size: 17px;
   }
 
+  /* Узкой карточке артикул рядом с кнопкой не помещается — уходит под неё */
+  .product__actions {
+    flex-wrap: wrap;
+    gap: 6px 12px;
+  }
+
   /* В списке на узком экране цена и кнопка уходят под название */
   .products--list .product {
     flex-wrap: wrap;

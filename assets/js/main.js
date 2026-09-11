@@ -291,4 +291,59 @@
   } else {
     desktop.addListener(onDesktop);
   }
+
+  /* ===== Артикул по клику копируется =====
+     Кнопки есть в каталоге и на странице товара, карточки в каталоге
+     приходят и уходят при каждой загрузке — поэтому один обработчик
+     на документ. */
+
+  document.addEventListener('click', function (event) {
+    var btn = event.target.closest('[data-copy]');
+
+    if (!btn) {
+      return;
+    }
+
+    var value = btn.getAttribute('data-copy');
+    var label = btn.querySelector('[data-copy-label]');
+
+    var done = function () {
+      if (!label) {
+        return;
+      }
+
+      var was = label.textContent;
+
+      btn.classList.add('is-copied');
+      label.textContent = 'скопирован';
+
+      setTimeout(function () {
+        btn.classList.remove('is-copied');
+        label.textContent = was;
+      }, 1400);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(value).then(done, function () {});
+      return;
+    }
+
+    /* Без защищённого соединения clipboard недоступен — старый способ */
+    var tmp = document.createElement('textarea');
+    tmp.value = value;
+    tmp.setAttribute('readonly', '');
+    tmp.style.position = 'absolute';
+    tmp.style.left = '-9999px';
+    document.body.appendChild(tmp);
+    tmp.select();
+
+    try {
+      document.execCommand('copy');
+      done();
+    } catch (e) {
+      /* Не скопировалось — артикул всё равно виден на карточке */
+    }
+
+    document.body.removeChild(tmp);
+  });
 })();

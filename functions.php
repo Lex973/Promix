@@ -101,14 +101,20 @@ function promix_assets(): void {
      * главной на страницу политики.
      */
     $is_catalog = promix_is_catalog();
+    $is_product = function_exists( 'is_product' ) && is_product();
     $sheets     = array( 'base', 'header', 'footer', 'modal' );
 
     if ( is_front_page() ) {
         $sheets[] = 'home';
     }
 
-    if ( $is_catalog ) {
+    // Странице товара нужны карточки соседей и крошки из стилей каталога.
+    if ( $is_catalog || $is_product ) {
         $sheets[] = 'catalog';
+    }
+
+    if ( $is_product ) {
+        $sheets[] = 'product';
     }
 
     if ( is_404() ) {
@@ -150,6 +156,7 @@ function promix_assets(): void {
         'reviews' => array(),
         'cookie'  => array(),
         'catalog' => array( 'promix-main' ),
+        'product' => array(),
     );
 
     foreach ( $scripts as $handle => $deps ) {
@@ -160,6 +167,11 @@ function promix_assets(): void {
 
         // Поиск, фильтры и сортировка — только на странице каталога.
         if ( 'catalog' === $handle && ! $is_catalog ) {
+            continue;
+        }
+
+        // Счётчик количества — только на странице товара.
+        if ( 'product' === $handle && ! $is_product ) {
             continue;
         }
 
