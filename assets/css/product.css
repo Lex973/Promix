@@ -182,9 +182,16 @@
   color: var(--color-muted);
 }
 
+/* Телефон и кнопка MAX в одну строку */
+.single__help-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+
 .single__help-phone {
   display: block;
-  margin-top: 18px;
   font-size: 22px;
   font-weight: var(--fw-bold);
   letter-spacing: -0.01em;
@@ -203,7 +210,21 @@
 }
 
 .single__help-max {
-  margin-top: 18px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+/* Счётчик корзины на странице товара — крупный, как кнопка рядом */
+.cart-control--single {
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.cart-control--single .single__buy {
+  margin-top: 0;
 }
 
 /* ===== Соседи по разделу ===== */

@@ -480,6 +480,13 @@
     align-self: start;
   }
 
+  /* Крестик — в правом верхнем углу строки, рядом с названием */
+  .cart-item__remove {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+  }
+
   .cart-item__qty {
     grid-column: 2;
     justify-self: start;

@@ -64,7 +64,7 @@ function promix_price( float $price ): string {
  * Это страница каталога или его раздела?
  */
 function promix_is_catalog(): bool {
-    return function_exists( 'is_shop' ) && ( is_shop() || is_product_category() );
+    return function_exists( 'is_shop' ) && ( is_shop() || is_product_category() || is_tax( 'product_brand' ) );
 }
 
 /**
@@ -104,11 +104,22 @@ function promix_catalog_state(): array {
         }
     }
 
+    $brands = promix_catalog_slugs( $_GET['brand'] ?? '' );
+
+    // На странице бренда он и есть выбранный фильтр.
+    if ( is_tax( 'product_brand' ) ) {
+        $term = get_queried_object();
+
+        if ( $term instanceof WP_Term ) {
+            $brands = array( $term->slug );
+        }
+    }
+
     $orderby = sanitize_key( (string) wp_unslash( $_GET['orderby'] ?? '' ) );
 
     $state = array(
         'cats'    => $cats,
-        'brands'  => promix_catalog_slugs( $_GET['brand'] ?? '' ),
+        'brands'  => $brands,
         'q'       => trim( sanitize_text_field( (string) wp_unslash( $_GET['q'] ?? '' ) ) ),
         'min'     => isset( $_GET['min_price'] ) && '' !== $_GET['min_price'] ? (string) absint( $_GET['min_price'] ) : '',
         'max'     => isset( $_GET['max_price'] ) && '' !== $_GET['max_price'] ? (string) absint( $_GET['max_price'] ) : '',
@@ -144,9 +155,9 @@ function promix_catalog_query( WP_Query $query ): void {
         );
     }
 
-    if ( $state['brands'] ) {
+    if ( $state['brands'] && ! is_tax( 'product_brand' ) ) {
         $tax_query[] = array(
-            'taxonomy' => 'pa_brand',
+            'taxonomy' => 'product_brand',
             'field'    => 'slug',
             'terms'    => $state['brands'],
         );
@@ -228,8 +239,7 @@ function promix_catalog_terms( string $taxonomy, array $checked ): array {
     $items = array();
 
     foreach ( $terms as $term ) {
-        // Своя страница есть только у разделов; у брендов архива нет.
-        $link = 'product_cat' === $taxonomy ? get_term_link( $term ) : '';
+        $link = get_term_link( $term );
 
         $items[] = array(
             'slug'    => $term->slug,
@@ -260,17 +270,16 @@ function promix_product_category( WC_Product $product ): string {
 }
 
 /**
- * Бренд товара — из глобального атрибута «Бренд».
+ * Бренд товара — из штатной таксономии брендов WooCommerce («Товары → Бренды»).
  *
- * Через get_the_terms(), а не $product->get_attribute(): второй ходит
- * в базу за каждым товаром, первый берёт из кэша, который WP_Query
- * уже прогрел для всей страницы.
+ * get_the_terms() берёт из кэша, который WP_Query уже прогрел для всей
+ * страницы, — ни одного лишнего запроса на карточку.
  *
  * @param WC_Product $product Товар.
  * @return string
  */
 function promix_product_brand( WC_Product $product ): string {
-    $terms = get_the_terms( $product->get_id(), 'pa_brand' );
+    $terms = get_the_terms( $product->get_id(), 'product_brand' );
 
     if ( ! $terms || is_wp_error( $terms ) ) {
         return '';

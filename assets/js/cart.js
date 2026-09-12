@@ -93,51 +93,131 @@
     }, 3200);
   }
 
-  /* ===== «В корзину» ===== */
+  /* ===== «В корзину» → счётчик =====
+     Товар добавляется один раз: кнопка сменяется счётчиком «− N +»,
+     дальше меняется только количество. Разметку счётчика и кнопки
+     отдаёт сервер — скрипт лишь подменяет блок [data-cart-control]. */
+
+  function controlOf(el) {
+    return el.closest('[data-cart-control]');
+  }
+
+  function swapControl(control, html) {
+    if (!control || !html) {
+      return;
+    }
+
+    var tmp = document.createElement('div');
+    tmp.innerHTML = html;
+
+    var next = tmp.firstElementChild;
+
+    if (next) {
+      control.replaceWith(next);
+
+      /* Страница товара пересчитывает цену по количеству в корзине */
+      var input = next.querySelector('[data-cart-qty]');
+      document.dispatchEvent(new CustomEvent('promix:cart', { detail: { qty: input ? parseInt(input.value, 10) || 0 : 0 } }));
+    }
+  }
 
   function addToCart(btn) {
+    var control = controlOf(btn);
     var id = btn.getAttribute('data-add');
     var form = btn.closest('form');
     var qtyInput = form ? form.querySelector('[data-qty-input]') : null;
     var qty = qtyInput ? parseInt(qtyInput.value, 10) || 1 : 1;
-    var label = btn.textContent;
+    var variant = control ? control.getAttribute('data-variant') : 'card';
 
     btn.classList.add('is-busy');
-    btn.disabled = true;
 
-    post('add_to_cart', { product_id: id, quantity: qty }).then(function (data) {
+    post('add_to_cart', { product_id: id, quantity: qty, promix_variant: variant }).then(function (data) {
       if (data.error) {
         throw new Error('add');
       }
 
       var f = data.fragments || {};
       setCount(f.promix_count || 0, f.promix_label || '');
-
-      btn.classList.add('is-added');
-      btn.textContent = cfg.added;
+      swapControl(control, f.promix_control);
       showToast(cfg.toast);
-
-      setTimeout(function () {
-        btn.classList.remove('is-added');
-        btn.textContent = label;
-      }, 1600);
     }).catch(function () {
-      showToast(cfg.error, true);
-    }).then(function () {
       btn.classList.remove('is-busy');
-      btn.disabled = false;
+      showToast(cfg.error, true);
+    });
+  }
+
+  /* Изменение количества из карточки или со страницы товара */
+  var stepTimers = {};
+
+  function stepCart(control, qty) {
+    var box = control.querySelector('[data-cart-key]');
+
+    if (!box) {
+      return;
+    }
+
+    control.classList.add('is-busy');
+
+    post('promix_cart', {
+      nonce: cfg.nonce,
+      key: box.getAttribute('data-cart-key'),
+      qty: qty,
+      do: qty > 0 ? 'update' : 'remove',
+      product_id: box.getAttribute('data-product'),
+      promix_variant: control.getAttribute('data-variant') || 'card'
+    }).then(function (res) {
+      if (!res.success) {
+        throw new Error('cart');
+      }
+
+      setCount(res.data.count, res.data.label);
+      swapControl(control, res.data.control);
+    }).catch(function () {
+      control.classList.remove('is-busy');
+      showToast(cfg.error, true);
     });
   }
 
   document.addEventListener('click', function (event) {
-    var btn = event.target.closest('[data-add]');
+    var add = event.target.closest('[data-add]');
 
-    if (!btn) {
+    if (add) {
+      event.preventDefault();
+      addToCart(add);
       return;
     }
 
-    event.preventDefault();
-    addToCart(btn);
+    var step = event.target.closest('[data-cart-step]');
+
+    if (step) {
+      var control = controlOf(step);
+      var input = control.querySelector('[data-cart-qty]');
+      var current = parseInt((input.value || '').replace(/\D/g, ''), 10) || 1;
+
+      stepCart(control, Math.max(0, current + parseInt(step.getAttribute('data-cart-step'), 10)));
+    }
+  });
+
+  document.addEventListener('input', function (event) {
+    var input = event.target.closest('[data-cart-qty]');
+
+    if (!input) {
+      return;
+    }
+
+    var clean = input.value.replace(/\D/g, '');
+
+    if (clean !== input.value) {
+      input.value = clean;
+    }
+
+    var control = controlOf(input);
+    var id = control.getAttribute('data-cart-control');
+
+    clearTimeout(stepTimers[id]);
+    stepTimers[id] = setTimeout(function () {
+      stepCart(control, Math.max(0, parseInt(clean, 10) || 0));
+    }, 600);
   });
 
   /* ===== Страница корзины ===== */

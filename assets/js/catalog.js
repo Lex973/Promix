@@ -38,7 +38,7 @@
 
   /* ===== Адрес из состояния формы =====
      Один раздел — его собственный адрес вида /catalog/valiki-i-ruchki/,
-     несколько — общий каталог с параметром cat. */
+     один бренд — /brand/storch/, несколько — общий каталог с параметрами. */
   function buildUrl() {
     var cats = checkedInputs('[data-filter-cat]');
     var brands = checkedInputs('[data-filter-brand]');
@@ -51,7 +51,10 @@
       params.set('cat', values(cats).join(','));
     }
 
-    if (brands.length) {
+    /* Один бренд без раздела — его собственная страница /brand/storch/ */
+    if (!cats.length && brands.length === 1 && brands[0].getAttribute('data-url')) {
+      base = brands[0].getAttribute('data-url');
+    } else if (brands.length) {
       params.set('brand', values(brands).join(','));
     }
 

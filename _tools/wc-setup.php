@@ -21,7 +21,8 @@ foreach (['shop', 'refund_returns', 'sample-page', 'my-account'] as $slug) {
     if ($p && (int)$p->ID !== (int)$catalog->ID) { wp_trash_post($p->ID); echo "trashed {$slug} ({$p->ID})\n"; }
 }
 
-// Адреса.
+// Адреса. База брендов — отдельная опция Woo, иначе она переводится как «бренд».
+$set('woocommerce_brand_permalink', 'brand');
 $set('woocommerce_permalinks', [
     'product_base' => 'product',
     'category_base' => 'catalog',

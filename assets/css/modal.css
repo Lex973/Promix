@@ -43,6 +43,26 @@ body.is-modal-open {
   animation: modal-in var(--transition-slow) var(--ease) 0.05s both;
 }
 
+/* Закрытие: та же пара анимаций в обратную сторону, короче открытия */
+.modal.is-closing .modal__overlay {
+  animation: overlay-out var(--transition) both;
+}
+
+.modal.is-closing .modal__window {
+  animation: modal-out var(--transition) var(--ease) both;
+  pointer-events: none;
+}
+
+@keyframes overlay-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes modal-out {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(12px) scale(0.98); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .modal__overlay,
     .modal__window {

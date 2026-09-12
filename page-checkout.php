@@ -108,7 +108,7 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
 
             <div class="checkout__layout">
 
-                <form class="checkout__form lead" method="post" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" novalidate data-checkout-form>
+                <form class="checkout__form lead" method="post" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" data-checkout-form>
                     <?php wp_nonce_field( 'promix-checkout' ); ?>
                     <input type="hidden" name="promix_checkout" value="1">
 

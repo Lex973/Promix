@@ -70,6 +70,21 @@ function promix_meta_description(): string {
         }
     }
 
+    // Страница бренда: число позиций марки.
+    if ( function_exists( 'is_shop' ) && is_tax( 'product_brand' ) ) {
+        $term = get_queried_object();
+
+        if ( $term instanceof WP_Term ) {
+            return sprintf(
+                /* translators: 1 — бренд, 2 — число позиций, 3 — слово «позиция». */
+                __( '%1$s в PROMIX: %2$s %3$s с ценами. Малярный центр в Казани, самовывоз и доставка.', 'promix' ),
+                $term->name,
+                number_format_i18n( (int) $term->count ),
+                promix_plural( (int) $term->count, 'позиция', 'позиции', 'позиций' )
+            );
+        }
+    }
+
     if ( function_exists( 'is_shop' ) && is_shop() ) {
         $total = (int) wp_count_posts( 'product' )->publish;
 

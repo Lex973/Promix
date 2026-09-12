@@ -25,6 +25,56 @@ function promix_cart_count(): int {
 }
 
 /**
+ * Строка корзины с этим товаром: ключ и количество, или null.
+ *
+ * @param int $product_id Товар.
+ * @return array{key: string, qty: int}|null
+ */
+function promix_cart_item( int $product_id ): ?array {
+    if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+        return null;
+    }
+
+    foreach ( WC()->cart->get_cart() as $key => $item ) {
+        if ( (int) $item['product_id'] === $product_id ) {
+            return array(
+                'key' => (string) $key,
+                'qty' => (int) $item['quantity'],
+            );
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Кнопка «В корзину» или счётчик — разметкой, для ответа скрипту.
+ *
+ * @param int    $product_id Товар.
+ * @param string $variant    card или single.
+ * @return string
+ */
+function promix_cart_control( int $product_id, string $variant = 'card' ): string {
+    $product = wc_get_product( $product_id );
+
+    if ( ! $product instanceof WC_Product ) {
+        return '';
+    }
+
+    ob_start();
+    get_template_part(
+        'template-parts/cart/control',
+        null,
+        array(
+            'product' => $product,
+            'variant' => $variant,
+        )
+    );
+
+    return (string) ob_get_clean();
+}
+
+/**
  * Подпись к иконке корзины для программ чтения с экрана.
  */
 function promix_cart_label(): string {
@@ -54,6 +104,16 @@ function promix_cart_fragments( array $fragments ): array {
 
     $fragments['promix_count'] = promix_cart_count();
     $fragments['promix_label'] = promix_cart_label();
+
+    // Скрипт подменит кнопку «В корзину» счётчиком того товара, который только что добавили.
+    // phpcs:disable WordPress.Security.NonceVerification.Missing -- добавление в корзину у Woo без nonce намеренно.
+    $product_id = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
+    $variant    = isset( $_POST['promix_variant'] ) ? sanitize_key( $_POST['promix_variant'] ) : 'card';
+    // phpcs:enable
+
+    if ( $product_id ) {
+        $fragments['promix_control'] = promix_cart_control( $product_id, $variant );
+    }
 
     return $fragments;
 }
@@ -101,7 +161,6 @@ function promix_cart_script(): void {
             'endpoint' => WC_AJAX::get_endpoint( '%%endpoint%%' ),
             'nonce'    => wp_create_nonce( 'promix-cart' ),
             'cartUrl'  => wc_get_cart_url(),
-            'added'    => __( 'Добавлено', 'promix' ),
             'toast'    => __( 'Товар в корзине', 'promix' ),
             'open'     => __( 'Перейти в корзину', 'promix' ),
             'error'    => __( 'Не получилось добавить. Попробуйте ещё раз.', 'promix' ),
@@ -119,9 +178,11 @@ add_action( 'wp_enqueue_scripts', 'promix_cart_script', 20 );
 function promix_cart_ajax(): void {
     check_ajax_referer( 'promix-cart', 'nonce' );
 
-    $key = isset( $_POST['key'] ) ? sanitize_text_field( wp_unslash( $_POST['key'] ) ) : '';
-    $qty = isset( $_POST['qty'] ) ? min( absint( $_POST['qty'] ), PROMIX_CART_MAX_QTY ) : 0;
-    $do  = isset( $_POST['do'] ) ? sanitize_key( $_POST['do'] ) : 'update';
+    $key        = isset( $_POST['key'] ) ? sanitize_text_field( wp_unslash( $_POST['key'] ) ) : '';
+    $qty        = isset( $_POST['qty'] ) ? min( absint( $_POST['qty'] ), PROMIX_CART_MAX_QTY ) : 0;
+    $do         = isset( $_POST['do'] ) ? sanitize_key( $_POST['do'] ) : 'update';
+    $product_id = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
+    $variant    = isset( $_POST['promix_variant'] ) ? sanitize_key( $_POST['promix_variant'] ) : 'card';
 
     if ( $key && WC()->cart->get_cart_item( $key ) ) {
         if ( 'remove' === $do || 0 === $qty ) {
@@ -133,17 +194,21 @@ function promix_cart_ajax(): void {
 
     WC()->cart->calculate_totals();
 
-    ob_start();
-    get_template_part( 'template-parts/cart/items' );
-    $html = ob_get_clean();
-
-    wp_send_json_success(
-        array(
-            'html'  => $html,
-            'count' => promix_cart_count(),
-            'label' => promix_cart_label(),
-        )
+    $data = array(
+        'count' => promix_cart_count(),
+        'label' => promix_cart_label(),
     );
+
+    // Со страницы корзины — перерисованный список; из карточки — кнопка или счётчик этого товара.
+    if ( $product_id ) {
+        $data['control'] = promix_cart_control( $product_id, $variant );
+    } else {
+        ob_start();
+        get_template_part( 'template-parts/cart/items' );
+        $data['html'] = ob_get_clean();
+    }
+
+    wp_send_json_success( $data );
 }
 add_action( 'wc_ajax_promix_cart', 'promix_cart_ajax' );
 

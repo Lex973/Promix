@@ -110,6 +110,8 @@
       (window.innerWidth - document.documentElement.clientWidth) + 'px'
     );
 
+    window.clearTimeout(hideTimer);
+    modal.classList.remove('is-closing');
     modal.hidden = false;
     document.body.classList.add('is-modal-open');
 
@@ -128,10 +130,36 @@
     }
   }
 
+  /* Закрытие в два шага: класс is-closing запускает обратную анимацию,
+     hidden ставится, когда она доиграла. Один слушатель с once и
+     запасной таймер на случай, если браузер анимацию не показал —
+     ничего не копится между открытиями. */
+  var hideTimer = null;
+
   function close() {
     window.clearTimeout(closeTimer);
+    window.clearTimeout(hideTimer);
 
-    modal.hidden = true;
+    if (modal.hidden || modal.classList.contains('is-closing')) {
+      return;
+    }
+
+    var win = modal.querySelector('.modal__window');
+
+    var finish = function () {
+      window.clearTimeout(hideTimer);
+      modal.hidden = true;
+      modal.classList.remove('is-closing');
+    };
+
+    modal.classList.add('is-closing');
+
+    if (win) {
+      win.addEventListener('animationend', finish, { once: true });
+    }
+
+    hideTimer = window.setTimeout(finish, 400);
+
     document.body.classList.remove('is-modal-open');
 
     if (releaseTrap) {

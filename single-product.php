@@ -116,21 +116,9 @@ while ( have_posts() ) :
                         <?php endif; ?>
                     </dl>
 
-                    <p class="single__price"><?php echo esc_html( promix_price( $price ) ); ?></p>
+                    <p class="single__price" data-price="<?php echo esc_attr( (string) $price ); ?>"><?php echo esc_html( promix_price( $price ) ); ?></p>
 
-                    <form class="single__buy" method="post" action="<?php echo esc_url( $product->get_permalink() ); ?>" data-add-form>
-                        <div class="qty" data-qty>
-                            <button class="qty__btn" type="button" data-qty-minus aria-label="<?php esc_attr_e( 'Меньше', 'promix' ); ?>">−</button>
-                            <label class="visually-hidden" for="quantity"><?php esc_html_e( 'Количество', 'promix' ); ?></label>
-                            <input class="qty__input" id="quantity" type="text" inputmode="numeric" name="quantity" value="1" autocomplete="off" data-qty-input>
-                            <button class="qty__btn" type="button" data-qty-plus aria-label="<?php esc_attr_e( 'Больше', 'promix' ); ?>">+</button>
-                        </div>
-
-                        <button class="btn btn--primary single__add" type="submit" name="add-to-cart" value="<?php echo esc_attr( (string) $product->get_id() ); ?>" data-add="<?php echo esc_attr( (string) $product->get_id() ); ?>">
-                            <?php echo promix_icon( 'cart', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                            <?php esc_html_e( 'В корзину', 'promix' ); ?>
-                        </button>
-                    </form>
+                    <?php get_template_part( 'template-parts/cart/control', null, array( 'product' => $product, 'variant' => 'single' ) ); ?>
 
                     <p class="single__note"><?php esc_html_e( 'Наличие и срок поставки подтвердит менеджер после заказа.', 'promix' ); ?></p>
 
@@ -156,9 +144,11 @@ while ( have_posts() ) :
                     <aside class="single__help">
                         <p class="single__help-title"><?php esc_html_e( 'Вопрос по товару?', 'promix' ); ?></p>
                         <p class="single__help-text"><?php esc_html_e( 'Позвоните или напишите — подскажем по применению и совместимости, подберём аналог, если этого нет на складе.', 'promix' ); ?></p>
-                        <a class="single__help-phone" href="<?php echo esc_url( promix_tel_href() ); ?>"><?php echo esc_html( $contacts['phone'] ); ?></a>
+                        <div class="single__help-row">
+                            <a class="single__help-phone" href="<?php echo esc_url( promix_tel_href() ); ?>"><?php echo esc_html( $contacts['phone'] ); ?></a>
+                            <?php get_template_part( 'template-parts/btn-max', null, array( 'class' => 'single__help-max', 'label' => '', 'aria' => __( 'Написать в MAX', 'promix' ) ) ); ?>
+                        </div>
                         <p class="single__help-hours"><?php echo esc_html( $contacts['hours'] ); ?></p>
-                        <?php get_template_part( 'template-parts/btn-max', null, array( 'class' => 'single__help-max' ) ); ?>
                     </aside>
                 </div>
             <?php endif; ?>

@@ -16,7 +16,7 @@ get_header();
 
 $state      = promix_catalog_state();
 $categories = promix_catalog_terms( 'product_cat', $state['cats'] );
-$brands     = promix_catalog_terms( 'pa_brand', $state['brands'] );
+$brands     = promix_catalog_terms( 'product_brand', $state['brands'] );
 $shop_url   = promix_catalog_url();
 $found      = (int) $GLOBALS['wp_query']->found_posts;
 $next_url   = $GLOBALS['wp_query']->max_num_pages > max( 1, (int) get_query_var( 'paged' ) ) ? get_next_posts_page_link() : '';
@@ -28,16 +28,18 @@ $sort_options = array(
     'title'      => __( 'по названию', 'promix' ),
 );
 
-$category = is_product_category() ? get_queried_object() : null;
-// В разделе считаем позиции раздела, в общем каталоге — все.
-$total    = $category instanceof WP_Term ? (int) $category->count : (int) wp_count_posts( 'product' )->publish;
-$title    = $category instanceof WP_Term ? $category->name : __( 'Материалы и инструмент', 'promix' );
-$lead     = $category instanceof WP_Term && $category->description
-    ? wp_strip_all_tags( $category->description )
+// Страница раздела или бренда: заголовок и счёт — по нему, в общем каталоге — всё.
+$term     = is_product_category() || is_tax( 'product_brand' ) ? get_queried_object() : null;
+$term     = $term instanceof WP_Term ? $term : null;
+$category = $term && 'product_cat' === $term->taxonomy ? $term : null;
+$total    = $term ? (int) $term->count : (int) wp_count_posts( 'product' )->publish;
+$title    = $term ? $term->name : __( 'Материалы и инструменты', 'promix' );
+$lead     = $term && $term->description
+    ? wp_strip_all_tags( $term->description )
     : sprintf(
-        $category instanceof WP_Term
+        $term
             /* translators: 1 — количество позиций, 2 — слово «позиция» в нужной форме. */
-            ? __( '%1$s %2$s в разделе. Не нашли нужное — спросите, привезём под заказ.', 'promix' )
+            ? __( '%1$s %2$s. Не нашли нужное — спросите, привезём под заказ.', 'promix' )
             /* translators: 1 — количество позиций, 2 — слово «позиция» в нужной форме. */
             : __( '%1$s %2$s для малярных и отделочных работ. Не нашли нужное — спросите, привезём под заказ.', 'promix' ),
         number_format_i18n( $total ),
@@ -54,10 +56,10 @@ $lead     = $category instanceof WP_Term && $category->description
                 'template-parts/crumbs',
                 null,
                 array(
-                    'items' => $category instanceof WP_Term
+                    'items' => $term
                         ? array(
                             __( 'Каталог', 'promix' ) => $shop_url,
-                            $category->name           => '',
+                            $term->name               => '',
                         )
                         : array( __( 'Каталог', 'promix' ) => '' ),
                 )

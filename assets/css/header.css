@@ -129,6 +129,9 @@
   position: absolute;
   top: -2px;
   right: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 21px;
   height: 21px;
   padding: 0 5px;
@@ -137,7 +140,7 @@
   color: var(--color-on-brand);
   font-size: 11px;
   font-weight: var(--fw-bold);
-  line-height: 21px;
+  line-height: 1;
   text-align: center;
   border: 2px solid var(--color-bg);
 }
@@ -294,7 +297,7 @@
 }
 
 .mobile-menu__list a::after {
-  content: '92';
+  content: '→';
   color: var(--color-border);
   transition: var(--transition);
 }
