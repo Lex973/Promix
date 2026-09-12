@@ -81,6 +81,9 @@ require_once get_theme_file_path( 'inc/woocommerce.php' );
 // Корзина и оформление заказа.
 require_once get_theme_file_path( 'inc/cart.php' );
 
+// Заявки и заказы — менеджеру в MAX.
+require_once get_theme_file_path( 'inc/max.php' );
+
 // Поля админки на Carbon Fields.
 require_once get_theme_file_path( 'inc/fields.php' );
 
