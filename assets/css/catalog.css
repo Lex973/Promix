@@ -691,11 +691,6 @@
   white-space: nowrap;
 }
 
-.product__rub {
-  font-weight: var(--fw-medium);
-  color: var(--color-muted);
-}
-
 /* Кнопка и артикул в одну строку под ценой */
 .product__actions {
   display: flex;

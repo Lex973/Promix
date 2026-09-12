@@ -62,7 +62,7 @@ $count = (int) $cart->get_cart_contents_count();
                             <?php if ( $sku ) : ?>
                                 <span><?php echo esc_html( sprintf( /* translators: %s — артикул. */ __( 'Арт. %s', 'promix' ), $sku ) ); ?></span>
                             <?php endif; ?>
-                            <span><?php echo esc_html( number_format_i18n( (float) $product->get_price() ) ); ?> ₽ / <?php esc_html_e( 'шт', 'promix' ); ?></span>
+                            <span><?php echo esc_html( promix_price( (float) $product->get_price() ) ); ?> / <?php esc_html_e( 'шт', 'promix' ); ?></span>
                         </p>
                     </div>
 
@@ -74,9 +74,7 @@ $count = (int) $cart->get_cart_contents_count();
                         <button class="qty__btn" type="button" data-qty-plus aria-label="<?php esc_attr_e( 'Больше', 'promix' ); ?>">+</button>
                     </div>
 
-                    <p class="cart-item__total">
-                        <?php echo esc_html( number_format_i18n( $line ) ); ?><span class="cart-item__rub"> ₽</span>
-                    </p>
+                    <p class="cart-item__total"><?php echo esc_html( promix_price( $line ) ); ?></p>
 
                     <a class="cart-item__remove" href="<?php echo esc_url( wc_get_cart_remove_url( $key ) ); ?>" data-cart-remove
                        aria-label="<?php echo esc_attr( sprintf( /* translators: %s — название товара. */ __( 'Убрать: %s', 'promix' ), $product->get_name() ) ); ?>">
@@ -96,7 +94,7 @@ $count = (int) $cart->get_cart_contents_count();
                 </div>
                 <div class="cart__row cart__row--total">
                     <dt><?php esc_html_e( 'Итого', 'promix' ); ?></dt>
-                    <dd><?php echo esc_html( number_format_i18n( (float) $cart->get_subtotal() ) ); ?> ₽</dd>
+                    <dd><?php echo esc_html( promix_price( (float) $cart->get_subtotal() ) ); ?></dd>
                 </div>
             </dl>
 

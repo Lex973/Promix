@@ -1,5 +1,7 @@
 <?php
-if (($_GET['k'] ?? '') !== 'СЕКРЕТ') { http_response_code(403); exit('no'); }
+$key = 'СЕКРЕТ';
+// Ключ должен быть заменён на случайную строку из 12+ латинских букв и цифр — с плейсхолдером скрипт не работает.
+if (!preg_match('/^[a-z0-9]{12,}$/i', $key) || ($_GET['k'] ?? '') !== $key) { http_response_code(403); exit('no'); }
 require __DIR__ . '/wp-load.php';
 header('Content-Type: text/plain; charset=utf-8');
 
@@ -12,8 +14,8 @@ wp_update_post(['ID' => $catalog->ID, 'post_name' => 'catalog']);
 echo "catalog page {$catalog->ID} → /" . get_post($catalog->ID)->post_name . "/\n";
 $set('woocommerce_shop_page_id', $catalog->ID);
 
-// Лишние страницы: shop от Woo, черновик возвратов, «Пример страницы».
-foreach (['shop', 'refund_returns', 'sample-page'] as $slug) {
+// Лишние страницы: shop от Woo, черновик возвратов, «Пример страницы», личный кабинет (регистрации нет).
+foreach (['shop', 'refund_returns', 'sample-page', 'my-account'] as $slug) {
     $p = get_page_by_path($slug, OBJECT, 'page') ?: get_page_by_path($slug);
     if (!$p) { $q = get_posts(['post_type'=>'page','name'=>$slug,'post_status'=>'any','numberposts'=>1]); $p = $q[0] ?? null; }
     if ($p && (int)$p->ID !== (int)$catalog->ID) { wp_trash_post($p->ID); echo "trashed {$slug} ({$p->ID})\n"; }
@@ -55,6 +57,14 @@ $set('woocommerce_enable_guest_checkout', 'yes');
 $set('woocommerce_enable_checkout_login_reminder', 'no');
 $set('woocommerce_enable_signup_and_login_from_checkout', 'no');
 $set('woocommerce_enable_myaccount_registration', 'no');
+$set('woocommerce_myaccount_page_id', 0);
+
+// Страницы Woo по-русски (перевод плагина на момент установки мог ещё не стоять).
+foreach (['cart' => 'Корзина', 'checkout' => 'Оформление заказа'] as $k => $t) {
+    $id = wc_get_page_id($k);
+    if ($id > 0) { wp_update_post(['ID' => $id, 'post_title' => $t, 'post_content' => '']); echo "$k #$id → $t
+"; }
+}
 
 // Служебное: заказы в своих таблицах, без мастера, подсказок и слежки.
 $set('woocommerce_custom_orders_table_enabled', 'yes');

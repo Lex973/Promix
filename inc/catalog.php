@@ -22,23 +22,42 @@ const PROMIX_CATALOG_PER_PAGE = 24;
  * @return string
  */
 function promix_catalog_url( string $category = '' ): string {
+    static $cache = array();
+
     $url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/catalog/' );
 
     if ( ! $category ) {
         return $url;
     }
 
-    $term = get_term_by( 'name', $category, 'product_cat' ) ?: get_term_by( 'slug', $category, 'product_cat' );
-
-    if ( $term instanceof WP_Term ) {
-        $link = get_term_link( $term );
-
-        if ( ! is_wp_error( $link ) ) {
-            return $link;
-        }
+    // get_term_by('name') не кэшируется, а подвал спрашивает шесть разделов на каждой странице.
+    if ( isset( $cache[ $category ] ) ) {
+        return $cache[ $category ];
     }
 
-    return add_query_arg( 'cat', rawurlencode( $category ), $url );
+    $term = get_term_by( 'name', $category, 'product_cat' ) ?: get_term_by( 'slug', $category, 'product_cat' );
+    $link = $term instanceof WP_Term ? get_term_link( $term ) : null;
+
+    $cache[ $category ] = $link && ! is_wp_error( $link ) ? $link : add_query_arg( 'cat', rawurlencode( $category ), $url );
+
+    return $cache[ $category ];
+}
+
+/**
+ * Цена словами: «2 890 ₽», «Цена по запросу» для нуля.
+ *
+ * Одно место на каталог, товар, корзину и мета-теги — и одно место,
+ * где решается, что делать с позицией без цены из следующей выгрузки 1С.
+ *
+ * @param float $price Цена.
+ * @return string
+ */
+function promix_price( float $price ): string {
+    if ( $price <= 0 ) {
+        return __( 'Цена по запросу', 'promix' );
+    }
+
+    return number_format_i18n( $price ) . ' ₽';
 }
 
 /**
@@ -153,7 +172,11 @@ add_action( 'pre_get_posts', 'promix_catalog_query', 20 );
  * Woo считает max_price= нулём и не находит ничего; чистим до того,
  * как WC_Query::product_query (приоритет 10) прочитает $_GET.
  */
-function promix_catalog_empty_prices(): void {
+function promix_catalog_empty_prices( WP_Query $query ): void {
+    if ( is_admin() || ! $query->is_main_query() || ! promix_is_catalog() ) {
+        return;
+    }
+
     // phpcs:disable WordPress.Security.NonceVerification.Recommended
     foreach ( array( 'min_price', 'max_price' ) as $key ) {
         if ( ! isset( $_GET[ $key ] ) ) {

@@ -167,7 +167,10 @@
       document.title = doc.title;
       applyView(currentView());
 
-      if (push) {
+      if (push === 'replace') {
+        /* Поиск: каждая буква — не отдельная страница в истории */
+        window.history.replaceState({ promixCatalog: true }, '', url);
+      } else if (push) {
         window.history.pushState({ promixCatalog: true }, '', url);
       } else {
         syncForm(doc);
@@ -180,8 +183,8 @@
     });
   }
 
-  function refresh() {
-    load(buildUrl(), true);
+  function refresh(mode) {
+    load(buildUrl(), mode || true);
   }
 
   window.addEventListener('popstate', function () {
@@ -240,7 +243,7 @@
       }
 
       clearTimeout(searchTimer);
-      searchTimer = setTimeout(refresh, 350);
+      searchTimer = setTimeout(function () { refresh('replace'); }, 350);
     });
   }
 

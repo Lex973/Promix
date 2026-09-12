@@ -149,7 +149,41 @@
 
     var pendingTimer = null;
 
+    /* Список перерисовывается целиком, и фокус с поля количества или
+       кнопки «+» пропадал. Запоминаем, где он был, и возвращаем. */
+    function focusOf() {
+      var el = document.activeElement;
+      var item = el && el.closest('[data-cart-item]');
+
+      if (!item) {
+        return null;
+      }
+
+      return { key: item.getAttribute('data-cart-item'), input: el.hasAttribute('data-qty-input'), plus: el.hasAttribute('data-qty-plus'), minus: el.hasAttribute('data-qty-minus') };
+    }
+
+    function restoreFocus(saved) {
+      if (!saved) {
+        return;
+      }
+
+      var item = cartBox.querySelector('[data-cart-item="' + saved.key + '"]');
+      var target = item && item.querySelector(saved.input ? '[data-qty-input]' : saved.plus ? '[data-qty-plus]' : saved.minus ? '[data-qty-minus]' : null);
+
+      if (!target) {
+        return;
+      }
+
+      target.focus();
+
+      if (saved.input) {
+        target.setSelectionRange(target.value.length, target.value.length);
+      }
+    }
+
     function update(key, qty, action) {
+      var saved = focusOf();
+
       cartBox.classList.add('is-loading');
 
       post('promix_cart', { nonce: cfg.nonce, key: key, qty: qty, do: action || 'update' }).then(function (res) {
@@ -159,6 +193,7 @@
 
         cartBox.innerHTML = res.data.html;
         setCount(res.data.count, res.data.label);
+        restoreFocus(saved);
       }).catch(function () {
         window.location.reload();
       }).then(function () {
@@ -174,7 +209,7 @@
     function qtyOf(item) {
       var input = item.querySelector('[data-qty-input]');
       var n = parseInt((input.value || '').replace(/\D/g, ''), 10);
-      return n > 0 ? n : 1;
+      return Math.min(n > 0 ? n : 1, 9999);
     }
 
     cartBox.addEventListener('click', function (event) {

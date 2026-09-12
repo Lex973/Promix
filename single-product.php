@@ -42,28 +42,33 @@ while ( have_posts() ) :
 
     $related = $category ? wc_get_products(
         array(
-            'status'   => 'publish',
-            'limit'    => 4,
-            'category' => array( $category->slug ),
-            'exclude'  => array( $product->get_id() ),
-            'orderby'  => 'menu_order',
-            'order'    => 'ASC',
+            'status'     => 'publish',
+            'visibility' => 'visible',
+            'limit'      => 4,
+            'category'   => array( $category->slug ),
+            'exclude'    => array( $product->get_id() ),
+            'orderby'    => 'menu_order',
+            'order'      => 'ASC',
         )
     ) : array();
+
+    // Разметка schema.org/Product для поисковиков: Woo соберёт и напечатает её в подвале.
+    WC()->structured_data->generate_product_data( $product );
     ?>
 
     <section class="section single">
         <div class="container">
 
-            <nav class="crumbs" aria-label="<?php esc_attr_e( 'Вы здесь', 'promix' ); ?>">
-                <a class="crumbs__link" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Главная', 'promix' ); ?></a>
-                <?php echo promix_icon( 'chevron-right', 2, 'crumbs__sep' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                <a class="crumbs__link" href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Каталог', 'promix' ); ?></a>
-                <?php if ( $category && $cat_link ) : ?>
-                    <?php echo promix_icon( 'chevron-right', 2, 'crumbs__sep' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                    <a class="crumbs__link" href="<?php echo esc_url( $cat_link ); ?>"><?php echo esc_html( $category->name ); ?></a>
-                <?php endif; ?>
-            </nav>
+            <?php
+            $crumbs = array( __( 'Каталог', 'promix' ) => $shop_url );
+
+            if ( $category && $cat_link ) {
+                $crumbs[ $category->name ] = $cat_link;
+            }
+
+            // Последний пункт — сам товар: название и так стоит заголовком, в крошках его не повторяем.
+            get_template_part( 'template-parts/crumbs', null, array( 'items' => $crumbs + array( '' => '' ) ) );
+            ?>
 
             <div class="single__layout">
 
@@ -112,9 +117,7 @@ while ( have_posts() ) :
                         <?php endif; ?>
                     </dl>
 
-                    <p class="single__price">
-                        <?php echo esc_html( number_format_i18n( $price ) ); ?><span class="single__rub"> ₽</span>
-                    </p>
+                    <p class="single__price"><?php echo esc_html( promix_price( $price ) ); ?></p>
 
                     <form class="single__buy" method="post" action="<?php echo esc_url( $product->get_permalink() ); ?>" data-add-form>
                         <div class="qty" data-qty>

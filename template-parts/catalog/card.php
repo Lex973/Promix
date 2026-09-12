@@ -56,16 +56,19 @@ $badge = ( 'PROMIX' === promix_product_brand( $product ) ) ? __( 'Своя ма�
     </div>
 
     <div class="product__foot">
-        <p class="product__price">
-            <?php echo esc_html( number_format_i18n( $price ) ); ?><span class="product__rub"> ₽</span>
-        </p>
+        <p class="product__price"><?php echo esc_html( promix_price( $price ) ); ?></p>
 
         <div class="product__actions">
-            <button class="btn btn--outline product__buy" type="button"
-                    data-add="<?php echo esc_attr( (string) $product->get_id() ); ?>"
-                    aria-label="<?php echo esc_attr( sprintf( /* translators: %s — название товара. */ __( 'В корзину: %s', 'promix' ), $name ) ); ?>">
-                <?php esc_html_e( 'В корзину', 'promix' ); ?>
-            </button>
+            <?php if ( $price > 0 ) : ?>
+                <?php /* Ссылка, а не кнопка: без скрипта её обработает Woo сам (add-to-cart), со скриптом перехватит cart.js. */ ?>
+                <a class="btn btn--outline product__buy" href="<?php echo esc_url( add_query_arg( 'add-to-cart', $product->get_id(), $url ) ); ?>"
+                   data-add="<?php echo esc_attr( (string) $product->get_id() ); ?>" rel="nofollow"
+                   aria-label="<?php echo esc_attr( sprintf( /* translators: %s — название товара. */ __( 'В корзину: %s', 'promix' ), $name ) ); ?>">
+                    <?php esc_html_e( 'В корзину', 'promix' ); ?>
+                </a>
+            <?php else : ?>
+                <a class="btn btn--outline product__buy" href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'Уточнить', 'promix' ); ?></a>
+            <?php endif; ?>
 
             <?php if ( $sku ) : ?>
                 <button class="product__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>"

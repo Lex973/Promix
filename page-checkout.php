@@ -65,7 +65,7 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
 
                     <p class="checkout__done-total">
                         <?php esc_html_e( 'Итого', 'promix' ); ?>
-                        <strong><?php echo esc_html( number_format_i18n( (float) $order->get_total() ) ); ?> ₽</strong>
+                        <strong><?php echo esc_html( promix_price( (float) $order->get_total() ) ); ?></strong>
                     </p>
 
                     <div class="checkout__done-actions">
@@ -91,13 +91,18 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
             $cart   = WC()->cart;
             ?>
 
-            <nav class="crumbs" aria-label="<?php esc_attr_e( 'Вы здесь', 'promix' ); ?>">
-                <a class="crumbs__link" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Главная', 'promix' ); ?></a>
-                <?php echo promix_icon( 'chevron-right', 2, 'crumbs__sep' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                <a class="crumbs__link" href="<?php echo esc_url( wc_get_cart_url() ); ?>"><?php esc_html_e( 'Корзина', 'promix' ); ?></a>
-                <?php echo promix_icon( 'chevron-right', 2, 'crumbs__sep' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                <span class="crumbs__current" aria-current="page"><?php esc_html_e( 'Оформление', 'promix' ); ?></span>
-            </nav>
+            <?php
+            get_template_part(
+                'template-parts/crumbs',
+                null,
+                array(
+                    'items' => array(
+                        __( 'Корзина', 'promix' )    => wc_get_cart_url(),
+                        __( 'Оформление', 'promix' ) => '',
+                    ),
+                )
+            );
+            ?>
 
             <h1 class="section__title cart__title"><?php esc_html_e( 'Оформление заказа', 'promix' ); ?></h1>
 
@@ -208,7 +213,7 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
                                 <li class="checkout__item">
                                     <span class="checkout__item-name"><?php echo esc_html( $product->get_name() ); ?></span>
                                     <span class="checkout__item-qty">× <?php echo esc_html( (string) $item['quantity'] ); ?></span>
-                                    <span class="checkout__item-sum"><?php echo esc_html( number_format_i18n( (float) $item['line_subtotal'] ) ); ?> ₽</span>
+                                    <span class="checkout__item-sum"><?php echo esc_html( promix_price( (float) $item['line_subtotal'] ) ); ?></span>
                                 </li>
                             <?php endif; ?>
                         <?php endforeach; ?>
@@ -217,7 +222,7 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
                     <dl class="cart__rows">
                         <div class="cart__row cart__row--total">
                             <dt><?php esc_html_e( 'Итого', 'promix' ); ?></dt>
-                            <dd><?php echo esc_html( number_format_i18n( (float) $cart->get_subtotal() ) ); ?> ₽</dd>
+                            <dd><?php echo esc_html( promix_price( (float) $cart->get_subtotal() ) ); ?></dd>
                         </div>
                     </dl>
 

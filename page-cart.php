@@ -16,11 +16,7 @@ get_header();
 <section class="section cart">
     <div class="container">
 
-        <nav class="crumbs" aria-label="<?php esc_attr_e( 'Вы здесь', 'promix' ); ?>">
-            <a class="crumbs__link" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Главная', 'promix' ); ?></a>
-            <?php echo promix_icon( 'chevron-right', 2, 'crumbs__sep' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-            <span class="crumbs__current" aria-current="page"><?php esc_html_e( 'Корзина', 'promix' ); ?></span>
-        </nav>
+        <?php get_template_part( 'template-parts/crumbs', null, array( 'items' => array( __( 'Корзина', 'promix' ) => '' ) ) ); ?>
 
         <h1 class="section__title cart__title"><?php esc_html_e( 'Корзина', 'promix' ); ?></h1>
 

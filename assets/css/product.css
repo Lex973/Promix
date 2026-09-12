@@ -105,11 +105,6 @@
   letter-spacing: -0.02em;
 }
 
-.single__rub {
-  font-weight: var(--fw-medium);
-  color: var(--color-muted);
-}
-
 /* ===== Количество и кнопка ===== */
 
 .single__buy {

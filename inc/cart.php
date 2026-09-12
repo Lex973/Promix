@@ -14,6 +14,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Больше — это уже не заказ с сайта, а разговор с менеджером.
+const PROMIX_CART_MAX_QTY = 9999;
+
 /**
  * Сколько единиц товара в корзине — для счётчика в шапке.
  */
@@ -46,12 +49,41 @@ function promix_cart_label(): string {
  * @return array<string, mixed>
  */
 function promix_cart_fragments( array $fragments ): array {
+    // HTML мини-корзины Woo скрипту не нужен — не гоняем его по сети.
+    unset( $fragments['div.widget_shopping_cart_content'] );
+
     $fragments['promix_count'] = promix_cart_count();
     $fragments['promix_label'] = promix_cart_label();
-    $fragments['promix_total'] = wp_strip_all_tags( WC()->cart->get_cart_total() );
 
     return $fragments;
 }
+
+/**
+ * Шаблоны корзины и оформления — по назначению страницы, а не по слагу.
+ *
+ * page-cart.php нашёлся бы и сам через иерархию, но только пока адрес
+ * страницы именно /cart/; переименуют в админке — тема молча отдаст
+ * page.php с пустым содержимым.
+ *
+ * @param string $template Шаблон, выбранный WordPress.
+ * @return string
+ */
+function promix_cart_templates( string $template ): string {
+    if ( ! function_exists( 'is_cart' ) ) {
+        return $template;
+    }
+
+    if ( is_cart() ) {
+        return get_theme_file_path( 'page-cart.php' );
+    }
+
+    if ( is_checkout() ) {
+        return get_theme_file_path( 'page-checkout.php' );
+    }
+
+    return $template;
+}
+add_filter( 'template_include', 'promix_cart_templates', 20 );
 add_filter( 'woocommerce_add_to_cart_fragments', 'promix_cart_fragments' );
 
 /**
@@ -88,7 +120,7 @@ function promix_cart_ajax(): void {
     check_ajax_referer( 'promix-cart', 'nonce' );
 
     $key = isset( $_POST['key'] ) ? sanitize_text_field( wp_unslash( $_POST['key'] ) ) : '';
-    $qty = isset( $_POST['qty'] ) ? absint( $_POST['qty'] ) : 0;
+    $qty = isset( $_POST['qty'] ) ? min( absint( $_POST['qty'] ), PROMIX_CART_MAX_QTY ) : 0;
     $do  = isset( $_POST['do'] ) ? sanitize_key( $_POST['do'] ) : 'update';
 
     if ( $key && WC()->cart->get_cart_item( $key ) ) {
@@ -296,7 +328,7 @@ function promix_checkout_submit(): void {
         }
 
         foreach ( WC()->cart->get_cart() as $item ) {
-            $order->add_product( $item['data'], (int) $item['quantity'] );
+            $order->add_product( $item['data'], min( (int) $item['quantity'], PROMIX_CART_MAX_QTY ) );
         }
 
         $order->set_address(

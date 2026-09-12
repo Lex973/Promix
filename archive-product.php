@@ -33,7 +33,7 @@ $category = is_product_category() ? get_queried_object() : null;
 $total    = $category instanceof WP_Term ? (int) $category->count : (int) wp_count_posts( 'product' )->publish;
 $title    = $category instanceof WP_Term ? $category->name : __( 'Материалы и инструмент', 'promix' );
 $lead     = $category instanceof WP_Term && $category->description
-    ? $category->description
+    ? wp_strip_all_tags( $category->description )
     : sprintf(
         $category instanceof WP_Term
             /* translators: 1 — количество позиций, 2 — слово «позиция» в нужной форме. */
@@ -49,17 +49,20 @@ $lead     = $category instanceof WP_Term && $category->description
     <div class="container">
 
         <div class="catalog__head" data-catalog-head>
-            <nav class="crumbs" aria-label="<?php esc_attr_e( 'Вы здесь', 'promix' ); ?>">
-                <a class="crumbs__link" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Главная', 'promix' ); ?></a>
-                <?php echo promix_icon( 'chevron-right', 2, 'crumbs__sep' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                <?php if ( $category instanceof WP_Term ) : ?>
-                    <a class="crumbs__link" href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Каталог', 'promix' ); ?></a>
-                    <?php echo promix_icon( 'chevron-right', 2, 'crumbs__sep' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
-                    <span class="crumbs__current" aria-current="page"><?php echo esc_html( $category->name ); ?></span>
-                <?php else : ?>
-                    <span class="crumbs__current" aria-current="page"><?php esc_html_e( 'Каталог', 'promix' ); ?></span>
-                <?php endif; ?>
-            </nav>
+            <?php
+            get_template_part(
+                'template-parts/crumbs',
+                null,
+                array(
+                    'items' => $category instanceof WP_Term
+                        ? array(
+                            __( 'Каталог', 'promix' ) => $shop_url,
+                            $category->name           => '',
+                        )
+                        : array( __( 'Каталог', 'promix' ) => '' ),
+                )
+            );
+            ?>
             <h1 class="section__title"><?php echo esc_html( $title ); ?></h1>
             <p class="section__lead"><?php echo esc_html( $lead ); ?></p>
         </div>
