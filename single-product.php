@@ -66,8 +66,7 @@ while ( have_posts() ) :
                 $crumbs[ $category->name ] = $cat_link;
             }
 
-            // Последний пункт — сам товар: название и так стоит заголовком, в крошках его не повторяем.
-            get_template_part( 'template-parts/crumbs', null, array( 'items' => $crumbs + array( '' => '' ) ) );
+            get_template_part( 'template-parts/crumbs', null, array( 'items' => $crumbs ) );
             ?>
 
             <div class="single__layout">
@@ -144,10 +143,23 @@ while ( have_posts() ) :
             </div>
 
             <?php if ( $product->get_description() ) : ?>
+                <?php $contacts = promix_contacts(); ?>
                 <div class="single__about">
-                    <div class="single__desc doc">
-                        <?php echo wp_kses_post( wpautop( $product->get_description() ) ); ?>
+                    <div class="single__about-text">
+                        <h2 class="single__about-title"><?php esc_html_e( 'Описание', 'promix' ); ?></h2>
+                        <div class="single__desc doc">
+                            <?php echo wp_kses_post( wpautop( $product->get_description() ) ); ?>
+                        </div>
                     </div>
+
+                    <?php /* Прямой контакт — в отличие от плашки внизу, где форма заявки. */ ?>
+                    <aside class="single__help">
+                        <p class="single__help-title"><?php esc_html_e( 'Вопрос по товару?', 'promix' ); ?></p>
+                        <p class="single__help-text"><?php esc_html_e( 'Позвоните или напишите — подскажем по применению и совместимости, подберём аналог, если этого нет на складе.', 'promix' ); ?></p>
+                        <a class="single__help-phone" href="<?php echo esc_url( promix_tel_href() ); ?>"><?php echo esc_html( $contacts['phone'] ); ?></a>
+                        <p class="single__help-hours"><?php echo esc_html( $contacts['hours'] ); ?></p>
+                        <?php get_template_part( 'template-parts/btn-max', null, array( 'class' => 'single__help-max' ) ); ?>
+                    </aside>
                 </div>
             <?php endif; ?>
 
