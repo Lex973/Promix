@@ -180,25 +180,27 @@ function promix_lead_client_ip(): string {
  * Ключ счётчика отправок.
  *
  * @param string $window Название окна: пауза или серия.
+ * @param string $scope  Что считаем: заявки (lead) или заказы (order) — у каждого свой счётчик.
  * @return string
  */
-function promix_lead_rate_key( string $window ): string {
+function promix_lead_rate_key( string $window, string $scope = 'lead' ): string {
     $salt = defined( 'AUTH_SALT' ) ? AUTH_SALT : '';
 
-    return 'promix_lead_' . $window . '_' . md5( promix_lead_client_ip() . $salt );
+    return 'promix_' . $scope . '_' . $window . '_' . md5( promix_lead_client_ip() . $salt );
 }
 
 /**
  * Не частит ли отправитель.
  *
+ * @param string $scope Заявки или заказы.
  * @return bool
  */
-function promix_lead_rate_limited(): bool {
-    if ( get_transient( promix_lead_rate_key( 'pause' ) ) ) {
+function promix_lead_rate_limited( string $scope = 'lead' ): bool {
+    if ( get_transient( promix_lead_rate_key( 'pause', $scope ) ) ) {
         return true;
     }
 
-    $series = get_transient( promix_lead_rate_key( 'series' ) );
+    $series = get_transient( promix_lead_rate_key( 'series', $scope ) );
 
     return is_array( $series ) && $series['count'] >= PROMIX_LEAD_LIMIT;
 }
@@ -206,11 +208,13 @@ function promix_lead_rate_limited(): bool {
 /**
  * Засчитать отправку. Считаются только заполненные формы, чтобы опечатка
  * в телефоне не запирала человека на полминуты.
+ *
+ * @param string $scope Заявки или заказы.
  */
-function promix_lead_count_attempt(): void {
-    set_transient( promix_lead_rate_key( 'pause' ), 1, PROMIX_LEAD_PAUSE );
+function promix_lead_count_attempt( string $scope = 'lead' ): void {
+    set_transient( promix_lead_rate_key( 'pause', $scope ), 1, PROMIX_LEAD_PAUSE );
 
-    $series = get_transient( promix_lead_rate_key( 'series' ) );
+    $series = get_transient( promix_lead_rate_key( 'series', $scope ) );
 
     if ( ! is_array( $series ) ) {
         $series = array(
@@ -222,7 +226,7 @@ function promix_lead_count_attempt(): void {
     ++$series['count'];
 
     // Окно не продлевается: срок считается от первой отправки в серии.
-    set_transient( promix_lead_rate_key( 'series' ), $series, max( 1, $series['until'] - time() ) );
+    set_transient( promix_lead_rate_key( 'series', $scope ), $series, max( 1, $series['until'] - time() ) );
 }
 
 /**

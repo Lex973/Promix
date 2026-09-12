@@ -54,12 +54,28 @@ add_action( 'after_setup_theme', 'promix_woocommerce_setup' );
  * своя разметка, а вместе с ними уезжает и jQuery.
  */
 function promix_woocommerce_assets(): void {
-    foreach ( array( 'woocommerce', 'wc-add-to-cart', 'wc-cart-fragments', 'wc-single-product', 'wc-jquery-blockui', 'wc-js-cookie', 'wc-order-attribution', 'sourcebuster-js' ) as $handle ) {
-        wp_dequeue_script( $handle );
+    /*
+     * Не перечисляем хэндлы поимённо: на корзине и оформлении Woo ставит
+     * ещё wc-cart, wc-checkout, wc-country-select со 150 КБ списка регионов,
+     * selectWoo — снимаем всё своё по префиксу. jQuery уйдёт сам: у него
+     * не останется зависимых.
+     */
+    $own = static function ( string $handle ): bool {
+        return 0 === strpos( $handle, 'wc-' )
+            || 0 === strpos( $handle, 'woocommerce' )
+            || in_array( $handle, array( 'selectWoo', 'select2', 'sourcebuster-js', 'jquery-blockui', 'js-cookie' ), true );
+    };
+
+    foreach ( wp_scripts()->queue as $handle ) {
+        if ( $own( (string) $handle ) ) {
+            wp_dequeue_script( (string) $handle );
+        }
     }
 
-    foreach ( array( 'woocommerce-inline', 'wc-blocks-style', 'wc-blocks-vendors-style' ) as $handle ) {
-        wp_dequeue_style( $handle );
+    foreach ( wp_styles()->queue as $handle ) {
+        if ( $own( (string) $handle ) ) {
+            wp_dequeue_style( (string) $handle );
+        }
     }
 }
 add_action( 'wp_enqueue_scripts', 'promix_woocommerce_assets', 100 );

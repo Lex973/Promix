@@ -239,9 +239,19 @@ function promix_product_category( WC_Product $product ): string {
 /**
  * Бренд товара — из глобального атрибута «Бренд».
  *
+ * Через get_the_terms(), а не $product->get_attribute(): второй ходит
+ * в базу за каждым товаром, первый берёт из кэша, который WP_Query
+ * уже прогрел для всей страницы.
+ *
  * @param WC_Product $product Товар.
  * @return string
  */
 function promix_product_brand( WC_Product $product ): string {
-    return (string) $product->get_attribute( 'pa_brand' );
+    $terms = get_the_terms( $product->get_id(), 'pa_brand' );
+
+    if ( ! $terms || is_wp_error( $terms ) ) {
+        return '';
+    }
+
+    return $terms[0]->name;
 }

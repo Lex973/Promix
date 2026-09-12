@@ -106,7 +106,6 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
                 <form class="checkout__form lead" method="post" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" novalidate data-checkout-form>
                     <?php wp_nonce_field( 'promix-checkout' ); ?>
                     <input type="hidden" name="promix_checkout" value="1">
-                    <input type="hidden" name="opened" value="<?php echo esc_attr( (string) time() ); ?>">
 
                     <?php if ( $errors ) : ?>
                         <div class="checkout__errors" role="alert">
@@ -195,7 +194,7 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
                         </label>
                     </div>
 
-                    <button class="btn btn--primary checkout__submit" type="submit"><?php esc_html_e( 'Отправить заказ', 'promix' ); ?></button>
+                    <button class="btn btn--primary checkout__submit" type="submit" data-checkout-submit><?php esc_html_e( 'Отправить заказ', 'promix' ); ?></button>
                     <p class="lead__note checkout__note"><?php esc_html_e( 'Без оплаты на сайте: менеджер перезвонит, подтвердит наличие и выставит счёт или примет оплату при получении.', 'promix' ); ?></p>
                 </form>
 

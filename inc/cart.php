@@ -191,18 +191,35 @@ function promix_checkout_submit(): void {
 
     $v = promix_checkout_values();
 
-    // Ловушка для ботов и слишком быстрая отправка — как в форме заявки.
-    $trap   = isset( $_POST['website'] ) ? trim( (string) wp_unslash( $_POST['website'] ) ) : '';
-    $opened = isset( $_POST['opened'] ) ? (int) $_POST['opened'] : 0;
+    /*
+     * Ловушка для ботов: спрятанное поле заполняют только скрипты.
+     * Корзину при этом не трогаем — человек с автозаполнением браузера
+     * не должен терять подобранные товары. Таймера «быстрее трёх секунд»
+     * здесь нет: на оформление приходят с уже заполненными полями.
+     */
+    $trap = isset( $_POST['website'] ) ? trim( (string) wp_unslash( $_POST['website'] ) ) : '';
 
-    if ( '' !== $trap || ( $opened > 0 && ( time() - $opened ) < 3 ) ) {
-        WC()->cart->empty_cart();
-        wp_safe_redirect( wc_get_cart_url() );
-        exit;
+    if ( '' !== $trap ) {
+        promix_checkout_errors( array( __( 'Не получилось отправить. Попробуйте ещё раз.', 'promix' ) ) );
+        return;
+    }
+
+    // Тот же лимит, что у заявок, со своим счётчиком: три заказа за десять минут.
+    if ( promix_lead_rate_limited( 'order' ) ) {
+        promix_checkout_errors( array( __( 'Заказ уже у нас — менеджер перезвонит. Если нужно срочно, позвоните.', 'promix' ) ) );
+        return;
     }
 
     $errors = array();
     $digits = preg_replace( '/\D/', '', $v['phone'] );
+
+    // Длину режем до проверки: обрезанный после is_email() адрес Woo не примет.
+    $v['client']  = mb_substr( $v['client'], 0, 100 );
+    $v['company'] = mb_substr( $v['company'], 0, 100 );
+    $v['phone']   = mb_substr( $v['phone'], 0, 30 );
+    $v['email']   = mb_substr( $v['email'], 0, 100 );
+    $v['address'] = mb_substr( $v['address'], 0, 200 );
+    $v['comment'] = mb_substr( $v['comment'], 0, 2000 );
 
     if ( '' === $v['client'] ) {
         $errors[] = __( 'Напишите, как к вам обращаться.', 'promix' );
@@ -229,50 +246,97 @@ function promix_checkout_submit(): void {
         return;
     }
 
-    $order = wc_create_order(
+    /*
+     * Защита от двойной отправки. Два клика или два одновременных запроса
+     * с одной сессией создавали два заказа: транзиент здесь не помогает,
+     * оба запроса успевают прочитать «свободно». Поэтому замок в MySQL
+     * (GET_LOCK — атомарный, второй запрос ждёт первого), а после него —
+     * поиск заказа с той же корзиной за последние две минуты: нашёлся —
+     * это тот же заказ, отправляем на его страницу, а не создаём новый.
+     */
+    global $wpdb;
+
+    $session   = (string) WC()->session->get_customer_id();
+    $dedup     = md5( $session . '|' . WC()->cart->get_cart_hash() );
+    $lock_name = 'promix_order_' . md5( $session );
+
+    $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 5)', $lock_name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- замок, а не данные.
+
+    $same = wc_get_orders(
         array(
-            'created_via' => 'promix',
-            'customer_id' => get_current_user_id(),
+            'limit'        => 1,
+            'created_via'  => 'promix',
+            'date_created' => '>' . ( time() - 2 * MINUTE_IN_SECONDS ),
+            'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- один заказ по индексированному ключу.
+                array(
+                    'key'   => '_promix_dedup',
+                    'value' => $dedup,
+                ),
+            ),
         )
     );
 
-    if ( is_wp_error( $order ) ) {
+    if ( $same ) {
+        $wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- замок, а не данные.
+        WC()->cart->empty_cart();
+        wp_safe_redirect( $same[0]->get_checkout_order_received_url() );
+        exit;
+    }
+
+    try {
+        $order = wc_create_order(
+            array(
+                'created_via' => 'promix',
+                'customer_id' => get_current_user_id(),
+            )
+        );
+
+        if ( is_wp_error( $order ) ) {
+            throw new RuntimeException( $order->get_error_message() );
+        }
+
+        foreach ( WC()->cart->get_cart() as $item ) {
+            $order->add_product( $item['data'], (int) $item['quantity'] );
+        }
+
+        $order->set_address(
+            array(
+                'first_name' => $v['client'],
+                'company'    => $v['company'],
+                'phone'      => $v['phone'],
+                'email'      => $v['email'],
+                'country'    => 'RU',
+            ),
+            'billing'
+        );
+
+        if ( 'delivery' === $v['delivery'] ) {
+            $order->set_address(
+                array(
+                    'first_name' => $v['client'],
+                    'address_1'  => $v['address'],
+                    'country'    => 'RU',
+                ),
+                'shipping'
+            );
+        }
+
+        $order->set_customer_note( $v['comment'] );
+        $order->update_meta_data( '_promix_delivery', $v['delivery'] );
+        $order->update_meta_data( '_promix_dedup', $dedup );
+        $order->calculate_totals( false );
+
+        // «На удержании»: заказ ждёт звонка, а не оплаты — processing помечал бы его оплаченным.
+        $order->update_status( 'on-hold', __( 'Заказ с сайта: ждёт звонка менеджера.', 'promix' ) );
+    } catch ( Throwable $e ) {
+        $wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- замок, а не данные.
         promix_checkout_errors( array( __( 'Не получилось сохранить заказ. Позвоните нам, пожалуйста.', 'promix' ) ) );
         return;
     }
 
-    foreach ( WC()->cart->get_cart() as $item ) {
-        $order->add_product( $item['data'], (int) $item['quantity'] );
-    }
+    $wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- замок, а не данные.
 
-    $order->set_address(
-        array(
-            'first_name' => mb_substr( $v['client'], 0, 100 ),
-            'company'    => mb_substr( $v['company'], 0, 100 ),
-            'phone'      => mb_substr( $v['phone'], 0, 30 ),
-            'email'      => mb_substr( $v['email'], 0, 100 ),
-            'country'    => 'RU',
-        ),
-        'billing'
-    );
-
-    if ( 'delivery' === $v['delivery'] ) {
-        $order->set_address(
-            array(
-                'first_name' => mb_substr( $v['client'], 0, 100 ),
-                'address_1'  => mb_substr( $v['address'], 0, 200 ),
-                'country'    => 'RU',
-            ),
-            'shipping'
-        );
-    }
-
-    $order->set_customer_note( mb_substr( $v['comment'], 0, 2000 ) );
-    $order->update_meta_data( '_promix_delivery', $v['delivery'] );
-    $order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
-    $order->set_customer_user_agent( wc_get_user_agent() );
-    $order->calculate_totals( false );
-    $order->update_status( 'processing', __( 'Заказ с сайта: ждёт звонка менеджера.', 'promix' ) );
+    promix_lead_count_attempt( 'order' );
 
     /**
      * Заказ создан — сюда встанет отправка менеджеру в MAX.
@@ -298,6 +362,20 @@ function promix_order_delivery( WC_Order $order ): string {
         ? __( 'Доставка', 'promix' )
         : __( 'Самовывоз', 'promix' );
 }
+
+/**
+ * Письмо «Новый заказ» — на ту же почту, что и заявки с сайта.
+ *
+ * Иначе Woo шлёт его на admin_email, а заявки уходят менеджеру — и заказы
+ * читает не тот человек.
+ *
+ * @param string $recipient Получатель по настройкам Woo.
+ * @return string
+ */
+function promix_order_recipient( string $recipient ): string {
+    return function_exists( 'promix_lead_recipient' ) ? promix_lead_recipient() : $recipient;
+}
+add_filter( 'woocommerce_email_recipient_new_order', 'promix_order_recipient' );
 
 /**
  * Способ получения и адрес — в письме менеджеру и на странице заказа в админке.

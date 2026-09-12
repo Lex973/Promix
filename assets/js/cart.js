@@ -243,10 +243,19 @@
 
   if (checkout) {
     var address = checkout.querySelector('[data-address]');
+    var submitBtn = checkout.querySelector('[data-checkout-submit]');
 
     checkout.addEventListener('change', function (event) {
       if (event.target.name === 'delivery' && address) {
         address.hidden = event.target.value !== 'delivery';
+      }
+    });
+
+    /* Второй клик по «Отправить заказ» создавал второй заказ */
+    checkout.addEventListener('submit', function () {
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('is-busy');
       }
     });
   }
