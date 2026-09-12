@@ -140,14 +140,16 @@ while ( have_posts() ) :
                        data-lead-title="<?php esc_attr_e( 'Спросим у технолога', 'promix' ); ?>">
                         <?php esc_html_e( 'Спросить у технолога', 'promix' ); ?>
                     </a>
-
-                    <?php if ( $product->get_description() ) : ?>
-                        <div class="single__desc doc">
-                            <?php echo wp_kses_post( wpautop( $product->get_description() ) ); ?>
-                        </div>
-                    <?php endif; ?>
                 </div>
             </div>
+
+            <?php if ( $product->get_description() ) : ?>
+                <div class="single__about">
+                    <div class="single__desc doc">
+                        <?php echo wp_kses_post( wpautop( $product->get_description() ) ); ?>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <?php if ( $related ) : ?>
                 <div class="single__related">
