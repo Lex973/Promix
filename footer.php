@@ -59,6 +59,7 @@ $promix_policy = get_privacy_policy_url();
 
         <div class="footer__bottom">
             <p>© <?php echo esc_html( wp_date( 'Y' ) ); ?> <?php esc_html_e( 'PROMIX — малярный центр в Казани', 'promix' ); ?></p>
+            <p class="footer__legal"><?php echo esc_html( promix_legal_line() ); ?></p>
             <?php if ( $promix_policy ) : ?>
                 <a class="footer__policy" href="<?php echo esc_url( $promix_policy ); ?>"><?php esc_html_e( 'Политика конфиденциальности', 'promix' ); ?></a>
             <?php endif; ?>

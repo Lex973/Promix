@@ -314,16 +314,68 @@ function promix_contacts(): array {
 
     $contacts = array(
         'phone'       => promix_option( 'phone', '+7 (953) 484-00-00' ),
-        'address'     => promix_option( 'address', 'Казань, ул. Габдуллы Тукая, 91' ),
-        'hours'       => promix_option( 'hours', 'Пн–Пт 9:00–18:00' ),
-        'hours_extra' => promix_option( 'hours_extra', 'Сб 9:00–14:00 · Вс — выходной' ),
-        'max_url'     => promix_option( 'max_url', '#' ),
-        'gis_url'     => promix_option( '2gis_url', 'https://2gis.ru/kazan/firm/70000001060590384' ),
-        'yandex_url'  => promix_option( 'yandex_url', 'https://yandex.ru/maps/org/promix/59684652364/' ),
-        'map_embed'   => promix_option( 'map_embed', 'https://yandex.ru/map-widget/v1/org/promix/59684652364/?ll=49.120092%2C55.774053&z=17' ),
+        'address'       => promix_option( 'address', 'Казань, ул. Габдуллы Тукая, 91к1' ),
+        'hours'         => promix_option( 'hours', 'Пн–Пт 9:00–18:00' ),
+        'hours_extra'   => promix_option( 'hours_extra', 'Сб 9:00–14:00 · Вс — выходной' ),
+        'email'         => promix_option( 'email', 'promix.kazan@mail.ru' ),
+        'legal_name'    => promix_option( 'legal_name', 'ООО «ПРОМИКС КАЗАНЬ»' ),
+        'inn'           => promix_option( 'inn', '1648048364' ),
+        'ogrn'          => promix_option( 'ogrn', '' ),
+        'legal_address' => promix_option( 'legal_address', '420095, г. Казань, ул. Шамиля Усманова, д. 12, кв. 17' ),
+        'max_url'       => promix_option( 'max_url', '#' ),
+        'gis_url'       => promix_option( '2gis_url', 'https://2gis.ru/kazan/firm/70000001060590384' ),
+        'yandex_url'    => promix_option( 'yandex_url', 'https://yandex.ru/maps/org/promix/59684652364/' ),
+        'map_embed'     => promix_option( 'map_embed', 'https://yandex.ru/map-widget/v1/org/promix/59684652364/?ll=49.120092%2C55.774053&z=17' ),
     );
 
     return $contacts;
+}
+
+/**
+ * Режим работы одной строкой, с субботой: «Пн–Пт 9:00–18:00 · Сб 9:00–14:00 · Вс — выходной».
+ *
+ * Там, где часы упоминаются мимоходом (шапка, оформление, письмо, карточка
+ * товара), одной будней строки мало: покупатель приезжает в субботу к 16:00.
+ *
+ * @param bool $short Без выходного — для шапки, где строка не влезает между меню и телефоном.
+ * @return string
+ */
+function promix_hours_full( bool $short = false ): string {
+    $c     = promix_contacts();
+    $extra = $c['hours_extra'];
+
+    if ( $short ) {
+        $extra = trim( explode( '·', $extra )[0] );
+    }
+
+    return implode( ' · ', array_filter( array( $c['hours'], $extra ) ) );
+}
+
+/**
+ * Реквизиты продавца одной строкой — для подвала: название, ИНН, ОГРН, адрес.
+ *
+ * Магазин обязан показывать продавца (ст. 26.1 закона о защите прав
+ * потребителей); ОГРН пропускается, пока не заполнен.
+ *
+ * @return string
+ */
+function promix_legal_line(): string {
+    $c     = promix_contacts();
+    $parts = array( $c['legal_name'] );
+
+    if ( $c['inn'] ) {
+        $parts[] = sprintf( /* translators: %s — ИНН. */ __( 'ИНН %s', 'promix' ), $c['inn'] );
+    }
+
+    if ( $c['ogrn'] ) {
+        $parts[] = sprintf( /* translators: %s — ОГРН. */ __( 'ОГРН %s', 'promix' ), $c['ogrn'] );
+    }
+
+    if ( $c['legal_address'] ) {
+        $parts[] = $c['legal_address'];
+    }
+
+    return implode( ' · ', array_filter( $parts ) );
 }
 
 /**

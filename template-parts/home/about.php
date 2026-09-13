@@ -19,7 +19,7 @@ $facts = promix_field(
         array( 'fact_icon' => 'circle-check-big', 'fact_value' => '10+ лет',  'fact_label' => 'опыта в стройсфере' ),
         array( 'fact_icon' => 'star',             'fact_value' => '4,9 из 5', 'fact_label' => '44 отзыва в 2ГИС' ),
         array( 'fact_icon' => 'package',          'fact_value' => '1 800+',   'fact_label' => 'товаров в наличии' ),
-        array( 'fact_icon' => 'map-pin',          'fact_value' => 'Казань',   'fact_label' => 'Габдуллы Тукая, 91' ),
+        array( 'fact_icon' => 'map-pin',          'fact_value' => 'Казань',   'fact_label' => 'Габдуллы Тукая, 91к1' ),
     )
 );
 

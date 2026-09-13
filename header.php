@@ -38,7 +38,7 @@ $promix = promix_contacts();
 
             <div class="header__contact">
                 <a class="header__phone" href="tel:<?php echo esc_attr( promix_tel_href() ); ?>"><?php echo esc_html( $promix['phone'] ); ?></a>
-                <span class="header__hours"><?php echo esc_html( $promix['hours'] ); ?></span>
+                <span class="header__hours"><?php echo esc_html( promix_hours_full( true ) ); ?></span>
             </div>
 
             <?php
@@ -92,7 +92,7 @@ $promix = promix_contacts();
 
     <div class="mobile-menu__foot">
         <a class="mobile-menu__phone" href="tel:<?php echo esc_attr( promix_tel_href() ); ?>"><?php echo esc_html( $promix['phone'] ); ?></a>
-        <p class="mobile-menu__hint"><?php echo esc_html( $promix['hours'] . ' · ' . $promix['address'] ); ?></p>
+        <p class="mobile-menu__hint"><?php echo esc_html( promix_hours_full() . ' · ' . $promix['address'] ); ?></p>
         <?php get_template_part( 'template-parts/btn-max' ); ?>
     </div>
 </aside>

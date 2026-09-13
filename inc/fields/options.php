@@ -22,7 +22,8 @@ Container::make( 'theme_options', __( 'Контакты PROMIX', 'promix' ) )
                 ->set_help_text( __( 'Как показывать на сайте: +7 (953) 484-00-00. Ссылка «позвонить» соберётся сама.', 'promix' ) )
                 ->set_width( 50 ),
 
-            Field::make( 'text', 'promix_address', __( 'Адрес', 'promix' ) )
+            Field::make( 'text', 'promix_address', __( 'Адрес магазина', 'promix' ) )
+                ->set_help_text( __( 'Как показывать на сайте: Казань, ул. Габдуллы Тукая, 91к1', 'promix' ) )
                 ->set_width( 50 ),
 
             Field::make( 'text', 'promix_hours', __( 'Режим работы', 'promix' ) )
@@ -36,6 +37,28 @@ Container::make( 'theme_options', __( 'Контакты PROMIX', 'promix' ) )
             Field::make( 'text', 'promix_lead_email', __( 'Почта для заявок', 'promix' ) )
                 ->set_attribute( 'type', 'email' )
                 ->set_help_text( __( 'Пусто — письма уходят на адрес администратора сайта.', 'promix' ) ),
+
+            Field::make( 'separator', 'promix_legal_sep', __( 'Реквизиты продавца', 'promix' ) )
+                ->set_help_text( __( 'Показываются в подвале. По карте партнёра; пусто — значения из темы.', 'promix' ) ),
+
+            Field::make( 'text', 'promix_legal_name', __( 'Юридическое лицо', 'promix' ) )
+                ->set_help_text( __( 'ООО «ПРОМИКС КАЗАНЬ»', 'promix' ) )
+                ->set_width( 50 ),
+
+            Field::make( 'text', 'promix_email', __( 'Официальная почта', 'promix' ) )
+                ->set_attribute( 'type', 'email' )
+                ->set_help_text( __( 'promix.kazan@mail.ru — для обращений по персональным данным.', 'promix' ) )
+                ->set_width( 50 ),
+
+            Field::make( 'text', 'promix_inn', __( 'ИНН', 'promix' ) )
+                ->set_width( 50 ),
+
+            Field::make( 'text', 'promix_ogrn', __( 'ОГРН', 'promix' ) )
+                ->set_help_text( __( 'В карте партнёра нет — заполнить, когда пришлёт заказчик.', 'promix' ) )
+                ->set_width( 50 ),
+
+            Field::make( 'text', 'promix_legal_address', __( 'Юридический адрес', 'promix' ) )
+                ->set_help_text( __( '420095, г. Казань, ул. Шамиля Усманова, д. 12, кв. 17', 'promix' ) ),
 
             Field::make( 'separator', 'promix_seo_sep', __( 'Для поиска и мессенджеров', 'promix' ) ),
 

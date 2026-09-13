@@ -34,7 +34,8 @@ $set('woocommerce_permalinks', [
 // Магазин: Россия, Казань, рубли без копеек.
 $set('woocommerce_default_country', 'RU');
 $set('woocommerce_store_city', 'Казань');
-$set('woocommerce_store_address', function_exists('carbon_get_theme_option') ? (string) carbon_get_theme_option('promix_address') : '');
+$set('woocommerce_store_address', 'ул. Габдуллы Тукая, 91к1'); // фактический адрес по карте партнёра
+$set('woocommerce_store_postcode', '420127');
 $set('woocommerce_allowed_countries', 'specific');
 $set('woocommerce_specific_allowed_countries', ['RU']);
 $set('woocommerce_ship_to_countries', 'disabled');

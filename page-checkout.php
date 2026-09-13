@@ -167,8 +167,8 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
                                 <span class="choice__title"><?php esc_html_e( 'Самовывоз', 'promix' ); ?></span>
                                 <span class="choice__text">
                                     <?php echo esc_html( $contacts['address'] ?? __( 'Казань, из нашего магазина', 'promix' ) ); ?>
-                                    <?php if ( ! empty( $contacts['hours'] ) ) : ?>
-                                        · <?php echo esc_html( $contacts['hours'] ); ?>
+                                    <?php if ( function_exists( 'promix_hours_full' ) && promix_hours_full() ) : ?>
+                                        · <?php echo esc_html( promix_hours_full() ); ?>
                                     <?php endif; ?>
                                 </span>
                             </span>

@@ -30,7 +30,7 @@ if ( ! empty( $contacts['phone'] ) ) {
             /* translators: 1 — телефон, 2 — часы работы. */
             __( 'Если нужно срочно — позвоните: %1$s, %2$s.', 'promix' ),
             $contacts['phone'],
-            $contacts['hours'] ?? ''
+            function_exists( 'promix_hours_full' ) ? promix_hours_full() : ''
         )
     ) . "\n\n";
 }
