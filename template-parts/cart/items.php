@@ -67,11 +67,15 @@ $count = (int) $cart->get_cart_contents_count();
                     </div>
 
                     <div class="qty cart-item__qty" data-qty>
-                        <button class="qty__btn" type="button" data-qty-minus aria-label="<?php esc_attr_e( 'Меньше', 'promix' ); ?>">−</button>
+                        <button class="qty__btn" type="button" data-qty-minus aria-label="<?php esc_attr_e( 'Меньше', 'promix' ); ?>">
+                            <?php echo promix_icon( 'minus', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        </button>
                         <label class="visually-hidden" for="qty-<?php echo esc_attr( $key ); ?>"><?php esc_html_e( 'Количество', 'promix' ); ?></label>
                         <input class="qty__input" id="qty-<?php echo esc_attr( $key ); ?>" type="text" inputmode="numeric" autocomplete="off"
                                name="cart[<?php echo esc_attr( $key ); ?>][qty]" value="<?php echo esc_attr( (string) $qty ); ?>" data-qty-input>
-                        <button class="qty__btn" type="button" data-qty-plus aria-label="<?php esc_attr_e( 'Больше', 'promix' ); ?>">+</button>
+                        <button class="qty__btn" type="button" data-qty-plus aria-label="<?php esc_attr_e( 'Больше', 'promix' ); ?>">
+                            <?php echo promix_icon( 'plus', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        </button>
                     </div>
 
                     <p class="cart-item__total"><?php echo esc_html( promix_price( $line ) ); ?></p>

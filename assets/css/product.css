@@ -217,14 +217,29 @@
   border-radius: 50%;
 }
 
-/* Счётчик корзины на странице товара — крупный, как кнопка рядом */
+/* Счётчик на странице товара — той же высоты, что кнопка «В корзину» */
 .cart-control--single {
-  gap: 12px;
   margin-top: 22px;
 }
 
 .cart-control--single .single__buy {
   margin-top: 0;
+}
+
+.cart-control--single .qty--cart .qty__btn {
+  width: 44px;
+  height: 44px;
+}
+
+.cart-control--single .qty--cart .qty__btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cart-control--single .qty--cart .qty__input {
+  width: 56px;
+  height: 44px;
+  font-size: 17px;
 }
 
 /* ===== Соседи по разделу ===== */

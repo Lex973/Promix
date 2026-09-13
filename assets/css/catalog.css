@@ -712,19 +712,25 @@
   flex-shrink: 0;
 }
 
+/* Счётчик в карточке — той же высоты, что кнопка «В корзину» */
 .product__actions .qty--cart {
+  padding: 2px;
   border-radius: var(--radius-xs);
 }
 
 .product__actions .qty--cart .qty__btn {
   width: 34px;
-  border-radius: 0;
-  font-size: 17px;
+  height: 34px;
+}
+
+.product__actions .qty--cart .qty__btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .product__actions .qty--cart .qty__input {
-  width: 42px;
-  padding: 8px 0;
+  width: 40px;
+  height: 34px;
   font-size: 14px;
 }
 
@@ -930,6 +936,7 @@
   /* В списке на узком экране цена и кнопка уходят под название */
   .products--list .product {
     flex-wrap: wrap;
+    gap: 10px 18px;
   }
 
   .products--list .product__media {
@@ -941,7 +948,7 @@
   }
 
   .products--list .product__body {
-    flex: 1 1 calc(100% - 92px);
+    flex: 1 1 calc(100% - 90px);
   }
 
   .products--list .product__price {
@@ -954,27 +961,30 @@
     -webkit-line-clamp: 2;
   }
 
+  /* Цена и кнопка — под названием, по его левому краю: отступ равен
+     ширине картинки с зазором, поэтому во всех строках они на одной линии */
   .products--list .product__foot {
-    grid-template-columns: auto minmax(0, 1fr);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
     flex: 1 1 100%;
+    margin-left: 90px;
   }
 
   .products--list .product__price {
+    min-width: 0;
     text-align: left;
   }
 
   .products--list .product__actions {
+    justify-content: flex-start;
     min-width: 0;
   }
 
   .products--list .product__sku {
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  .products--list .product__price {
-    min-width: 0;
-    text-align: left;
   }
 }
 

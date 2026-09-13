@@ -124,14 +124,11 @@
   function addToCart(btn) {
     var control = controlOf(btn);
     var id = btn.getAttribute('data-add');
-    var form = btn.closest('form');
-    var qtyInput = form ? form.querySelector('[data-qty-input]') : null;
-    var qty = qtyInput ? parseInt(qtyInput.value, 10) || 1 : 1;
     var variant = control ? control.getAttribute('data-variant') : 'card';
 
     btn.classList.add('is-busy');
 
-    post('add_to_cart', { product_id: id, quantity: qty, promix_variant: variant }).then(function (data) {
+    post('add_to_cart', { product_id: id, quantity: 1, promix_variant: variant }).then(function (data) {
       if (data.error) {
         throw new Error('add');
       }

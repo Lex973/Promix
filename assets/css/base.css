@@ -393,23 +393,34 @@ body.is-menu-open {
     }
 }
 
-/* ===== Счётчик количества: на странице товара и в корзине ===== */
+/* ===== Счётчик количества: на странице товара, в корзине и в карточках ===== */
 
+/* Кнопки лежат внутри рамки с зазором: их фон при наведении не касается
+   обводки, поэтому она не «рвётся» на дробных пикселях */
 .qty {
   display: inline-flex;
-  align-items: stretch;
+  align-items: center;
+  padding: 3px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
 }
 
 .qty__btn {
-  width: 44px;
-  font-size: 20px;
-  font-weight: var(--fw-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-xs);
   color: var(--color-ink-soft);
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.qty__btn svg {
+  width: 18px;
+  height: 18px;
 }
 
 .qty__btn:hover {
@@ -417,19 +428,10 @@ body.is-menu-open {
   color: var(--color-ink);
 }
 
-.qty__btn:first-child {
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-}
-
-.qty__btn:last-child {
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-
 .qty__input {
-  width: 56px;
+  width: 48px;
+  height: 38px;
   border: 0;
-  border-left: 1px solid var(--color-border);
-  border-right: 1px solid var(--color-border);
   background: transparent;
   font-family: inherit;
   font-size: 16px;
@@ -440,7 +442,6 @@ body.is-menu-open {
 
 .qty__input:focus {
   outline: none;
-  background: var(--color-surface-alt);
 }
 
 /* ===== Плашка внизу экрана: «Товар в корзине» ===== */
@@ -514,9 +515,4 @@ body.is-menu-open {
 
 .qty--cart {
   border-color: var(--color-ink);
-}
-
-.qty--cart .qty__btn svg {
-  width: 14px;
-  height: 14px;
 }
