@@ -3,7 +3,8 @@ import csv
 import io
 
 rows = list(csv.DictReader(io.open('katalog-dlya-sayta.csv', encoding='utf-8-sig'), delimiter=';'))
-PRICE = 'Цена, ₽'
+# Колонка цены в выгрузках называлась и «Цена», и «Цена, ₽» — ищем по началу.
+PRICE = next(k for k in rows[0] if k.startswith('Цена'))
 
 with io.open('woo-import.csv', 'w', encoding='utf-8', newline='') as out:
     w = csv.writer(out)
