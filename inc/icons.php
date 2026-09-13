@@ -87,6 +87,116 @@ function promix_icon( string $name, float $stroke = 1.8, string $extra_class = '
 }
 
 /**
+ * Какие теги и атрибуты допустимы в инлайновом SVG темы.
+ *
+ * Иконки из файлов и звёзды печатаются через wp_kses с этим списком —
+ * вывод экранируется по-настоящему, а не помечается «доверенным».
+ *
+ * @return array<string, array<string, bool>>
+ */
+function promix_svg_kses(): array {
+    static $allowed = null;
+
+    if ( null === $allowed ) {
+        $shape = array(
+            'd'                 => true,
+            'fill'              => true,
+            'stroke'            => true,
+            'stroke-width'      => true,
+            'stroke-linecap'    => true,
+            'stroke-linejoin'   => true,
+            'cx'                => true,
+            'cy'                => true,
+            'r'                 => true,
+            'rx'                => true,
+            'ry'                => true,
+            'x'                 => true,
+            'y'                 => true,
+            'x1'                => true,
+            'y1'                => true,
+            'x2'                => true,
+            'y2'                => true,
+            'width'             => true,
+            'height'            => true,
+            'points'            => true,
+            'transform'         => true,
+            'opacity'           => true,
+            'fill-rule'         => true,
+            'clip-rule'         => true,
+        );
+
+        $allowed = array(
+            'svg'      => array(
+                'viewbox'           => true,
+                'fill'              => true,
+                'stroke'            => true,
+                'stroke-width'      => true,
+                'stroke-linecap'    => true,
+                'stroke-linejoin'   => true,
+                'aria-hidden'       => true,
+                'aria-label'        => true,
+                'role'              => true,
+                'class'             => true,
+                'width'             => true,
+                'height'            => true,
+                'xmlns'             => true,
+            ),
+            'g'        => $shape,
+            'path'     => $shape,
+            'circle'   => $shape,
+            'ellipse'  => $shape,
+            'rect'     => $shape,
+            'line'     => $shape,
+            'polyline' => $shape,
+            'polygon'  => $shape,
+            'div'      => array(
+                'class'      => true,
+                'style'      => true,
+                'role'       => true,
+                'aria-label' => true,
+            ),
+        );
+    }
+
+    return $allowed;
+}
+
+/**
+ * Напечатать иконку.
+ *
+ * @param string $name        Имя файла без расширения.
+ * @param float  $stroke      Толщина обводки.
+ * @param string $extra_class Дополнительный класс на svg.
+ */
+function promix_the_icon( string $name, float $stroke = 1.8, string $extra_class = '' ): void {
+    echo wp_kses( promix_icon( $name, $stroke, $extra_class ), promix_svg_kses() );
+}
+
+/**
+ * Напечатать ряд звёзд (см. promix_stars).
+ *
+ * @param float  $rating Оценка от 0 до 5.
+ * @param string $label  Подпись для программ чтения с экрана.
+ */
+function promix_the_stars( float $rating, string $label = '' ): void {
+    // Инлайновый style="--stars: N" kses по умолчанию вырезает, для него своё разрешение.
+    add_filter( 'safe_style_css', 'promix_svg_kses_style' );
+    echo wp_kses( promix_stars( $rating, $label ), promix_svg_kses() );
+    remove_filter( 'safe_style_css', 'promix_svg_kses_style' );
+}
+
+/**
+ * Разрешить кастомное свойство --stars в инлайновом стиле звёзд.
+ *
+ * @param string[] $styles Разрешённые свойства.
+ * @return string[]
+ */
+function promix_svg_kses_style( array $styles ): array {
+    $styles[] = '--stars';
+    return $styles;
+}
+
+/**
  * Иконка категории каталога.
  *
  * Фотографий товаров пока нет, поэтому карточка показывает иконку

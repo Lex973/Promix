@@ -18,6 +18,35 @@ defined( 'ABSPATH' ) || exit;
 const PROMIX_CART_MAX_QTY = 9999;
 
 /**
+ * Потолок количества на штатных путях Woo: ?add-to-cart=…&quantity=,
+ * wc-ajax=add_to_cart и «Пересчитать» без скрипта. Иначе корзина
+ * показывала бы сумму на миллиарды, а заказ создавался на 9999 —
+ * покупатель и менеджер видели бы разные цифры.
+ *
+ * @param mixed $qty Количество из запроса.
+ * @return int
+ */
+function promix_cart_cap_qty( $qty ): int {
+    return (int) min( max( 0, (int) $qty ), PROMIX_CART_MAX_QTY );
+}
+add_filter( 'woocommerce_add_to_cart_quantity', 'promix_cart_cap_qty' );
+add_filter( 'woocommerce_stock_amount_cart_item', 'promix_cart_cap_qty' );
+
+/**
+ * Повторное добавление суммируется с тем, что уже лежит, — сумму тоже режем.
+ *
+ * @param string $key Ключ строки корзины.
+ */
+function promix_cart_cap_line( string $key ): void {
+    $item = WC()->cart->get_cart_item( $key );
+
+    if ( $item && (int) $item['quantity'] > PROMIX_CART_MAX_QTY ) {
+        WC()->cart->set_quantity( $key, PROMIX_CART_MAX_QTY, false );
+    }
+}
+add_action( 'woocommerce_add_to_cart', 'promix_cart_cap_line' );
+
+/**
  * Сколько единиц товара в корзине — для счётчика в шапке.
  */
 function promix_cart_count(): int {
@@ -348,8 +377,11 @@ function promix_checkout_submit(): void {
      * с одной сессией создавали два заказа: транзиент здесь не помогает,
      * оба запроса успевают прочитать «свободно». Поэтому замок в MySQL
      * (GET_LOCK — атомарный, второй запрос ждёт первого), а после него —
-     * поиск заказа с той же корзиной за последние две минуты: нашёлся —
+     * поиск заказа с той же корзиной за последние полминуты: нашёлся —
      * это тот же заказ, отправляем на его страницу, а не создаём новый.
+     * Окно не шире паузы между заказами: дальше честный повтор (тот же
+     * набор, но на другой телефон) получит сообщение от лимита, а не
+     * молчаливый редирект на чужой заказ.
      */
     global $wpdb;
 
@@ -363,7 +395,7 @@ function promix_checkout_submit(): void {
         array(
             'limit'        => 1,
             'created_via'  => 'promix',
-            'date_created' => '>' . ( time() - 2 * MINUTE_IN_SECONDS ),
+            'date_created' => '>' . ( time() - PROMIX_LEAD_PAUSE ),
             'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- один заказ по индексированному ключу.
                 array(
                     'key'   => '_promix_dedup',
@@ -417,6 +449,11 @@ function promix_checkout_submit(): void {
                 'shipping'
             );
         }
+
+        // Woo сам пишет в заказ IP и браузер покупателя; для звонка менеджеру они не нужны,
+        // а политика обещает, что адрес нигде не хранится.
+        $order->set_customer_ip_address( '' );
+        $order->set_customer_user_agent( '' );
 
         $order->set_customer_note( $v['comment'] );
         $order->update_meta_data( '_promix_delivery', $v['delivery'] );

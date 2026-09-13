@@ -72,7 +72,7 @@ $wide_cta_url  = promix_field( 'why_wide_cta_url', '#contacts' );
                 <?php foreach ( $items as $item ) : ?>
                     <article class="reason">
                         <span class="reason__icon" aria-hidden="true">
-                            <?php echo promix_icon( $item['why_icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( $item['why_icon'] ); ?>
                         </span>
                         <h3 class="reason__title"><?php echo esc_html( $item['why_title'] ); ?></h3>
                         <p class="reason__text"><?php echo esc_html( $item['why_text'] ); ?></p>
@@ -82,7 +82,7 @@ $wide_cta_url  = promix_field( 'why_wide_cta_url', '#contacts' );
                 <?php if ( ! $wide_hidden ) : ?>
                     <article class="reason reason--wide">
                         <span class="reason__icon" aria-hidden="true">
-                            <?php echo promix_icon( $wide_icon ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( $wide_icon ); ?>
                         </span>
                         <div class="reason__body">
                             <h3 class="reason__title"><?php echo esc_html( $wide_title ); ?></h3>
@@ -94,7 +94,7 @@ $wide_cta_url  = promix_field( 'why_wide_cta_url', '#contacts' );
                                data-lead-title="<?php esc_attr_e( 'Обсудим условия', 'promix' ); ?>">
                                 <?php echo esc_html( $wide_cta_text ); ?>
                                 <span aria-hidden="true">
-                                    <?php echo promix_icon( 'arrow-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                                    <?php promix_the_icon( 'arrow-right', 2 ); ?>
                                 </span>
                             </a>
                         <?php endif; ?>

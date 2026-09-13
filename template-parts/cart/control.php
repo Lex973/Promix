@@ -39,13 +39,13 @@ $url   = $product->get_permalink();
             <?php /* На единице «минус» убирает товар из корзины — иконка при этом та же. */ ?>
             <button class="qty__btn" type="button" data-cart-step="-1"
                     aria-label="<?php echo esc_attr( 1 === $item['qty'] ? __( 'Убрать из корзины', 'promix' ) : __( 'Меньше', 'promix' ) ); ?>">
-                <?php echo promix_icon( 'minus', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                <?php promix_the_icon( 'minus', 2 ); ?>
             </button>
             <label class="visually-hidden" for="cart-qty-<?php echo esc_attr( (string) $id ); ?>"><?php esc_html_e( 'Количество в корзине', 'promix' ); ?></label>
             <input class="qty__input" id="cart-qty-<?php echo esc_attr( (string) $id ); ?>" type="text" inputmode="numeric" autocomplete="off"
                    value="<?php echo esc_attr( (string) $item['qty'] ); ?>" data-cart-qty>
             <button class="qty__btn" type="button" data-cart-step="1" aria-label="<?php esc_attr_e( 'Больше', 'promix' ); ?>">
-                <?php echo promix_icon( 'plus', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                <?php promix_the_icon( 'plus', 2 ); ?>
             </button>
         </div>
 
@@ -54,7 +54,7 @@ $url   = $product->get_permalink();
         <?php /* Форма, а не ссылка: без скрипта её обработает Woo сам (add-to-cart), со скриптом перехватит cart.js. */ ?>
         <form class="single__buy" method="post" action="<?php echo esc_url( $url ); ?>" data-add-form>
             <button class="btn btn--primary single__add" type="submit" name="add-to-cart" value="<?php echo esc_attr( (string) $id ); ?>" data-add="<?php echo esc_attr( (string) $id ); ?>">
-                <?php echo promix_icon( 'cart', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                <?php promix_the_icon( 'cart', 2 ); ?>
                 <?php esc_html_e( 'В корзину', 'promix' ); ?>
             </button>
         </form>

@@ -13,10 +13,12 @@ defined( 'ABSPATH' ) || exit;
 
 $cart = WC()->cart;
 
+get_template_part( 'template-parts/notices' );
+
 if ( ! $cart || $cart->is_empty() ) :
     ?>
     <div class="cart__empty">
-        <?php echo promix_icon( 'cart', 1.2, 'cart__empty-icon' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+        <?php promix_the_icon( 'cart', 1.2, 'cart__empty-icon' ); ?>
         <p class="cart__empty-title"><?php esc_html_e( 'В корзине пока пусто', 'promix' ); ?></p>
         <p class="cart__empty-text"><?php esc_html_e( 'Добавьте товары из каталога — и оформим заказ за пару минут.', 'promix' ); ?></p>
         <a class="btn btn--primary cart__empty-btn" href="<?php echo esc_url( promix_catalog_url() ); ?>"><?php esc_html_e( 'В каталог', 'promix' ); ?></a>
@@ -50,9 +52,9 @@ $count = (int) $cart->get_cart_contents_count();
                 <li class="cart-item" data-cart-item="<?php echo esc_attr( $key ); ?>">
                     <a class="cart-item__media" href="<?php echo esc_url( $url ); ?>" aria-hidden="true" tabindex="-1">
                         <?php if ( $product->get_image_id() ) : ?>
-                            <?php echo $product->get_image( 'woocommerce_gallery_thumbnail', array( 'class' => 'cart-item__img' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка картинки. ?>
+                            <?php echo wp_kses_post( $product->get_image( 'woocommerce_gallery_thumbnail', array( 'class' => 'cart-item__img' ) ) ); ?>
                         <?php else : ?>
-                            <?php echo promix_icon( promix_category_icon( $cat ), 1.3, 'cart-item__icon' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( promix_category_icon( $cat ), 1.3, 'cart-item__icon' ); ?>
                         <?php endif; ?>
                     </a>
 
@@ -68,13 +70,13 @@ $count = (int) $cart->get_cart_contents_count();
 
                     <div class="qty cart-item__qty" data-qty>
                         <button class="qty__btn" type="button" data-qty-minus aria-label="<?php esc_attr_e( 'Меньше', 'promix' ); ?>">
-                            <?php echo promix_icon( 'minus', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( 'minus', 2 ); ?>
                         </button>
                         <label class="visually-hidden" for="qty-<?php echo esc_attr( $key ); ?>"><?php esc_html_e( 'Количество', 'promix' ); ?></label>
                         <input class="qty__input" id="qty-<?php echo esc_attr( $key ); ?>" type="text" inputmode="numeric" autocomplete="off"
                                name="cart[<?php echo esc_attr( $key ); ?>][qty]" value="<?php echo esc_attr( (string) $qty ); ?>" data-qty-input>
                         <button class="qty__btn" type="button" data-qty-plus aria-label="<?php esc_attr_e( 'Больше', 'promix' ); ?>">
-                            <?php echo promix_icon( 'plus', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( 'plus', 2 ); ?>
                         </button>
                     </div>
 
@@ -82,7 +84,7 @@ $count = (int) $cart->get_cart_contents_count();
 
                     <a class="cart-item__remove" href="<?php echo esc_url( wc_get_cart_remove_url( $key ) ); ?>" data-cart-remove
                        aria-label="<?php echo esc_attr( sprintf( /* translators: %s — название товара. */ __( 'Убрать: %s', 'promix' ), $product->get_name() ) ); ?>">
-                        <?php echo promix_icon( 'x', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        <?php promix_the_icon( 'x', 2 ); ?>
                     </a>
                 </li>
             <?php endforeach; ?>

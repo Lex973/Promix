@@ -190,10 +190,10 @@
     load(buildUrl(), mode || true);
   }
 
+  /* Скрипт живёт только на страницах каталога (разделы, бренды, поиск),
+     поэтому любое «назад/вперёд» — это возврат к другому состоянию выдачи */
   window.addEventListener('popstate', function () {
-    if (window.location.pathname.indexOf(shopUrl.replace(/^https?:\/\/[^/]+/, '')) === 0) {
-      load(window.location.href, false);
-    }
+    load(window.location.href, false);
   });
 
   /* ===== Форма: «Применить», Enter в поиске ===== */
@@ -310,11 +310,15 @@
       var grid = section.querySelector('[data-products]');
       var nextGrid = doc.querySelector('[data-products]');
       var nextMore = doc.querySelector('.catalog__more');
+      var cards = null;
 
       if (grid && nextGrid) {
+        /* children — живая коллекция: при переносе узлов она сжимается,
+           и перебор пропускал бы каждую вторую карточку. Берём снимок. */
+        cards = Array.prototype.slice.call(nextGrid.children);
         var frag = document.createDocumentFragment();
 
-        Array.prototype.forEach.call(nextGrid.children, function (card) {
+        cards.forEach(function (card) {
           frag.appendChild(card);
         });
 
@@ -327,6 +331,13 @@
         block.replaceWith(nextMore);
       } else {
         block.remove();
+      }
+
+      /* Кнопка, на которой был фокус, заменена — с клавиатуры продолжаем с первой новой карточки */
+      var first = cards && cards[0] ? cards[0].querySelector('a') : null;
+
+      if (first) {
+        first.focus({ preventScroll: true });
       }
     }).catch(function (error) {
       if (error.name !== 'AbortError') {
@@ -459,7 +470,7 @@
       var open = list.classList.toggle('is-open');
 
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.textContent = open ? 'Свернуть' : 'Показать все';
+      btn.textContent = btn.getAttribute(open ? 'data-label-open' : 'data-label-closed') || '';
     });
   });
 

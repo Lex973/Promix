@@ -33,7 +33,7 @@ $c = promix_contacts();
 
                     <div class="contact">
                         <span class="contact__icon" aria-hidden="true">
-                            <?php echo promix_icon( 'map-pin' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( 'map-pin' ); ?>
                         </span>
                         <div>
                             <h3 class="contact__title"><?php esc_html_e( 'Адрес', 'promix' ); ?></h3>
@@ -43,7 +43,7 @@ $c = promix_contacts();
 
                     <div class="contact">
                         <span class="contact__icon" aria-hidden="true">
-                            <?php echo promix_icon( 'clock' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( 'clock' ); ?>
                         </span>
                         <div>
                             <h3 class="contact__title"><?php esc_html_e( 'Режим работы', 'promix' ); ?></h3>
@@ -56,7 +56,7 @@ $c = promix_contacts();
 
                     <div class="contact">
                         <span class="contact__icon" aria-hidden="true">
-                            <?php echo promix_icon( 'phone' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( 'phone' ); ?>
                         </span>
                         <div>
                             <h3 class="contact__title"><?php esc_html_e( 'Телефон', 'promix' ); ?></h3>
@@ -75,13 +75,13 @@ $c = promix_contacts();
                         <a class="maplink" href="<?php echo esc_url( $c['gis_url'] ); ?>" target="_blank" rel="noopener">
                             <?php esc_html_e( 'Открыть в 2ГИС', 'promix' ); ?>
                             <span class="maplink__icon" aria-hidden="true">
-                                <?php echo promix_icon( 'external-link' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                                <?php promix_the_icon( 'external-link' ); ?>
                             </span>
                         </a>
                         <a class="maplink" href="<?php echo esc_url( $c['yandex_url'] ); ?>" target="_blank" rel="noopener">
                             <?php esc_html_e( 'Открыть в Яндекс Картах', 'promix' ); ?>
                             <span class="maplink__icon" aria-hidden="true">
-                                <?php echo promix_icon( 'external-link' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                                <?php promix_the_icon( 'external-link' ); ?>
                             </span>
                         </a>
                     </div>
@@ -96,7 +96,7 @@ $c = promix_contacts();
                                 data-map="<?php echo esc_url( $c['map_embed'] ); ?>"
                                 data-map-title="<?php echo esc_attr( sprintf( /* translators: %s — адрес магазина. */ __( 'Карта: %s', 'promix' ), $c['address'] ) ); ?>">
                             <span class="mapbox__icon" aria-hidden="true">
-                                <?php echo promix_icon( 'map-pin' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                                <?php promix_the_icon( 'map-pin' ); ?>
                             </span>
                             <span class="mapbox__title"><?php esc_html_e( 'Показать карту', 'promix' ); ?></span>
                             <span class="mapbox__hint"><?php echo esc_html( $c['address'] ); ?></span>

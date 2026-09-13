@@ -17,7 +17,7 @@ $first = true;
 <nav class="crumbs" aria-label="<?php esc_attr_e( 'Вы здесь', 'promix' ); ?>">
     <?php foreach ( $items as $label => $url ) : ?>
         <?php if ( ! $first ) : ?>
-            <?php echo promix_icon( 'chevron-right', 2, 'crumbs__sep' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+            <?php promix_the_icon( 'chevron-right', 2, 'crumbs__sep' ); ?>
         <?php endif; ?>
         <?php if ( $url ) : ?>
             <a class="crumbs__link" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $label ); ?></a>

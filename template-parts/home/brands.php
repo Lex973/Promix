@@ -99,7 +99,7 @@ $rows   = array(
                        data-lead-title="<?php esc_attr_e( 'Спросим у технолога', 'promix' ); ?>">
                         <?php echo esc_html( $cta_text ); ?>
                         <span class="brands__btn-arrow" aria-hidden="true">
-                            <?php echo promix_icon( 'arrow-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( 'arrow-right', 2 ); ?>
                         </span>
                     </a>
                 <?php endif; ?>

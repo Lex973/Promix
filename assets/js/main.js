@@ -315,7 +315,7 @@
       var was = label.textContent;
 
       btn.classList.add('is-copied');
-      label.textContent = 'скопирован';
+      label.textContent = btn.getAttribute('data-copy-done') || 'скопирован';
 
       setTimeout(function () {
         btn.classList.remove('is-copied');

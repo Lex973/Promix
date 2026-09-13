@@ -13,7 +13,7 @@ with io.open('woo-import.csv', 'w', encoding='utf-8', newline='') as out:
         price = r[PRICE]
         price = price[:-2] if price.endswith('.0') else price
         # Запятая внутри названия категории — иначе импортёр разрежет её на три.
-        cat = r['Категория'].replace(',', '\,')
+        cat = r['Категория'].replace(',', '\\,')
         # Бренд — штатная таксономия WooCommerce («Товары → Бренды»), колонка Brands.
         w.writerow(['simple', r['Артикул'], r['Наименование'], 1, 'visible', 1, price, cat, r['ID'], r['Бренд']])
 

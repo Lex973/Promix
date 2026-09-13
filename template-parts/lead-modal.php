@@ -15,7 +15,7 @@ $policy_url = get_privacy_policy_url();
 
     <div class="modal__window" role="dialog" aria-modal="true" aria-labelledby="lead-modal-title">
         <button class="modal__close" type="button" data-lead-close aria-label="<?php esc_attr_e( 'Закрыть', 'promix' ); ?>">
-            <?php echo promix_icon( 'x', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+            <?php promix_the_icon( 'x', 2 ); ?>
         </button>
 
         <p class="kicker" data-lead-kicker><?php esc_html_e( 'Заявка', 'promix' ); ?></p>

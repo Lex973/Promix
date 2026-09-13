@@ -22,7 +22,7 @@ if ( ! $max_url ) {
 ?>
 <a class="btn-max<?php echo esc_attr( $max_class ); ?>" href="<?php echo esc_url( $max_url ); ?>"
     <?php echo $max_aria ? 'aria-label="' . esc_attr( $max_aria ) . '"' : ''; ?>>
-    <?php echo promix_icon( 'max', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+    <?php promix_the_icon( 'max', 2 ); ?>
     <?php if ( $max_label ) : ?>
         <span><?php echo esc_html( $max_label ); ?></span>
     <?php endif; ?>

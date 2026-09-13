@@ -77,9 +77,9 @@ while ( have_posts() ) :
                     <?php endif; ?>
 
                     <?php if ( $product->get_image_id() ) : ?>
-                        <?php echo $product->get_image( 'woocommerce_single', array( 'class' => 'single__img' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка картинки. ?>
+                        <?php echo wp_kses_post( $product->get_image( 'woocommerce_single', array( 'class' => 'single__img' ) ) ); ?>
                     <?php else : ?>
-                        <?php echo promix_icon( promix_category_icon( $category ? $category->name : '' ), 1, 'single__icon' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        <?php promix_the_icon( promix_category_icon( $category ? $category->name : '' ), 1, 'single__icon' ); ?>
                         <p class="single__nophoto"><?php esc_html_e( 'Фото скоро появится', 'promix' ); ?></p>
                     <?php endif; ?>
                 </div>
@@ -93,9 +93,10 @@ while ( have_posts() ) :
                                 <dt><?php esc_html_e( 'Артикул', 'promix' ); ?></dt>
                                 <dd>
                                     <button class="product__sku single__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>"
+                        data-copy-done="<?php esc_attr_e( 'скопирован', 'promix' ); ?>"
                                             aria-label="<?php echo esc_attr( sprintf( /* translators: %s — артикул. */ __( 'Скопировать артикул %s', 'promix' ), $sku ) ); ?>">
                                         <span data-copy-label><?php echo esc_html( $sku ); ?></span>
-                                        <?php echo promix_icon( 'copy', 1.7 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                                        <?php promix_the_icon( 'copy', 1.7 ); ?>
                                     </button>
                                 </dd>
                             </div>
@@ -167,7 +168,7 @@ while ( have_posts() ) :
                         </h2>
                         <a class="single__related-link" href="<?php echo esc_url( $cat_link ); ?>">
                             <?php esc_html_e( 'Весь раздел', 'promix' ); ?>
-                            <?php echo promix_icon( 'arrow-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( 'arrow-right', 2 ); ?>
                         </a>
                     </div>
 

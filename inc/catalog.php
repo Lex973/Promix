@@ -15,14 +15,22 @@ defined( 'ABSPATH' ) || exit;
 
 const PROMIX_CATALOG_PER_PAGE = 24;
 
+// Сколько пунктов фильтра видно до «Показать все» (то же число в catalog.css: nth-child(n + 7)).
+const PROMIX_FILTER_SHORT = 6;
+
 /**
  * Адрес каталога или его раздела.
+ *
+ * Карта «название раздела → ссылка» лежит в транзиенте: get_term_by('name')
+ * не кэшируется, а подвал спрашивает шесть разделов на каждой странице —
+ * это было 12 запросов к базе на любой странице сайта. Сбрасывается,
+ * когда разделы меняют (см. promix_catalog_links_flush).
  *
  * @param string $category Название или слаг раздела; пустая строка — весь каталог.
  * @return string
  */
 function promix_catalog_url( string $category = '' ): string {
-    static $cache = array();
+    static $links = null;
 
     $url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/catalog/' );
 
@@ -30,18 +38,92 @@ function promix_catalog_url( string $category = '' ): string {
         return $url;
     }
 
-    // get_term_by('name') не кэшируется, а подвал спрашивает шесть разделов на каждой странице.
-    if ( isset( $cache[ $category ] ) ) {
-        return $cache[ $category ];
+    if ( null === $links ) {
+        $links = get_transient( 'promix_catalog_links' );
+        $links = is_array( $links ) ? $links : array();
+    }
+
+    if ( isset( $links[ $category ] ) ) {
+        return $links[ $category ];
     }
 
     $term = get_term_by( 'name', $category, 'product_cat' ) ?: get_term_by( 'slug', $category, 'product_cat' );
     $link = $term instanceof WP_Term ? get_term_link( $term ) : null;
 
-    $cache[ $category ] = $link && ! is_wp_error( $link ) ? $link : add_query_arg( 'cat', rawurlencode( $category ), $url );
+    $links[ $category ] = $link && ! is_wp_error( $link ) ? $link : add_query_arg( 'cat', rawurlencode( $category ), $url );
 
-    return $cache[ $category ];
+    set_transient( 'promix_catalog_links', $links, DAY_IN_SECONDS );
+
+    return $links[ $category ];
 }
+
+/**
+ * Разделы или адреса поменяли — карта ссылок и счётчик товаров устарели.
+ */
+function promix_catalog_links_flush(): void {
+    delete_transient( 'promix_catalog_links' );
+}
+add_action( 'created_product_cat', 'promix_catalog_links_flush' );
+add_action( 'edited_product_cat', 'promix_catalog_links_flush' );
+add_action( 'delete_product_cat', 'promix_catalog_links_flush' );
+add_action( 'update_option_permalink_structure', 'promix_catalog_links_flush' );
+add_action( 'update_option_woocommerce_permalinks', 'promix_catalog_links_flush' );
+
+/**
+ * Сколько товаров видно в каталоге — для подводки «N позиций».
+ *
+ * wp_count_posts() считает все опубликованные, включая скрытые из каталога,
+ * и разошёлся бы с «Найдено N» при первом же скрытом товаре. Считаем тем же
+ * условием, что и выдача, и держим в транзиенте: товары меняются редко.
+ *
+ * @return int
+ */
+function promix_catalog_total(): int {
+    $total = get_transient( 'promix_catalog_total' );
+
+    if ( false !== $total ) {
+        return (int) $total;
+    }
+
+    $query = new WP_Query(
+        array(
+            'post_type'      => 'product',
+            'post_status'    => 'publish',
+            'fields'         => 'ids',
+            'posts_per_page' => 1,
+            'no_found_rows'  => false,
+            'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- то же условие, что у выдачи каталога.
+                array(
+                    'taxonomy' => 'product_visibility',
+                    'field'    => 'slug',
+                    'terms'    => array( 'exclude-from-catalog' ),
+                    'operator' => 'NOT IN',
+                ),
+            ),
+        )
+    );
+
+    $total = (int) $query->found_posts;
+
+    set_transient( 'promix_catalog_total', $total, HOUR_IN_SECONDS );
+
+    return $total;
+}
+
+/**
+ * Товар сохранили или удалили — счётчик пересчитается при следующем показе.
+ *
+ * @param int $post_id Запись.
+ */
+function promix_catalog_total_flush( int $post_id ): void {
+    if ( 'product' === get_post_type( $post_id ) ) {
+        delete_transient( 'promix_catalog_total' );
+    }
+}
+add_action( 'save_post_product', 'promix_catalog_total_flush' );
+add_action( 'deleted_post', 'promix_catalog_total_flush' );
+add_action( 'trashed_post', 'promix_catalog_total_flush' );
+add_action( 'untrashed_post', 'promix_catalog_total_flush' );
 
 /**
  * Цена словами: «2 890 ₽», «Цена по запросу» для нуля.

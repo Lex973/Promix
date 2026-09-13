@@ -12,6 +12,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Шаблон по слагу подхватится и без WooCommerce (плагин выключен на время
+// неудачного обновления) — тогда это обычная страница, а не фатал.
+if ( ! function_exists( 'WC' ) ) {
+    get_template_part( 'page' );
+    return;
+}
+
 get_header();
 
 $received = absint( get_query_var( 'order-received' ) );
@@ -33,7 +40,7 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
 
             <?php if ( $order ) : ?>
                 <div class="checkout__done">
-                    <?php echo promix_icon( 'circle-check-big', 1.4, 'checkout__done-icon' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                    <?php promix_the_icon( 'circle-check-big', 1.4, 'checkout__done-icon' ); ?>
                     <p class="kicker"><?php esc_html_e( 'Заказ принят', 'promix' ); ?></p>
                     <h1 class="section__title">
                         <?php
@@ -112,6 +119,8 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
                     <?php wp_nonce_field( 'promix-checkout' ); ?>
                     <input type="hidden" name="promix_checkout" value="1">
 
+                    <?php get_template_part( 'template-parts/notices' ); ?>
+
                     <?php if ( $errors ) : ?>
                         <div class="checkout__errors" role="alert">
                             <ul>
@@ -173,7 +182,7 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
 
                     <label class="lead__field checkout__address" data-address <?php echo 'delivery' === $v['delivery'] ? '' : 'hidden'; ?>>
                         <span class="lead__label"><?php esc_html_e( 'Адрес доставки', 'promix' ); ?></span>
-                        <textarea class="lead__input lead__input--area" name="address" rows="2"><?php echo esc_textarea( $v['address'] ); ?></textarea>
+                        <textarea class="lead__input lead__input--area" name="address" rows="2" autocomplete="street-address"><?php echo esc_textarea( $v['address'] ); ?></textarea>
                     </label>
 
                     <label class="lead__field">

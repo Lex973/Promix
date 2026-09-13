@@ -56,7 +56,7 @@ $stats = promix_field(
             <?php if ( $cta_text ) : ?>
                 <a class="hero__cta" href="<?php echo esc_url( $cta_url ); ?>">
                     <?php echo esc_html( $cta_text ); ?>
-                    <?php echo promix_icon( 'arrow-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                    <?php promix_the_icon( 'arrow-right', 2 ); ?>
                 </a>
             <?php endif; ?>
 

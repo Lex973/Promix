@@ -43,9 +43,9 @@ $badge = ( 'PROMIX' === promix_product_brand( $product ) ) ? __( 'Своя ма�
 
     <a class="product__media" href="<?php echo esc_url( $url ); ?>" aria-hidden="true" tabindex="-1">
         <?php if ( $product->get_image_id() ) : ?>
-            <?php echo $product->get_image( 'woocommerce_thumbnail', array( 'class' => 'product__img', 'loading' => 'lazy' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка картинки. ?>
+            <?php echo wp_kses_post( $product->get_image( 'woocommerce_thumbnail', array( 'class' => 'product__img', 'loading' => 'lazy' ) ) ); ?>
         <?php else : ?>
-            <?php echo promix_icon( promix_category_icon( $cat ), 1.2, 'product__icon' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+            <?php promix_the_icon( promix_category_icon( $cat ), 1.2, 'product__icon' ); ?>
         <?php endif; ?>
     </a>
 
@@ -63,10 +63,11 @@ $badge = ( 'PROMIX' === promix_product_brand( $product ) ) ? __( 'Своя ма�
 
             <?php if ( $sku ) : ?>
                 <button class="product__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>"
+                        data-copy-done="<?php esc_attr_e( 'скопирован', 'promix' ); ?>"
                         aria-label="<?php echo esc_attr( sprintf( /* translators: %s — артикул. */ __( 'Скопировать артикул %s', 'promix' ), $sku ) ); ?>">
                     <span class="product__sku-label"><?php esc_html_e( 'Арт.', 'promix' ); ?></span>
                     <span data-copy-label><?php echo esc_html( $sku ); ?></span>
-                    <?php echo promix_icon( 'copy', 1.7 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                    <?php promix_the_icon( 'copy', 1.7 ); ?>
                 </button>
             <?php endif; ?>
         </div>

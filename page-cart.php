@@ -10,6 +10,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Шаблон по слагу подхватится и без WooCommerce (плагин выключен на время
+// неудачного обновления) — тогда это обычная страница, а не фатал.
+if ( ! function_exists( 'WC' ) ) {
+    get_template_part( 'page' );
+    return;
+}
+
 get_header();
 ?>
 

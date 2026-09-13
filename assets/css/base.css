@@ -516,3 +516,29 @@ body.is-menu-open {
 .qty--cart {
   border-color: var(--color-ink);
 }
+
+/* ===== Уведомления Woo (товар убран из корзины и т. п.) ===== */
+
+.notices {
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.notices__item + .notices__item {
+  margin-top: 4px;
+}
+
+.notices__item--error {
+  color: var(--color-brand-dark);
+}
+
+.notices a {
+  margin-left: 6px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

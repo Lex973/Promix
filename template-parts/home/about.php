@@ -65,7 +65,7 @@ $doodles = array( 'paint-bucket', 'paint-roller', 'brush', 'palette', 'spray-can
                             <?php foreach ( $facts as $fact ) : ?>
                                 <div class="fact">
                                     <span class="fact__icon" aria-hidden="true">
-                                        <?php echo promix_icon( $fact['fact_icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                                        <?php promix_the_icon( $fact['fact_icon'] ); ?>
                                     </span>
                                     <div class="fact__body">
                                         <dt class="fact__value"><?php echo esc_html( $fact['fact_value'] ); ?></dt>
@@ -84,7 +84,7 @@ $doodles = array( 'paint-bucket', 'paint-roller', 'brush', 'palette', 'spray-can
             <div class="seminars">
                 <div class="seminars__decor" aria-hidden="true">
                     <?php foreach ( $doodles as $doodle ) : ?>
-                        <?php echo promix_icon( $doodle, 1.1, 'doodle doodle--' . $doodle ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        <?php promix_the_icon( $doodle, 1.1, 'doodle doodle--' . $doodle ); ?>
                     <?php endforeach; ?>
                 </div>
 

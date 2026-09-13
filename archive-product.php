@@ -32,7 +32,7 @@ $sort_options = array(
 $term     = is_product_category() || is_tax( 'product_brand' ) ? get_queried_object() : null;
 $term     = $term instanceof WP_Term ? $term : null;
 $category = $term && 'product_cat' === $term->taxonomy ? $term : null;
-$total    = $term ? (int) $term->count : (int) wp_count_posts( 'product' )->publish;
+$total    = $term ? (int) $term->count : promix_catalog_total();
 $title    = $term ? $term->name : __( 'Материалы и инструменты', 'promix' );
 $lead     = $term && $term->description
     ? wp_strip_all_tags( $term->description )
@@ -74,7 +74,7 @@ $lead     = $term && $term->description
             <div class="catalog__toolbar">
                 <div class="search">
                     <span class="search__icon">
-                        <?php echo promix_icon( 'search', 1.8 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        <?php promix_the_icon( 'search', 1.8 ); ?>
                     </span>
                     <label class="visually-hidden" for="catalog-search"><?php esc_html_e( 'Поиск по каталогу', 'promix' ); ?></label>
                     <input class="search__input" id="catalog-search" type="search" name="q" data-catalog-search
@@ -82,13 +82,13 @@ $lead     = $term && $term->description
                            placeholder="<?php esc_attr_e( 'Название или артикул', 'promix' ); ?>" autocomplete="off">
                     <button class="search__clear" type="button" data-search-clear <?php echo $state['q'] ? '' : 'hidden'; ?>
                             aria-label="<?php esc_attr_e( 'Очистить поиск', 'promix' ); ?>">
-                        <?php echo promix_icon( 'x', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        <?php promix_the_icon( 'x', 2 ); ?>
                     </button>
                 </div>
 
                 <button class="btn btn--outline catalog__filters-btn" type="button"
                         data-filters-open aria-expanded="false" aria-controls="catalog-filters">
-                    <?php echo promix_icon( 'sliders', 1.8 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                    <?php promix_the_icon( 'sliders', 1.8 ); ?>
                     <span><?php esc_html_e( 'Фильтры', 'promix' ); ?></span>
                 </button>
 
@@ -104,7 +104,7 @@ $lead     = $term && $term->description
                         <p class="filters__title"><?php esc_html_e( 'Фильтры', 'promix' ); ?></p>
                         <button class="filters__close" type="button" data-filters-close
                                 aria-label="<?php esc_attr_e( 'Закрыть фильтры', 'promix' ); ?>">
-                            <?php echo promix_icon( 'x', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( 'x', 2 ); ?>
                         </button>
                     </div>
 
@@ -127,7 +127,7 @@ $lead     = $term && $term->description
                         // Отмеченный пункт в скрытой части списка — список открыт сразу.
                         $hidden_checked = false;
 
-                        foreach ( array_slice( $terms, 6 ) as $term ) {
+                        foreach ( array_slice( $terms, PROMIX_FILTER_SHORT ) as $term ) {
                             $hidden_checked = $hidden_checked || $term['checked'];
                         }
                         ?>
@@ -146,8 +146,9 @@ $lead     = $term && $term->description
                                     </label>
                                 <?php endforeach; ?>
                             </div>
-                            <?php if ( count( $terms ) > 6 ) : ?>
-                                <button class="filter__more" type="button" data-filter-more aria-expanded="<?php echo $hidden_checked ? 'true' : 'false'; ?>">
+                            <?php if ( count( $terms ) > PROMIX_FILTER_SHORT ) : ?>
+                                <button class="filter__more" type="button" data-filter-more aria-expanded="<?php echo $hidden_checked ? 'true' : 'false'; ?>"
+                                        data-label-open="<?php esc_attr_e( 'Свернуть', 'promix' ); ?>" data-label-closed="<?php esc_attr_e( 'Показать все', 'promix' ); ?>">
                                     <?php echo $hidden_checked ? esc_html__( 'Свернуть', 'promix' ) : esc_html__( 'Показать все', 'promix' ); ?>
                                 </button>
                             <?php endif; ?>
@@ -190,7 +191,7 @@ $lead     = $term && $term->description
                                 aria-haspopup="listbox" aria-expanded="false">
                             <span class="sort__label"><?php esc_html_e( 'Сортировка:', 'promix' ); ?></span>
                             <span class="sort__value" data-sort-value><?php echo esc_html( $sort_options[ $state['orderby'] ] ); ?></span>
-                            <?php echo promix_icon( 'chevron-down', 2, 'sort__arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                            <?php promix_the_icon( 'chevron-down', 2, 'sort__arrow' ); ?>
                         </button>
 
                         <ul class="sort__list" role="listbox" data-sort-list hidden
@@ -200,7 +201,7 @@ $lead     = $term && $term->description
                                     data-sort-option="<?php echo esc_attr( $value ); ?>"
                                     aria-selected="<?php echo $state['orderby'] === $value ? 'true' : 'false'; ?>">
                                     <span><?php echo esc_html( $label ); ?></span>
-                                    <?php echo promix_icon( 'check', 2.2, 'sort__check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                                    <?php promix_the_icon( 'check', 2.2, 'sort__check' ); ?>
                                 </li>
                             <?php endforeach; ?>
                         </ul>
@@ -209,11 +210,11 @@ $lead     = $term && $term->description
                         <div class="view" role="group" aria-label="<?php esc_attr_e( 'Вид списка', 'promix' ); ?>">
                             <button class="view__btn" type="button" data-view="grid" aria-pressed="true"
                                     aria-label="<?php esc_attr_e( 'Сеткой', 'promix' ); ?>" title="<?php esc_attr_e( 'Сеткой', 'promix' ); ?>">
-                                <?php echo promix_icon( 'layout-grid', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                                <?php promix_the_icon( 'layout-grid', 2 ); ?>
                             </button>
                             <button class="view__btn" type="button" data-view="list" aria-pressed="false"
                                     aria-label="<?php esc_attr_e( 'Списком', 'promix' ); ?>" title="<?php esc_attr_e( 'Списком', 'promix' ); ?>">
-                                <?php echo promix_icon( 'list', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                                <?php promix_the_icon( 'list', 2 ); ?>
                             </button>
                         </div>
                     </div>

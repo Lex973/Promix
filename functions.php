@@ -187,6 +187,12 @@ function promix_assets(): void {
             continue;
         }
 
+        // Кнопки «В корзину» есть в каталоге, на товаре и в корзине; главной
+        // и политике скрипт с nonce ни к чему.
+        if ( 'cart' === $handle && ! ( $is_catalog || $is_product || $is_cart ) ) {
+            continue;
+        }
+
         wp_enqueue_script(
             'promix-' . $handle,
             get_theme_file_uri( "assets/js/{$handle}.js" ),
@@ -212,6 +218,34 @@ function promix_assets(): void {
     );
 }
 add_action( 'wp_enqueue_scripts', 'promix_assets' );
+
+/**
+ * Лишнее от ядра: тема классическая, блоков на фронте нет.
+ *
+ * global-styles и wp-block-library — 14 КБ инлайн-CSS на каждой странице,
+ * wp_print_font_faces — 4 запроса к базе за шрифтами блоков, которых нет,
+ * emoji — скрипт и стили для замены смайлов картинками.
+ */
+function promix_core_assets(): void {
+    wp_dequeue_style( 'wp-block-library' );
+    wp_dequeue_style( 'classic-theme-styles' );
+}
+add_action( 'wp_enqueue_scripts', 'promix_core_assets', 100 );
+
+/**
+ * Хуки ядра снимаются на init: global-styles классическая тема получает
+ * в подвале, не в шапке, поэтому wp_dequeue_style его не достаёт.
+ */
+function promix_core_head(): void {
+    remove_action( 'wp_enqueue_scripts', 'wp_enqueue_global_styles' );
+    remove_action( 'wp_footer', 'wp_enqueue_global_styles', 1 );
+    remove_action( 'wp_enqueue_scripts', 'wp_enqueue_classic_theme_styles' );
+    remove_action( 'wp_head', 'wp_print_font_faces', 50 );
+    remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+    remove_action( 'wp_print_styles', 'print_emoji_styles' );
+    remove_action( 'wp_head', 'wp_generator' );
+}
+add_action( 'init', 'promix_core_head' );
 
 /**
  * Шрифты объявлены прямо в head.

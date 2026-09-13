@@ -56,7 +56,7 @@ $promix = promix_contacts();
             <a class="icon-btn" href="<?php echo esc_url( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) ); ?>"
                data-cart-link data-count="<?php echo esc_attr( (string) $cart_count ); ?>"
                aria-label="<?php echo esc_attr( function_exists( 'promix_cart_label' ) ? promix_cart_label() : __( 'Корзина', 'promix' ) ); ?>">
-                <?php echo promix_icon( 'cart' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                <?php promix_the_icon( 'cart' ); ?>
                 <span class="icon-btn__count"><?php echo esc_html( (string) $cart_count ); ?></span>
             </a>
 
@@ -82,7 +82,7 @@ $promix = promix_contacts();
         <?php get_template_part( 'template-parts/logo' ); ?>
 
         <button class="mobile-menu__close" type="button" data-menu-close aria-label="<?php esc_attr_e( 'Закрыть меню', 'promix' ); ?>">
-            <?php echo promix_icon( 'x', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+            <?php promix_the_icon( 'x', 2 ); ?>
         </button>
     </div>
 

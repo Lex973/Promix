@@ -35,7 +35,7 @@ $reviews = promix_field( 'reviews_items', promix_default_reviews() );
 
                     <div class="rating__meta">
                         <?php
-                        echo promix_stars( (float) str_replace( ',', '.', $rating ), sprintf( /* translators: %s — оценка компании. */ __( 'Рейтинг %s из 5', 'promix' ), $rating ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка звёзд.
+                        promix_the_stars( (float) str_replace( ',', '.', $rating ), sprintf( /* translators: %s — оценка компании. */ __( 'Рейтинг %s из 5', 'promix' ), $rating ) );
                         ?>
                         <p class="rating__count"><?php echo esc_html( $count ); ?></p>
                     </div>
@@ -73,7 +73,7 @@ $reviews = promix_field( 'reviews_items', promix_default_reviews() );
                             </div>
 
                             <?php
-                            echo promix_stars( $stars, sprintf( /* translators: %d — оценка в отзыве. */ __( 'Оценка: %d из 5', 'promix' ), $stars ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка звёзд.
+                            promix_the_stars( $stars, sprintf( /* translators: %d — оценка в отзыве. */ __( 'Оценка: %d из 5', 'promix' ), $stars ) );
                             ?>
 
                             <p class="review__text">«<?php echo esc_html( $text ); ?>»</p>
@@ -95,17 +95,17 @@ $reviews = promix_field( 'reviews_items', promix_default_reviews() );
             <div class="reviews__foot">
                 <div class="reviews__ctrls">
                     <button class="ctrl" type="button" data-reviews-prev aria-label="<?php esc_attr_e( 'Предыдущие отзывы', 'promix' ); ?>">
-                        <?php echo promix_icon( 'arrow-left', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        <?php promix_the_icon( 'arrow-left', 2 ); ?>
                     </button>
                     <button class="ctrl" type="button" data-reviews-next aria-label="<?php esc_attr_e( 'Следующие отзывы', 'promix' ); ?>">
-                        <?php echo promix_icon( 'arrow-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        <?php promix_the_icon( 'arrow-right', 2 ); ?>
                     </button>
                 </div>
 
                 <?php if ( $all_text ) : ?>
                     <a class="reviews__all" href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener">
                         <?php echo esc_html( $all_text ); ?>
-                        <?php echo promix_icon( 'arrow-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                        <?php promix_the_icon( 'arrow-right', 2 ); ?>
                     </a>
                 <?php endif; ?>
             </div>

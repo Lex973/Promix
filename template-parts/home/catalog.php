@@ -77,7 +77,7 @@ $wide_url   = promix_field( 'catalog_wide_url', promix_catalog_url() );
                     <h3 class="cat__title"><?php echo esc_html( $item['cat_title'] ); ?></h3>
                     <p class="cat__text"><?php echo esc_html( $item['cat_text'] ); ?></p>
                     <span class="cat__arrow" aria-hidden="true">
-                    <?php echo promix_icon( 'arrow-up-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                    <?php promix_the_icon( 'arrow-up-right', 2 ); ?>
                 </span>
                 </a>
             <?php endforeach; ?>
@@ -104,7 +104,7 @@ $wide_url   = promix_field( 'catalog_wide_url', promix_catalog_url() );
                         <span class="cat__wide-note"><?php echo esc_html( $wide_note ); ?></span>
                     </span>
                     <span class="cat__arrow" aria-hidden="true">
-                    <?php echo promix_icon( 'arrow-up-right', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                    <?php promix_the_icon( 'arrow-up-right', 2 ); ?>
                 </span>
                 </a>
             </div>

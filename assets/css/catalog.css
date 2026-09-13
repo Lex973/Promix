@@ -401,7 +401,8 @@
   gap: 1px;
 }
 
-/* Длинные списки подрезаны, пока не нажали «Показать все» */
+/* Длинные списки подрезаны, пока не нажали «Показать все»:
+   видно PROMIX_FILTER_SHORT = 6 пунктов (inc/catalog.php) */
 .filter__list--short .check:nth-child(n + 7) {
   display: none;
 }
