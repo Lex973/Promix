@@ -83,5 +83,9 @@ $set('woocommerce_coming_soon', 'no');
 $set('woocommerce_admin_notices', []);
 $set('woocommerce_demo_store', 'no');
 
-flush_rewrite_rules();
-echo "\nrewrite flushed\n";
+// Не flush_rewrite_rules(): Woo уже зарегистрировал типы и таксономии со старыми
+// базами адресов, и «сброс» записал бы их же — разделы /catalog/… и /brand/… отвечали
+// бы 404 (поймано на репетиции переноса). Правила удаляются, WordPress соберёт их
+// заново при следующем запросе.
+delete_option('rewrite_rules');
+echo "\nrewrite rules dropped, rebuilt on next request\n";

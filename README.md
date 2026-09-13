@@ -10,7 +10,8 @@
 - `front-page.php` — главная, собирается из секций
 - `template-parts/home/` — секции главной: hero, catalog, brands, about, why, reviews, contacts
 - `template-parts/` — общие части: логотип, кнопка MAX, окно заявки, плашка про cookie
-- `inc/` — поля админки (`fields/`), форма заявки, меню, иконки
+- `inc/` — поля админки (`fields/`), форма заявки, меню, иконки, корзина и оформление,
+  MAX, почта через SMTP (`mail.php`, константы в `wp-config.php`)
 - `assets/css/variables.css` — дизайн-токены: цвета, шрифты, сетка, радиусы
 - `assets/css/` — стили по кускам страницы: `base`, `header`, `footer`, `modal` подключаются
   везде, `home` — только на главной, `notfound` — только на 404
@@ -31,6 +32,7 @@ WordPress + WooCommerce + Carbon Fields. Содержимое главной и 
 
 ## Перенос на сервер
 
+Пошаговая инструкция, проверенная на чистом WordPress, — в `DEPLOY.md`.
 Деплоить архивом, а не `git pull` на сервере:
 
     git archive --format=zip -o promix.zip HEAD

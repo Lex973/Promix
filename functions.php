@@ -93,6 +93,9 @@ require_once get_theme_file_path( 'inc/fields.php' );
 // Заявки с сайта.
 require_once get_theme_file_path( 'inc/lead-form.php' );
 
+// Почта через SMTP (константы в wp-config.php).
+require_once get_theme_file_path( 'inc/mail.php' );
+
 /**
  * Стили и скрипты фронта.
  */
