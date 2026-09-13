@@ -65,7 +65,7 @@ function promix_meta_description(): string {
                 __( '%1$s в PROMIX: %2$s %3$s с ценами. Малярный центр в Казани, самовывоз и доставка.', 'promix' ),
                 $term->name,
                 number_format_i18n( (int) $term->count ),
-                promix_plural( (int) $term->count, 'позиция', 'позиции', 'позиций' )
+                promix_plural( (int) $term->count, __( 'позиция', 'promix' ), __( 'позиции', 'promix' ), __( 'позиций', 'promix' ) )
             );
         }
     }
@@ -80,7 +80,7 @@ function promix_meta_description(): string {
                 __( '%1$s в PROMIX: %2$s %3$s с ценами. Малярный центр в Казани, самовывоз и доставка.', 'promix' ),
                 $term->name,
                 number_format_i18n( (int) $term->count ),
-                promix_plural( (int) $term->count, 'позиция', 'позиции', 'позиций' )
+                promix_plural( (int) $term->count, __( 'позиция', 'promix' ), __( 'позиции', 'promix' ), __( 'позиций', 'promix' ) )
             );
         }
     }
@@ -92,7 +92,7 @@ function promix_meta_description(): string {
             /* translators: 1 — число позиций, 2 — слово «позиция». */
             __( 'Каталог PROMIX: %1$s %2$s для малярных и отделочных работ с ценами. Шпатели, ленты, валики, окрасочное оборудование, абразивы, краски.', 'promix' ),
             number_format_i18n( $total ),
-            promix_plural( $total, 'позиция', 'позиции', 'позиций' )
+            promix_plural( $total, __( 'позиция', 'promix' ), __( 'позиции', 'promix' ), __( 'позиций', 'promix' ) )
         );
     }
 

@@ -25,6 +25,9 @@ function promix_asset_version( string $relative_path ): string {
  * по английским правилам и на 21 даёт множественное число.
  *
  * @param int    $number Количество.
+ * Формы передаются уже через __(): у русского их три, а _n() без
+ * .po-файла умеет только две.
+ *
  * @param string $one    Форма для 1.
  * @param string $few    Форма для 2-4.
  * @param string $many   Форма для 5 и больше.

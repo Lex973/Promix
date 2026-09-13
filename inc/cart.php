@@ -117,7 +117,7 @@ function promix_cart_label(): string {
         /* translators: 1 — количество, 2 — слово «товар» в нужной форме. */
         __( 'Корзина: %1$s %2$s', 'promix' ),
         number_format_i18n( $count ),
-        promix_plural( $count, 'товар', 'товара', 'товаров' )
+        promix_plural( $count, __( 'товар', 'promix' ), __( 'товара', 'promix' ), __( 'товаров', 'promix' ) )
     );
 }
 
@@ -514,18 +514,24 @@ add_filter( 'woocommerce_email_recipient_new_order', 'promix_order_recipient' );
 /**
  * Способ получения и адрес — в письме менеджеру и на странице заказа в админке.
  *
- * @param WC_Order $order Заказ.
+ * В текстовой версии письма — без тегов: Woo зовёт этот же хук
+ * и для plain-text шаблона, а там <p><strong> печатались бы буквально.
+ *
+ * @param WC_Order $order         Заказ.
+ * @param bool     $sent_to_admin Письмо менеджеру (не используется, позиционный аргумент Woo).
+ * @param bool     $plain_text    Текстовая версия письма.
  */
-function promix_order_delivery_details( WC_Order $order ): void {
-    echo '<p><strong>' . esc_html__( 'Получение:', 'promix' ) . '</strong> ' . esc_html( promix_order_delivery( $order ) );
+function promix_order_delivery_details( WC_Order $order, bool $sent_to_admin = false, bool $plain_text = false ): void {
+    $line = promix_order_delivery( $order ) . ( $order->get_shipping_address_1() ? ' — ' . $order->get_shipping_address_1() : '' );
 
-    if ( $order->get_shipping_address_1() ) {
-        echo ' — ' . esc_html( $order->get_shipping_address_1() );
+    if ( $plain_text ) {
+        echo esc_html( __( 'Получение:', 'promix' ) . ' ' . $line ) . "\n\n";
+        return;
     }
 
-    echo '</p>';
+    echo '<p><strong>' . esc_html__( 'Получение:', 'promix' ) . '</strong> ' . esc_html( $line ) . '</p>';
 }
-add_action( 'woocommerce_email_after_order_table', 'promix_order_delivery_details' );
+add_action( 'woocommerce_email_after_order_table', 'promix_order_delivery_details', 10, 3 );
 add_action( 'woocommerce_admin_order_data_after_shipping_address', 'promix_order_delivery_details' );
 
 /**

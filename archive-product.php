@@ -43,7 +43,7 @@ $lead     = $term && $term->description
             /* translators: 1 — количество позиций, 2 — слово «позиция» в нужной форме. */
             : __( '%1$s %2$s для малярных и отделочных работ. Не нашли нужное — спросите, привезём под заказ.', 'promix' ),
         number_format_i18n( $total ),
-        promix_plural( $total, 'позиция', 'позиции', 'позиций' )
+        promix_plural( $total, __( 'позиция', 'promix' ), __( 'позиции', 'promix' ), __( 'позиций', 'promix' ) )
     );
 ?>
 
@@ -180,7 +180,7 @@ $lead     = $term && $term->description
                                 /* translators: 1 — количество товаров, 2 — слово «товар» в нужной форме. */
                                 esc_html__( 'Найдено %1$s %2$s', 'promix' ),
                                 esc_html( number_format_i18n( $found ) ),
-                                esc_html( promix_plural( $found, 'товар', 'товара', 'товаров' ) )
+                                esc_html( promix_plural( $found, __( 'товар', 'promix' ), __( 'товара', 'promix' ), __( 'товаров', 'promix' ) ) )
                             );
                             ?>
                         </p>
