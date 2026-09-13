@@ -440,8 +440,14 @@ body.is-menu-open {
   color: var(--color-ink);
 }
 
+/* Кольцо фокуса рисует рамка целиком, а не поле внутри неё */
 .qty__input:focus {
   outline: none;
+}
+
+.qty:focus-within {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 3px rgba(29, 110, 245, 0.18);
 }
 
 /* ===== Плашка внизу экрана: «Товар в корзине» ===== */
@@ -498,10 +504,15 @@ body.is-menu-open {
 }
 
 /* Кнопка «В корзину» и счётчик, пока идёт запрос */
-.btn.is-busy,
-.cart-control.is-busy {
+.btn.is-busy {
   opacity: 0.6;
   pointer-events: none;
+}
+
+/* Счётчик во время запроса кликабелен: нажатия копятся в очереди cart.js,
+   а не теряются, пока сервер отвечает */
+.cart-control.is-busy {
+  opacity: 0.6;
 }
 
 /* ===== Счётчик товара в корзине вместо кнопки «В корзину» ===== */

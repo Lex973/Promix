@@ -21,8 +21,11 @@ if ( ! function_exists( 'WC' ) ) {
 
 get_header();
 
-$received = absint( get_query_var( 'order-received' ) );
-$order    = $received ? wc_get_order( $received ) : null;
+// Признак страницы «Заказ принят» — сам адрес, а не номер: на
+// order-received/abc/ номер обнулится, и вместо формы нужно «Заказ не найден».
+$received = is_wc_endpoint_url( 'order-received' );
+$order_id = absint( get_query_var( 'order-received' ) );
+$order    = $order_id ? wc_get_order( $order_id ) : null;
 $key      = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- ключ заказа проверяется ниже.
 
 if ( $order instanceof WC_Order && ! hash_equals( $order->get_order_key(), $key ) ) {

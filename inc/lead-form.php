@@ -153,27 +153,54 @@ add_action( 'wp_ajax_nopriv_promix_lead_nonce', 'promix_lead_nonce' );
  *
  * Сам адрес нигде не сохраняется: в счётчик уходит хеш с солью.
  *
+ * Заголовкам верим только когда PHP стоит за своим же прокси (REMOTE_ADDR —
+ * loopback или внутренняя сеть). Из X-Forwarded-For берётся последний
+ * элемент: его дописывает прокси, а первые присылает сам клиент и может
+ * подставить что угодно. Подделанный или пустой адрес откатывается
+ * к REMOTE_ADDR, чтобы лимит не стал общим на весь сайт.
+ *
  * @return string
  */
 function promix_lead_client_ip(): string {
-    $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+    $remote = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 
-    // За nginx в REMOTE_ADDR приходит сам сервер, настоящий адрес — в заголовке.
-    if ( ! in_array( $ip, array( '127.0.0.1', '::1' ), true ) ) {
-        return $ip;
+    if ( ! promix_lead_ip_is_proxy( $remote ) ) {
+        return $remote;
     }
 
+    $candidates = array();
+
     if ( ! empty( $_SERVER['HTTP_X_REAL_IP'] ) ) {
-        return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );
+        $candidates[] = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );
     }
 
     if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-        $forwarded = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
-
-        return trim( $forwarded[0] );
+        $forwarded    = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
+        $candidates[] = trim( (string) end( $forwarded ) );
     }
 
-    return $ip;
+    foreach ( $candidates as $candidate ) {
+        if ( filter_var( $candidate, FILTER_VALIDATE_IP ) ) {
+            return $candidate;
+        }
+    }
+
+    return $remote;
+}
+
+/**
+ * Похож ли адрес на свой прокси: loopback или частная сеть.
+ *
+ * @param string $ip Адрес из REMOTE_ADDR.
+ * @return bool
+ */
+function promix_lead_ip_is_proxy( string $ip ): bool {
+    if ( '' === $ip ) {
+        return true;
+    }
+
+    // Публичный адрес — прокси перед PHP нет, заголовки пришли снаружи.
+    return false === filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
 }
 
 /**

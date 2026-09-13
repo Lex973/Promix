@@ -29,6 +29,23 @@ WordPress + WooCommerce + Carbon Fields. Содержимое главной и 
 Заявки с сайта сохраняются в разделе «Заявки» и дублируются письмом; точка подключения
 для отправки в MAX или CRM — хук `promix_lead_created`.
 
+## Перенос на сервер
+
+Деплоить архивом, а не `git pull` на сервере:
+
+    git archive --format=zip -o promix.zip HEAD
+
+`export-ignore` в `.gitattributes` выкидывает из архива `_tools/`, `_content/`,
+`_static/` — им на хостинге делать нечего. При `git pull` эти папки и
+`composer.json`, `composer.lock`, `README.md` окажутся в `wp-content/themes/promix/`
+и будут отдаваться по прямой ссылке. На Apache их закрывает `.htaccess` в корне
+темы; под чистым nginx добавить в server-блок:
+
+    location ~ ^/wp-content/themes/promix/(_|.*\.(json|lock|md)$) { return 404; }
+
+После переноса проверить: `/wp-content/themes/promix/README.md` и
+`/wp-content/themes/promix/_static/index.html` отвечают 404.
+
 ## Как поднять локально
 
 1. Создать сайт в Local: PHP 8.2+, свежий WordPress.

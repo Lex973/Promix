@@ -104,7 +104,7 @@
 
   function swapControl(control, html) {
     if (!control || !html) {
-      return;
+      return control;
     }
 
     var tmp = document.createElement('div');
@@ -112,19 +112,28 @@
 
     var next = tmp.firstElementChild;
 
-    if (next) {
-      control.replaceWith(next);
-
-      /* Страница товара пересчитывает цену по количеству в корзине */
-      var input = next.querySelector('[data-cart-qty]');
-      document.dispatchEvent(new CustomEvent('promix:cart', { detail: { qty: input ? parseInt(input.value, 10) || 0 : 0 } }));
+    if (!next) {
+      return control;
     }
+
+    control.replaceWith(next);
+
+    /* Страница товара пересчитывает цену по количеству в корзине */
+    var input = next.querySelector('[data-cart-qty]');
+    document.dispatchEvent(new CustomEvent('promix:cart', { detail: { qty: input ? parseInt(input.value, 10) || 0 : 0 } }));
+
+    return next;
   }
 
   function addToCart(btn) {
     var control = controlOf(btn);
     var id = btn.getAttribute('data-add');
     var variant = control ? control.getAttribute('data-variant') : 'card';
+
+    /* Повторное нажатие (в том числе с клавиатуры), пока идёт запрос, добавило бы товар дважды */
+    if (btn.classList.contains('is-busy')) {
+      return;
+    }
 
     btn.classList.add('is-busy');
 
@@ -143,16 +152,44 @@
     });
   }
 
-  /* Изменение количества из карточки или со страницы товара */
+  /* Изменение количества из карточки или со страницы товара.
+
+     На один товар в полёте только один запрос: пока сервер отвечает,
+     следующие нажатия меняют число на экране, а уходит одно итоговое
+     значение. Без очереди два быстрых «+» могли ответить в обратном
+     порядке — на сервере и на экране осталось бы старое число. */
   var stepTimers = {};
+  var stepQueue = {};
 
   function stepCart(control, qty) {
-    var box = control.querySelector('[data-cart-key]');
-
-    if (!box) {
+    if (!control.querySelector('[data-cart-key]')) {
       return;
     }
 
+    var id = control.getAttribute('data-cart-control');
+    var state = stepQueue[id] || (stepQueue[id] = { control: control, busy: false, next: null });
+    var input = control.querySelector('[data-cart-qty]');
+
+    state.control = control;
+
+    if (input && qty > 0) {
+      input.value = String(qty);
+    }
+
+    if (state.busy) {
+      state.next = qty;
+      return;
+    }
+
+    stepSend(state, qty);
+  }
+
+  function stepSend(state, qty) {
+    var control = state.control;
+    var box = control.querySelector('[data-cart-key]');
+
+    state.busy = true;
+    state.next = null;
     control.classList.add('is-busy');
 
     post('promix_cart', {
@@ -167,11 +204,29 @@
         throw new Error('cart');
       }
 
+      /* Товар удалён — ключа в корзине больше нет, дальнейшие правки некуда слать */
+      if (qty === 0) {
+        state.next = null;
+      }
+
+      /* Пока ждали ответ, число поменяли ещё раз: экран не трогаем,
+         ответ уже устарел — сейчас уйдёт итоговое значение */
+      if (state.next !== null) {
+        return;
+      }
+
       setCount(res.data.count, res.data.label);
-      swapControl(control, res.data.control);
+      state.control = swapControl(control, res.data.control);
     }).catch(function () {
+      state.next = null;
       control.classList.remove('is-busy');
       showToast(cfg.error, true);
+    }).then(function () {
+      state.busy = false;
+
+      if (state.next !== null) {
+        stepSend(state, state.next);
+      }
     });
   }
 
@@ -258,14 +313,30 @@
       }
     }
 
+    /* Та же очередь, что у счётчиков в карточках: один запрос в полёте,
+       остальные правки копятся по ключу позиции и уходят следом.
+       Ответ на устаревший запрос список не перерисовывает. */
+    var cartBusy = false;
+    var cartNext = {};
+
     function update(key, qty, action) {
+      if (cartBusy) {
+        cartNext[key] = { qty: qty, action: action };
+        return;
+      }
+
       var saved = focusOf();
 
+      cartBusy = true;
       cartBox.classList.add('is-loading');
 
       post('promix_cart', { nonce: cfg.nonce, key: key, qty: qty, do: action || 'update' }).then(function (res) {
         if (!res.success) {
           throw new Error('cart');
+        }
+
+        if (Object.keys(cartNext).length) {
+          return;
         }
 
         cartBox.innerHTML = res.data.html;
@@ -274,7 +345,17 @@
       }).catch(function () {
         window.location.reload();
       }).then(function () {
-        cartBox.classList.remove('is-loading');
+        cartBusy = false;
+
+        var keys = Object.keys(cartNext);
+
+        if (keys.length) {
+          var pending = cartNext[keys[0]];
+          delete cartNext[keys[0]];
+          update(keys[0], pending.qty, pending.action);
+        } else {
+          cartBox.classList.remove('is-loading');
+        }
       });
     }
 

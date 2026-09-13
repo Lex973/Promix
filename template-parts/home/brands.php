@@ -57,6 +57,11 @@ $rows   = array(
                                 continue;
                             }
 
+                            // Ссылка не задана в админке — ведём на страницу бренда в каталоге.
+                            if ( ! $url && function_exists( 'promix_brand_url' ) ) {
+                                $url = promix_brand_url( $name );
+                            }
+
                             $tag = $url ? 'a' : 'span';
 
                             /* Содержимое плитки печатается без отступов: лишние пробелы

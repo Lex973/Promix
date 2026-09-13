@@ -62,12 +62,60 @@ function promix_catalog_url( string $category = '' ): string {
  */
 function promix_catalog_links_flush(): void {
     delete_transient( 'promix_catalog_links' );
+    delete_transient( 'promix_brand_links' );
 }
 add_action( 'created_product_cat', 'promix_catalog_links_flush' );
 add_action( 'edited_product_cat', 'promix_catalog_links_flush' );
 add_action( 'delete_product_cat', 'promix_catalog_links_flush' );
+add_action( 'created_product_brand', 'promix_catalog_links_flush' );
+add_action( 'edited_product_brand', 'promix_catalog_links_flush' );
+add_action( 'delete_product_brand', 'promix_catalog_links_flush' );
 add_action( 'update_option_permalink_structure', 'promix_catalog_links_flush' );
 add_action( 'update_option_woocommerce_permalinks', 'promix_catalog_links_flush' );
+
+/**
+ * Адрес страницы бренда по названию марки — для плиток на главной.
+ *
+ * Карта «название → ссылка» строится одним запросом по всей таксономии
+ * и лежит в транзиенте вместе с картой разделов (тот же сброс). Марки,
+ * которых нет среди брендов Woo, остаются без ссылки — плитка будет span.
+ *
+ * @param string $name Название марки как в повторителе.
+ * @return string Ссылка или пустая строка.
+ */
+function promix_brand_url( string $name ): string {
+    static $links = null;
+
+    if ( null === $links ) {
+        $links = get_transient( 'promix_brand_links' );
+    }
+
+    if ( ! is_array( $links ) ) {
+        $links = array();
+        $terms = taxonomy_exists( 'product_brand' )
+            ? get_terms(
+                array(
+                    'taxonomy'   => 'product_brand',
+                    'hide_empty' => true,
+                )
+            )
+            : array();
+
+        foreach ( is_wp_error( $terms ) ? array() : $terms as $term ) {
+            $link = get_term_link( $term );
+
+            if ( ! is_wp_error( $link ) ) {
+                $links[ mb_strtolower( $term->name ) ] = $link;
+            }
+        }
+
+        set_transient( 'promix_brand_links', $links, DAY_IN_SECONDS );
+    }
+
+    $key = mb_strtolower( trim( $name ) );
+
+    return isset( $links[ $key ] ) ? $links[ $key ] : '';
+}
 
 /**
  * Сколько товаров видно в каталоге — для подводки «N позиций».

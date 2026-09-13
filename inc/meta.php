@@ -123,9 +123,7 @@ function promix_meta_description(): string {
  * @return string
  */
 function promix_og_image(): string {
-    $image_id = function_exists( 'carbon_get_theme_option' )
-        ? (int) carbon_get_theme_option( 'promix_og_image' )
-        : 0;
+    $image_id = function_exists( 'promix_option' ) ? (int) promix_option( 'og_image' ) : 0;
 
     if ( $image_id ) {
         $src = wp_get_attachment_image_url( $image_id, 'full' );
@@ -152,12 +150,11 @@ function promix_canonical_url(): string {
         return home_url( '/' );
     }
 
-    // Каталог с фильтрами каноничен без параметров: адрес раздела или самого каталога.
+    // Каталог с фильтрами каноничен без параметров: адрес раздела, бренда
+    // или самого каталога. Страницы пагинации — сами себе канонические:
+    // иначе поисковик считает вторую и дальше копиями первой.
     if ( function_exists( 'promix_is_catalog' ) && promix_is_catalog() ) {
-        $term = is_product_category() ? get_queried_object() : null;
-        $link = $term instanceof WP_Term ? get_term_link( $term ) : promix_catalog_url();
-
-        return is_wp_error( $link ) ? promix_catalog_url() : $link;
+        return promix_catalog_page_url( max( 1, (int) get_query_var( 'paged' ) ) );
     }
 
     if ( is_singular() ) {
@@ -169,6 +166,30 @@ function promix_canonical_url(): string {
     }
 
     return home_url( add_query_arg( array() ) );
+}
+
+/**
+ * Адрес N-й страницы текущего раздела каталога без параметров фильтров.
+ *
+ * @param int $page Номер страницы, с единицы.
+ * @return string
+ */
+function promix_catalog_page_url( int $page ): string {
+    global $wp_rewrite;
+
+    $term = is_product_category() || is_tax( 'product_brand' ) ? get_queried_object() : null;
+    $base = $term instanceof WP_Term ? get_term_link( $term ) : promix_catalog_url();
+    $base = is_wp_error( $base ) ? promix_catalog_url() : $base;
+
+    if ( $page <= 1 ) {
+        return $base;
+    }
+
+    if ( $wp_rewrite instanceof WP_Rewrite && $wp_rewrite->using_permalinks() ) {
+        return user_trailingslashit( trailingslashit( $base ) . $wp_rewrite->pagination_base . '/' . $page, 'paged' );
+    }
+
+    return add_query_arg( 'paged', $page, $base );
 }
 
 /**
@@ -202,8 +223,26 @@ function promix_meta_tags(): void {
     }
 
     // WordPress ставит canonical только записям; каталогу и разделам — сами.
+    // Соседние страницы выдачи — через prev/next, чтобы поисковик прошёл всю серию.
     if ( function_exists( 'promix_is_catalog' ) && promix_is_catalog() ) {
+        $paged = max( 1, (int) get_query_var( 'paged' ) );
+        $pages = (int) $GLOBALS['wp_query']->max_num_pages;
+
         printf( '<link rel="canonical" href="%s">' . "\n", esc_url( promix_canonical_url() ) );
+
+        // С параметрами фильтров серия другая, и она noindex — соседей не печатаем.
+        if ( promix_is_filtered_catalog() ) {
+            $pages = 1;
+            $paged = 1;
+        }
+
+        if ( $paged > 1 ) {
+            printf( '<link rel="prev" href="%s">' . "\n", esc_url( promix_catalog_page_url( $paged - 1 ) ) );
+        }
+
+        if ( $paged < $pages ) {
+            printf( '<link rel="next" href="%s">' . "\n", esc_url( promix_catalog_page_url( $paged + 1 ) ) );
+        }
     }
 
     if ( $is_product ) {

@@ -12,9 +12,10 @@
  * добавили; узнать его можно на странице «Инструменты → MAX» в админке:
  * менеджер пишет боту любое слово, страница показывает, откуда пришло.
  *
- * Отправка идёт прямо в момент заявки или заказа, с таймаутом в пять
- * секунд. Не ушло — заявка и заказ помечаются, менеджер увидит это
- * в списке; письмо при этом всё равно уходит.
+ * Отправка не задерживает покупателя: под PHP-FPM она идёт в том же
+ * запросе после закрытия соединения, иначе — фоновой задачей Action
+ * Scheduler (см. promix_max_defer). Не ушло — заявка и заказ помечаются,
+ * менеджер увидит это в списке; письмо при этом всё равно уходит.
  *
  * API: https://dev.max.ru/docs-api — POST /messages?chat_id=…,
  * токен в заголовке Authorization, текст без разметки.
@@ -80,6 +81,101 @@ function promix_max_request( string $method, string $path, array $query = array(
 }
 
 /**
+ * Выполнить отправку так, чтобы покупатель её не ждал.
+ *
+ * Заявка и заказ заканчиваются редиректом или JSON — то есть exit,
+ * а он запускает shutdown. Под PHP-FPM там закрывается соединение
+ * с браузером (fastcgi_finish_request), и пять секунд таймаута API MAX
+ * ждёт уже только PHP. Без FPM отправка уходит в Action Scheduler
+ * WooCommerce — выполнится с ближайшим тиком cron (на хостинге нужен
+ * настоящий cron, см. чек-лист переноса). Нет и его — как раньше,
+ * синхронно на shutdown.
+ *
+ * @param string  $hook Действие-отправитель (promix_max_send_lead / _order).
+ * @param mixed[] $args Его аргументы — только скаляры, они уходят в базу.
+ */
+function promix_max_defer( string $hook, array $args ): void {
+    if ( ! function_exists( 'fastcgi_finish_request' ) && function_exists( 'as_enqueue_async_action' ) ) {
+        as_enqueue_async_action( $hook, $args, 'promix' );
+        return;
+    }
+
+    if ( doing_action( 'shutdown' ) || did_action( 'shutdown' ) ) {
+        do_action_ref_array( $hook, $args );
+        return;
+    }
+
+    add_action(
+        'shutdown',
+        static function () use ( $hook, $args ) {
+            promix_max_release_client();
+            do_action_ref_array( $hook, $args );
+        },
+        100
+    );
+}
+
+/**
+ * Отправка заявки — то, что откладывает promix_max_defer.
+ *
+ * @param int    $lead_id Идентификатор заявки.
+ * @param string $text    Готовый текст сообщения.
+ */
+function promix_max_send_lead( int $lead_id, string $text ): void {
+    $result = promix_max_send( $text );
+
+    if ( is_wp_error( $result ) ) {
+        update_post_meta( $lead_id, '_promix_max_failed', $result->get_error_message() );
+    }
+}
+add_action( 'promix_max_send_lead', 'promix_max_send_lead', 10, 2 );
+
+/**
+ * Отправка заказа — то, что откладывает promix_max_defer.
+ *
+ * @param int    $order_id Номер заказа.
+ * @param string $text     Готовый текст сообщения.
+ */
+function promix_max_send_order( int $order_id, string $text ): void {
+    $order = wc_get_order( $order_id );
+
+    if ( ! $order instanceof WC_Order ) {
+        return;
+    }
+
+    $result = promix_max_send( $text );
+
+    if ( is_wp_error( $result ) ) {
+        $order->update_meta_data( '_promix_max_failed', $result->get_error_message() );
+        $order->add_order_note( sprintf( /* translators: %s — ошибка. */ __( 'В MAX не ушло: %s', 'promix' ), $result->get_error_message() ) );
+        $order->save();
+    } else {
+        $order->add_order_note( __( 'Отправлено менеджеру в MAX.', 'promix' ) );
+    }
+}
+add_action( 'promix_max_send_order', 'promix_max_send_order', 10, 2 );
+
+/**
+ * Отдать ответ браузеру и закрыть соединение, не завершая скрипт.
+ *
+ * Один раз за запрос: повторный вызов под FPM ничего не делает,
+ * но и незачем.
+ */
+function promix_max_release_client(): void {
+    static $released = false;
+
+    if ( $released ) {
+        return;
+    }
+
+    $released = true;
+
+    if ( function_exists( 'fastcgi_finish_request' ) ) {
+        fastcgi_finish_request();
+    }
+}
+
+/**
  * Сообщение в чат менеджера.
  *
  * Текст без разметки: в названиях товаров попадаются звёздочки
@@ -142,11 +238,7 @@ function promix_max_lead( int $lead_id, string $name, string $phone, string $not
     $lines[] = '';
     $lines[] = admin_url( 'edit.php?post_type=promix_lead' );
 
-    $result = promix_max_send( implode( "\n", $lines ) );
-
-    if ( is_wp_error( $result ) ) {
-        update_post_meta( $lead_id, '_promix_max_failed', $result->get_error_message() );
-    }
+    promix_max_defer( 'promix_max_send_lead', array( $lead_id, implode( "\n", $lines ) ) );
 }
 add_action( 'promix_lead_created', 'promix_max_lead', 10, 5 );
 
@@ -198,15 +290,7 @@ function promix_max_order( WC_Order $order ): void {
     $lines[] = '';
     $lines[] = $order->get_edit_order_url();
 
-    $result = promix_max_send( implode( "\n", $lines ) );
-
-    if ( is_wp_error( $result ) ) {
-        $order->update_meta_data( '_promix_max_failed', $result->get_error_message() );
-        $order->add_order_note( sprintf( /* translators: %s — ошибка. */ __( 'В MAX не ушло: %s', 'promix' ), $result->get_error_message() ) );
-        $order->save();
-    } else {
-        $order->add_order_note( __( 'Отправлено менеджеру в MAX.', 'promix' ) );
-    }
+    promix_max_defer( 'promix_max_send_order', array( $order->get_id(), implode( "\n", $lines ) ) );
 }
 add_action( 'promix_order_created', 'promix_max_order' );
 

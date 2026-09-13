@@ -60,11 +60,11 @@ add_action( 'carbon_fields_register_fields', 'promix_register_fields' );
  * На главной блочный редактор не нужен: содержимое собирают шаблоны и поля,
  * а в Gutenberg метабоксы Carbon Fields прячутся в самый низ страницы.
  *
- * @param bool     $use_block_editor Включать ли Gutenberg.
+ * @param mixed    $use_block_editor Включать ли Gutenberg (тип не гарантирован).
  * @param \WP_Post $post             Редактируемая запись.
- * @return bool
+ * @return mixed
  */
-function promix_disable_block_editor_on_front( bool $use_block_editor, $post ): bool {
+function promix_disable_block_editor_on_front( $use_block_editor, $post ) {
     $front_id = (int) get_option( 'page_on_front' );
 
     if ( $front_id && isset( $post->ID ) && (int) $post->ID === $front_id ) {
@@ -116,7 +116,13 @@ function promix_field( string $name, $default = '' ) {
         return $default;
     }
 
-    $value = carbon_get_post_meta( $page_id, 'promix_' . $name );
+    $value = promix_cached_value(
+        'promix_fields_' . $page_id,
+        $name,
+        static function () use ( $page_id, $name ) {
+            return carbon_get_post_meta( $page_id, 'promix_' . $name );
+        }
+    );
 
     if ( '' === $value || null === $value || array() === $value ) {
         return $default;
@@ -124,6 +130,66 @@ function promix_field( string $name, $default = '' ) {
 
     return $value;
 }
+
+/**
+ * Значение из кэша полей Carbon Fields — или из базы, с записью в кэш.
+ *
+ * Carbon читает каждое поле отдельным запросом мимо кэша WP: главная с
+ * полусотней полей давала 51 запрос, контакты — ещё 8–10 на любой странице.
+ * Значения (включая пустые) складываются в транзиент по одному на страницу
+ * или на настройки; промахи пишутся один раз в конце запроса, а не по
+ * штуке. Сброс — при сохранении полей (см. promix_fields_flush).
+ *
+ * @param string   $bucket Ключ транзиента.
+ * @param string   $name   Имя поля без префикса.
+ * @param callable $read   Чтение из базы, если в кэше нет.
+ * @return mixed
+ */
+function promix_cached_value( string $bucket, string $name, callable $read ) {
+    static $cache = array();
+    static $dirty = array();
+
+    if ( ! isset( $cache[ $bucket ] ) ) {
+        $stored           = get_transient( $bucket );
+        $cache[ $bucket ] = is_array( $stored ) ? $stored : array();
+    }
+
+    if ( array_key_exists( $name, $cache[ $bucket ] ) ) {
+        return $cache[ $bucket ][ $name ];
+    }
+
+    $cache[ $bucket ][ $name ] = $read();
+
+    if ( ! isset( $dirty[ $bucket ] ) ) {
+        $dirty[ $bucket ] = true;
+
+        add_action(
+            'shutdown',
+            static function () use ( $bucket, &$cache ) {
+                set_transient( $bucket, $cache[ $bucket ], DAY_IN_SECONDS );
+            }
+        );
+    }
+
+    return $cache[ $bucket ][ $name ];
+}
+
+/**
+ * Поля сохранили — кэш страницы или настроек устарел.
+ *
+ * @param int|mixed $post_id ID записи для полей страницы; для настроек Carbon передаёт данные формы.
+ */
+function promix_fields_flush( $post_id = 0 ): void {
+    if ( is_numeric( $post_id ) && (int) $post_id > 0 ) {
+        delete_transient( 'promix_fields_' . (int) $post_id );
+        return;
+    }
+
+    delete_transient( 'promix_options' );
+}
+add_action( 'carbon_fields_post_meta_container_saved', 'promix_fields_flush' );
+add_action( 'save_post', 'promix_fields_flush' );
+add_action( 'carbon_fields_theme_options_container_saved', 'promix_fields_flush' );
 
 /**
  * Контейнер полей для главной страницы.
@@ -222,7 +288,13 @@ function promix_option( string $name, string $default = '' ): string {
         return $default;
     }
 
-    $value = carbon_get_theme_option( 'promix_' . $name );
+    $value = promix_cached_value(
+        'promix_options',
+        $name,
+        static function () use ( $name ) {
+            return carbon_get_theme_option( 'promix_' . $name );
+        }
+    );
 
     return ( '' === $value || null === $value ) ? $default : (string) $value;
 }

@@ -149,6 +149,14 @@ function promix_svg_kses(): array {
             'line'     => $shape,
             'polyline' => $shape,
             'polygon'  => $shape,
+            'symbol'   => array(
+                'id'      => true,
+                'viewbox' => true,
+            ),
+            'use'      => array(
+                'href'       => true,
+                'xlink:href' => true,
+            ),
             'div'      => array(
                 'class'      => true,
                 'style'      => true,
@@ -231,30 +239,35 @@ function promix_category_icon( string $category ): string {
  * Пять контурных звёзд и залитая копия поверх, обрезанная по ширине:
  * 4,9 из 5 — это 98% ширины, а не «четыре звезды» и не «пять».
  *
+ * Контур звезды описан один раз в <symbol> перед первым рядом, дальше
+ * идут только <use>: на главной десять звёзд на каждый отзыв, и с
+ * полным путём в каждой это было 60 КБ разметки. Контур и заливка —
+ * из CSS (.stars__row svg), символ общий.
+ *
  * @param float  $rating Оценка от 0 до 5, можно дробную.
  * @param string $label  Подпись для программ чтения с экрана.
  * @return string
  */
 function promix_stars( float $rating, string $label = '' ): string {
+    static $defined = false;
+
     $rating = max( 0.0, min( 5.0, $rating ) );
-    $path   = 'M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z';
+    $defs   = '';
 
-    $outline = sprintf(
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="%s"/></svg>',
-        $path
-    );
+    if ( ! $defined ) {
+        $defined = true;
+        $defs    = '<svg class="stars__defs" width="0" height="0" aria-hidden="true"><symbol id="promix-star" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z"/></symbol></svg>';
+    }
 
-    $filled = sprintf(
-        '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="%s"/></svg>',
-        $path
-    );
+    $star = '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#promix-star"/></svg>';
 
     return sprintf(
-        '<div class="stars"%s style="--stars: %s"><div class="stars__row">%s</div><div class="stars__row stars__row--fill">%s</div></div>',
+        '%s<div class="stars"%s style="--stars: %s"><div class="stars__row">%s</div><div class="stars__row stars__row--fill">%s</div></div>',
+        $defs,
         $label ? ' role="img" aria-label="' . esc_attr( $label ) . '"' : '',
         esc_attr( (string) round( $rating / 5 * 100, 2 ) ),
-        str_repeat( $outline, 5 ),
-        str_repeat( $filled, 5 )
+        str_repeat( $star, 5 ),
+        str_repeat( $star, 5 )
     );
 }
 

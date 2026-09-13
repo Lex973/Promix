@@ -12,9 +12,9 @@
 }
 
 /* Пока сервер пересчитывает, список бледнеет, а не пропадает */
+/* Без pointer-events: none — правки во время запроса встают в очередь (cart.js) */
 .cart__body.is-loading {
   opacity: 0.5;
-  pointer-events: none;
   transition: opacity 0.2s var(--ease);
 }
 

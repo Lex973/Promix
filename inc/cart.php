@@ -154,10 +154,10 @@ function promix_cart_fragments( array $fragments ): array {
  * страницы именно /cart/; переименуют в админке — тема молча отдаст
  * page.php с пустым содержимым.
  *
- * @param string $template Шаблон, выбранный WordPress.
- * @return string
+ * @param mixed $template Шаблон, выбранный WordPress (тип не гарантирован).
+ * @return mixed
  */
-function promix_cart_templates( string $template ): string {
+function promix_cart_templates( $template ) {
     if ( ! function_exists( 'is_cart' ) ) {
         return $template;
     }
@@ -503,10 +503,10 @@ function promix_order_delivery( WC_Order $order ): string {
  * Иначе Woo шлёт его на admin_email, а заявки уходят менеджеру — и заказы
  * читает не тот человек.
  *
- * @param string $recipient Получатель по настройкам Woo.
- * @return string
+ * @param mixed $recipient Получатель по настройкам Woo (тип не гарантирован).
+ * @return mixed
  */
-function promix_order_recipient( string $recipient ): string {
+function promix_order_recipient( $recipient ) {
     return function_exists( 'promix_lead_recipient' ) ? promix_lead_recipient() : $recipient;
 }
 add_filter( 'woocommerce_email_recipient_new_order', 'promix_order_recipient' );
@@ -535,9 +535,16 @@ add_action( 'woocommerce_admin_order_data_after_shipping_address', 'promix_order
  * @return array<string, string>
  */
 function promix_checkout_title( array $parts ): array {
-    if ( function_exists( 'is_checkout' ) && is_checkout() && get_query_var( 'order-received' ) ) {
-        $parts['title'] = __( 'Заказ принят', 'promix' );
+    if ( ! function_exists( 'is_wc_endpoint_url' ) || ! is_wc_endpoint_url( 'order-received' ) ) {
+        return $parts;
     }
+
+    $order = wc_get_order( absint( get_query_var( 'order-received' ) ) );
+    $key   = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- ключ заказа, не форма.
+
+    $parts['title'] = $order instanceof WC_Order && hash_equals( $order->get_order_key(), $key )
+        ? __( 'Заказ принят', 'promix' )
+        : __( 'Заказ не найден', 'promix' );
 
     return $parts;
 }

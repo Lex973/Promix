@@ -18,10 +18,15 @@ defined( 'ABSPATH' ) || exit;
  * вида %d0%a8%d0%bf…; такой адрес неудобно читать и копировать.
  * Сюда же попадают названия загружаемых файлов.
  *
- * @param string $title Строка, из которой делается адрес.
+ * Тип аргумента не объявлен: в фильтр любой плагин может передать null,
+ * а строгий тип уронил бы сайт TypeError'ом.
+ *
+ * @param mixed $title Строка, из которой делается адрес.
  * @return string
  */
-function promix_translit( string $title ): string {
+function promix_translit( $title ): string {
+    $title = (string) $title;
+
     static $map = array(
         'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e', 'ё' => 'yo',
         'ж' => 'zh', 'з' => 'z', 'и' => 'i', 'й' => 'y', 'к' => 'k', 'л' => 'l', 'м' => 'm',
