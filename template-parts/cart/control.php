@@ -36,10 +36,10 @@ $url   = $product->get_permalink();
     <?php elseif ( $item ) : ?>
 
         <div class="qty qty--cart" data-cart-key="<?php echo esc_attr( $item['key'] ); ?>" data-product="<?php echo esc_attr( (string) $id ); ?>">
-            <?php /* На единице «минус» становится крестиком: следующий шаг — убрать товар. */ ?>
+            <?php /* На единице «минус» убирает товар из корзины — иконка при этом та же. */ ?>
             <button class="qty__btn" type="button" data-cart-step="-1"
                     aria-label="<?php echo esc_attr( 1 === $item['qty'] ? __( 'Убрать из корзины', 'promix' ) : __( 'Меньше', 'promix' ) ); ?>">
-                <?php echo promix_icon( 1 === $item['qty'] ? 'x' : 'minus', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
+                <?php echo promix_icon( 'minus', 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- готовая разметка иконки. ?>
             </button>
             <label class="visually-hidden" for="cart-qty-<?php echo esc_attr( (string) $id ); ?>"><?php esc_html_e( 'Количество в корзине', 'promix' ); ?></label>
             <input class="qty__input" id="cart-qty-<?php echo esc_attr( (string) $id ); ?>" type="text" inputmode="numeric" autocomplete="off"
