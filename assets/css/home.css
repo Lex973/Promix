@@ -338,7 +338,7 @@
   text-transform: uppercase;
   white-space: nowrap;
   color: #A8ADB6;
-  transition: color var(--transition), border-color var(--transition), transform var(--transition);
+  transition: color var(--transition), border-color var(--transition);
 }
 
 .brand__logo {
@@ -356,11 +356,11 @@
   opacity: 1;
 }
 
+/* Без подъёма плитки: лента обрезана по высоте, и сдвиг срезал бы верхнюю обводку */
 .brand:hover,
 .brand:focus-visible {
   color: var(--brand-color);
   border-color: currentColor;
-  transform: translateY(-2px);
 }
 
 .brands__cta {
