@@ -173,6 +173,48 @@ function promix_cart_templates( $template ) {
     return $template;
 }
 add_filter( 'template_include', 'promix_cart_templates', 20 );
+
+/**
+ * Сообщение «добавлено в корзину» — своими словами.
+ *
+ * Штатное Woo — «Вы отложили … в свою корзину. Просмотр корзины», а без
+ * перевода и вовсе английское. Показывается оно только на странице
+ * корзины (уведомления печатает template-parts/notices.php), поэтому
+ * ссылка «Просмотр корзины» там бессмысленна.
+ *
+ * @param mixed                 $message  Разметка Woo.
+ * @param array<int, int|float> $products ID товара → количество.
+ * @param mixed                 $show_qty Показывать ли количество.
+ * @return string
+ */
+function promix_cart_added_message( $message, $products, $show_qty ) {
+    $lines = array();
+
+    foreach ( (array) $products as $product_id => $qty ) {
+        $name = wp_strip_all_tags( get_the_title( (int) $product_id ) );
+
+        if ( '' === $name ) {
+            continue;
+        }
+
+        $lines[] = $show_qty && (int) $qty > 1
+            ? sprintf( '%s × «%s»', number_format_i18n( (int) $qty ), $name )
+            : '«' . $name . '»';
+    }
+
+    if ( ! $lines ) {
+        return $message;
+    }
+
+    return esc_html(
+        sprintf(
+            /* translators: %s — список товаров в кавычках. */
+            __( 'В корзине: %s.', 'promix' ),
+            implode( ', ', $lines )
+        )
+    );
+}
+add_filter( 'wc_add_to_cart_message_html', 'promix_cart_added_message', 10, 3 );
 add_filter( 'woocommerce_add_to_cart_fragments', 'promix_cart_fragments' );
 
 /**
