@@ -13,7 +13,7 @@ $title  = promix_field( 'reviews_title', "Что говорят\nнаши кли
 $rating   = promix_field( 'reviews_rating', '4,9' );
 $count    = promix_field( 'reviews_count', '44 отзыва · 53 оценки в 2ГИС' );
 $btn_text = promix_field( 'reviews_btn_text', 'Открыть в 2ГИС' );
-$all_text = promix_field( 'reviews_all_text', 'Все 44 отзыва в 2ГИС' );
+$all_text = promix_field( 'reviews_all_text', 'Все отзывы в 2ГИС' );
 $url      = promix_field( 'reviews_url', 'https://2gis.ru/kazan/firm/70000001060590384/tab/reviews' );
 
 $reviews = promix_field( 'reviews_items', promix_default_reviews() );

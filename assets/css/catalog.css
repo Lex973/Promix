@@ -934,14 +934,27 @@
     gap: 6px 12px;
   }
 
-  /* В списке на узком экране цена и кнопка уходят под название */
+  /* В списке на узком экране строка — сетка: фото слева на всю высоту,
+     справа столбиком название, цена, кнопка. Фото тянется по высоте
+     столбика, поэтому текст начинается с его верхнего края, а кнопка
+     заканчивается на нижнем */
   .products--list .product {
-    flex-wrap: wrap;
-    gap: 10px 18px;
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: start;
+    gap: 8px 16px;
+    padding: 8px;
   }
 
   .products--list .product__media {
-    flex-basis: 72px;
+    grid-row: 1 / 3;
+    align-self: stretch;
+    aspect-ratio: auto;
+  }
+
+  .products--list .product__icon {
+    width: 36%;
   }
 
   .products--list .product__title {
@@ -949,11 +962,8 @@
   }
 
   .products--list .product__body {
-    flex: 1 1 calc(100% - 90px);
-  }
-
-  .products--list .product__price {
-    font-size: 18px;
+    flex: none;
+    min-width: 0;
   }
 
   .products--list .product__title a {
@@ -962,19 +972,18 @@
     -webkit-line-clamp: 2;
   }
 
-  /* Цена и кнопка — под названием, по его левому краю: отступ равен
-     ширине картинки с зазором, поэтому во всех строках они на одной линии */
   .products--list .product__foot {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
-    flex: 1 1 100%;
-    margin-left: 90px;
+    gap: 6px;
+    flex: none;
+    margin: 0;
   }
 
   .products--list .product__price {
     min-width: 0;
+    font-size: 18px;
     text-align: left;
   }
 
