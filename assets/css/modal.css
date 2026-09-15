@@ -107,6 +107,13 @@ body.is-modal-open {
   color: var(--color-muted);
 }
 
+/* Красная звёздочка у обязательного поля. Только для глаз: читалкам
+   об обязательности говорит атрибут required */
+.lead__label--req::after {
+  content: ' *';
+  color: var(--color-brand);
+}
+
 .lead__input {
   width: 100%;
   padding: 13px 16px;

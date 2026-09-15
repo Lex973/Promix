@@ -24,12 +24,12 @@ $policy_url = get_privacy_policy_url();
 
         <form class="lead" data-lead-form novalidate>
             <label class="lead__field">
-                <span class="lead__label"><?php esc_html_e( 'Как к вам обращаться', 'promix' ); ?></span>
+                <span class="lead__label lead__label--req"><?php esc_html_e( 'Как к вам обращаться', 'promix' ); ?></span>
                 <input class="lead__input" type="text" name="name" autocomplete="name" required>
             </label>
 
             <label class="lead__field">
-                <span class="lead__label"><?php esc_html_e( 'Телефон', 'promix' ); ?></span>
+                <span class="lead__label lead__label--req"><?php esc_html_e( 'Телефон', 'promix' ); ?></span>
                 <input class="lead__input" type="tel" name="phone" autocomplete="tel" placeholder="+7 (___) ___-__-__" required>
             </label>
 

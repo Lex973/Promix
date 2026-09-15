@@ -138,12 +138,12 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
 
                     <div class="checkout__grid">
                         <label class="lead__field">
-                            <span class="lead__label"><?php esc_html_e( 'Как к вам обращаться', 'promix' ); ?></span>
+                            <span class="lead__label lead__label--req"><?php esc_html_e( 'Как к вам обращаться', 'promix' ); ?></span>
                             <input class="lead__input" type="text" name="client" autocomplete="name" required value="<?php echo esc_attr( $v['client'] ); ?>">
                         </label>
 
                         <label class="lead__field">
-                            <span class="lead__label"><?php esc_html_e( 'Телефон', 'promix' ); ?></span>
+                            <span class="lead__label lead__label--req"><?php esc_html_e( 'Телефон', 'promix' ); ?></span>
                             <input class="lead__input" type="tel" name="phone" autocomplete="tel" placeholder="+7 (___) ___-__-__" required value="<?php echo esc_attr( $v['phone'] ); ?>">
                         </label>
 
@@ -184,7 +184,7 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
                     </div>
 
                     <label class="lead__field checkout__address" data-address <?php echo 'delivery' === $v['delivery'] ? '' : 'hidden'; ?>>
-                        <span class="lead__label"><?php esc_html_e( 'Адрес доставки', 'promix' ); ?></span>
+                        <span class="lead__label lead__label--req"><?php esc_html_e( 'Адрес доставки', 'promix' ); ?></span>
                         <textarea class="lead__input lead__input--area" name="address" rows="2" autocomplete="street-address"><?php echo esc_textarea( $v['address'] ); ?></textarea>
                     </label>
 
