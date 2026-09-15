@@ -999,14 +999,13 @@
 
 /* ===== Загрузка выдачи ===== */
 
-/* Пока сервер отвечает, старая выдача бледнеет, а не пропадает */
+/* Пока сервер отвечает, старая выдача бледнеет, а не пропадает.
+   Бледнеют дети, а не сам блок — иначе побледнело бы и кольцо (base.css) */
 .catalog__results.is-loading {
-  opacity: 0.45;
   pointer-events: none;
-  transition: opacity 0.2s var(--ease);
 }
 
-.catalog__more .is-loading {
-  opacity: 0.6;
-  pointer-events: none;
+.catalog__results.is-loading > * {
+  opacity: 0.45;
+  transition: opacity 0.2s var(--ease);
 }

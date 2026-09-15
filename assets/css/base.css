@@ -138,6 +138,7 @@ html.lenis body {
 }
 
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -503,10 +504,66 @@ body.is-menu-open {
   }
 }
 
-/* Кнопка «В корзину» и счётчик, пока идёт запрос */
+/* ===== Индикатор запроса ===== */
+
+/* Одно кольцо на все запросы: кнопки («В корзину», «Отправить заказ»,
+   «Показать ещё», заявка) и блоки (список корзины, выдача каталога) */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Кнопка, пока идёт запрос: текст и иконка прячутся, размер не прыгает,
+   по центру крутится кольцо цвета текста */
 .btn.is-busy {
-  opacity: 0.6;
+  color: transparent;
   pointer-events: none;
+}
+
+.btn.is-busy::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 2px solid var(--btn-spinner, var(--color-ink));
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.btn--primary {
+  --btn-spinner: var(--color-on-brand);
+}
+
+/* Блок, который ждёт ответа: содержимое бледнеет (правила у самих блоков),
+   поверх — кольцо. Кольцо липкое: в длинной выдаче едет вместе с экраном,
+   но за границы блока не выходит. Отрицательный нижний отступ — чтобы оно
+   не сдвигало содержимое */
+.is-loading::before {
+  content: '';
+  position: sticky;
+  top: calc(50vh - 16px);
+  z-index: 5;
+  display: block;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto -32px;
+  border: 3px solid var(--color-brand);
+  border-right-color: transparent;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: spin 0.7s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn.is-busy::after,
+  .is-loading::before {
+    animation-duration: 1.6s;
+  }
 }
 
 /* Счётчик во время запроса кликабелен: нажатия копятся в очереди cart.js,

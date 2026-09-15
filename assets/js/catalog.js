@@ -303,7 +303,7 @@
     }
 
     event.preventDefault();
-    more.classList.add('is-loading');
+    more.classList.add('is-busy');
     more.setAttribute('aria-disabled', 'true');
 
     fetchPage(more.href).then(function (doc) {

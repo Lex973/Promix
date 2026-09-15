@@ -11,9 +11,10 @@
   margin-bottom: clamp(20px, 2.4vw, 32px);
 }
 
-/* Пока сервер пересчитывает, список бледнеет, а не пропадает */
+/* Пока сервер пересчитывает, список бледнеет, а не пропадает.
+   Бледнеют дети, а не сам блок — иначе побледнело бы и кольцо (base.css) */
 /* Без pointer-events: none — правки во время запроса встают в очередь (cart.js) */
-.cart__body.is-loading {
+.cart__body.is-loading > * {
   opacity: 0.5;
   transition: opacity 0.2s var(--ease);
 }

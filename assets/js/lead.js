@@ -200,6 +200,7 @@
     event.preventDefault();
 
     submit.disabled = true;
+    submit.classList.add('is-busy');
     message.className = 'lead__note';
     message.textContent = window.PROMIX_LEAD.sending;
 
@@ -231,6 +232,7 @@
       })
       .then(function () {
         submit.disabled = false;
+        submit.classList.remove('is-busy');
       });
   });
 })();
