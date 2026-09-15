@@ -21,6 +21,12 @@ foreach (['shop', 'refund_returns', 'sample-page', 'my-account'] as $slug) {
     if ($p && (int)$p->ID !== (int)$catalog->ID) { wp_trash_post($p->ID); echo "trashed {$slug} ({$p->ID})\n"; }
 }
 
+// Блога нет: запись «Привет, мир!» и её комментарий из свежей установки — в корзину.
+foreach (get_posts(['post_type'=>'post','post_status'=>'any','numberposts'=>-1]) as $post) {
+    wp_trash_post($post->ID); echo "trashed post {$post->ID} ({$post->post_title})
+";
+}
+
 // Адреса. База брендов — отдельная опция Woo, иначе она переводится как «бренд».
 $set('woocommerce_brand_permalink', 'brand');
 $set('woocommerce_permalinks', [

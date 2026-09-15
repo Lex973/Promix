@@ -3,3 +3,5 @@ _tools/ export-ignore
 _content/ export-ignore
 .gitattributes export-ignore
 .gitignore export-ignore
+# Исходник фона первого экрана (4 МБ): на сайт идут собранные WebP.
+assets/img/office/8.png export-ignore

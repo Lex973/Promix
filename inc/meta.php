@@ -295,6 +295,31 @@ function promix_sitemap_providers( $provider, string $name ) {
 add_filter( 'wp_sitemaps_add_provider', 'promix_sitemap_providers', 10, 2 );
 
 /**
+ * Блога на сайте нет: записи и их рубрики в карту не идут — иначе туда
+ * попадают «Привет, мир!» и «Без рубрики» из свежей установки.
+ *
+ * @param array<string, WP_Post_Type> $post_types Типы записей.
+ * @return array<string, WP_Post_Type>
+ */
+function promix_sitemap_post_types( array $post_types ): array {
+    unset( $post_types['post'] );
+
+    return $post_types;
+}
+add_filter( 'wp_sitemaps_post_types', 'promix_sitemap_post_types' );
+
+/**
+ * @param array<string, WP_Taxonomy> $taxonomies Таксономии.
+ * @return array<string, WP_Taxonomy>
+ */
+function promix_sitemap_taxonomies( array $taxonomies ): array {
+    unset( $taxonomies['category'], $taxonomies['post_tag'] );
+
+    return $taxonomies;
+}
+add_filter( 'wp_sitemaps_taxonomies', 'promix_sitemap_taxonomies' );
+
+/**
  * @param array<string, mixed> $args      Аргументы WP_Query.
  * @param string               $post_type Тип записи.
  * @return array<string, mixed>
