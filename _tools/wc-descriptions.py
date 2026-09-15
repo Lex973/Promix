@@ -12,6 +12,12 @@
 import csv
 import io
 import re
+import sys
+from pathlib import Path
+
+# Прайс берётся из docs/data/ (папка вне git), результат ложится рядом.
+# Другой прайс — первым аргументом: python _tools/wc-descriptions.py путь/к/прайсу.csv
+PRICE_LIST = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / 'docs' / 'data' / 'katalog-dlya-sayta.csv'
 
 # Тип товара: ключевые слова (регулярка по названию без учёта регистра) →
 # (как назвать в короткой строке, для чего нужен). Порядок важен: первое
@@ -206,10 +212,10 @@ def build(row):
 
 
 def main():
-    rows = list(csv.DictReader(io.open('katalog-dlya-sayta.csv', encoding='utf-8-sig'), delimiter=';'))
+    rows = list(csv.DictReader(io.open(PRICE_LIST, encoding='utf-8-sig'), delimiter=';'))
     typed = 0
 
-    with io.open('woo-descriptions.csv', 'w', encoding='utf-8', newline='') as out:
+    with io.open(PRICE_LIST.with_name('woo-descriptions.csv'), 'w', encoding='utf-8', newline='') as out:
         w = csv.writer(out)
         w.writerow(['SKU', 'Short description', 'Description'])
         for r in rows:

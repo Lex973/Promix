@@ -5,23 +5,41 @@
 
 ## Структура
 
-- `functions.php` — настройки темы и подключение ассетов
-- `header.php`, `footer.php` — шапка с мобильным меню и подвал
-- `front-page.php` — главная, собирается из секций
-- `template-parts/home/` — секции главной: hero, catalog, brands, about, why, reviews, contacts
-- `template-parts/` — общие части: логотип, кнопка MAX, окно заявки, плашка про cookie
-- `inc/` — поля админки (`fields/`), форма заявки, меню, иконки, корзина и оформление,
-  MAX, почта через SMTP (`mail.php`, константы в `wp-config.php`)
-- `assets/css/variables.css` — дизайн-токены: цвета, шрифты, сетка, радиусы
-- `assets/css/` — стили по кускам страницы: `base`, `header`, `footer`, `modal` подключаются
-  везде, `home` — только на главной, `notfound` — только на 404
-- `assets/js/` — `main.js` (шапка, меню, якоря), `lead.js` (форма заявки),
-  `cookie.js` (плашка про cookie), `brands.js` и `reviews.js` (ленты на главной)
-- `assets/fonts/` — Onest и Unbounded, переменные woff2, отдельно кириллица и латиница
-- `assets/icons/` — исходники иконок Lucide (лицензия ISC), в разметку вставляются инлайном
-- `assets/img/` — фотографии зала и логотип (по мере переноса секций уезжают в медиабиблиотеку)
-- `_content/` — исходники текстов страниц, которые заводятся в админке
-- `_static/index.html` — согласованная статика, архив (см. `_static/README.md`)
+Корень репозитория — сама тема, поэтому шаблоны WordPress лежат прямо в нём.
+
+    functions.php          настройки темы, подключение inc/ и ассетов
+    header.php, footer.php шапка с мобильным меню, подвал
+    front-page.php         главная — собирается из template-parts/home/
+    index.php, page.php    запасной и обычная страница
+    404.php                своя страница «не найдено»
+    archive-product.php    каталог: разделы, бренды, поиск, фильтры
+    single-product.php     страница товара
+    page-cart.php          корзина
+    page-checkout.php      оформление заказа
+    templates/home.php     шаблон страницы «Главная PROMIX» (к нему привязаны поля)
+    template-parts/        куски разметки: home/ — секции главной, catalog/ — карточка
+                           товара, cart/ — список и счётчик; логотип, кнопка MAX,
+                           окно заявки, плашка про cookie, крошки, уведомления
+    inc/                   логика: catalog, cart, lead-form, mail (SMTP), max,
+                           meta (описание и Open Graph), nav, woocommerce, icons;
+                           fields.php и fields/ — поля админки на Carbon Fields,
+                           *-default.php — запасные данные, пока поля пустые
+    woocommerce/emails/    свои шаблоны писем о заказе
+    assets/css/            variables — токены; base, header, footer, modal — везде;
+                           home, catalog, product, cart, notfound — по своим страницам
+    assets/js/             main (шапка, меню, якоря), lead, cookie, brands, reviews,
+                           catalog, product, cart; vendor/lenis.min.js
+    assets/fonts/          Onest и Unbounded, переменные woff2, кириллица и латиница
+    assets/icons/          иконки Lucide (ISC), в разметку идут инлайном через inc/icons.php
+    assets/img/            фон первого экрана в трёх размерах, логотип, og-картинка,
+                           office/ — фото офиса (8.png — исходник фона)
+    vendor/                Carbon Fields через composer, коммитится
+    _content/              исходники текстов страниц, которые заводятся в админке
+    _tools/                скрипты развёртывания и импорта товаров (см. _tools/README.md)
+    docs/                  вне git: документы заказчика, выгрузки из 1С, отчёты
+
+Папки с подчёркиванием — не часть темы: в архив `git archive` не попадают,
+на сервере закрываются от прямых ссылок (см. «Перенос на сервер»).
 
 ## Стек
 
@@ -37,8 +55,8 @@ WordPress + WooCommerce + Carbon Fields. Содержимое главной и 
 
     git archive --format=zip -o promix.zip HEAD
 
-`export-ignore` в `.gitattributes` выкидывает из архива `_tools/`, `_content/`,
-`_static/` — им на хостинге делать нечего. При `git pull` эти папки и
+`export-ignore` в `.gitattributes` выкидывает из архива `_tools/` и `_content/` —
+им на хостинге делать нечего. При `git pull` эти папки и
 `composer.json`, `composer.lock`, `README.md` окажутся в `wp-content/themes/promix/`
 и будут отдаваться по прямой ссылке. На Apache их закрывает `.htaccess` в корне
 темы; под чистым nginx добавить в server-блок:
@@ -46,7 +64,7 @@ WordPress + WooCommerce + Carbon Fields. Содержимое главной и 
     location ~ ^/wp-content/themes/promix/(_|.*\.(json|lock|md)$) { return 404; }
 
 После переноса проверить: `/wp-content/themes/promix/README.md` и
-`/wp-content/themes/promix/_static/index.html` отвечают 404.
+`/wp-content/themes/promix/_tools/` отвечают 404.
 
 ## Как поднять локально
 

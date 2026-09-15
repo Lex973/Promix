@@ -8,9 +8,9 @@
 
 | Что | Откуда |
 |---|---|
-| Архив темы `promix.zip` | `git archive --format=zip -o promix.zip HEAD` — без `_tools/`, `_content/`, `_static/` |
+| Архив темы `promix.zip` | `git archive --format=zip -o promix.zip HEAD` — без `_tools/` и `_content/` |
 | `wc-setup.php` | `_tools/wc-setup.php` из репозитория (в архив не входит) |
-| `woo-import.csv`, `woo-descriptions.csv` | `python _tools/wc-import-csv.py` и `python _tools/wc-descriptions.py` из прайса `katalog-dlya-sayta.csv` |
+| `woo-import.csv`, `woo-descriptions.csv` | `python _tools/wc-import-csv.py` и `python _tools/wc-descriptions.py` — из прайса `docs/data/katalog-dlya-sayta.csv`, результат там же |
 | Текст политики | `_content/privacy-policy.md`; заменить `[ОГРН]` и `[ДАТА]` |
 | Константы для `wp-config.php` | токен и чат MAX, SMTP (см. шаг 7) |
 
@@ -138,7 +138,7 @@ define( 'DISABLE_WP_CRON', true );
 - [ ] Заявка через «Спросить у технолога»: письмо, MAX, запись в «Заявки».
 - [ ] `/privacy-policy/` — без квадратных скобок в тексте.
 - [ ] `/nope/` — своя 404.
-- [ ] `/wp-content/themes/promix/README.md` и `/wp-content/themes/promix/_static/`
+- [ ] `/wp-content/themes/promix/README.md` и `/wp-content/themes/promix/_tools/`
       отвечают 403/404. На Apache это делает `.htaccess` темы, под nginx —
       правило из README («Перенос на сервер»).
 - [ ] `/wp-sitemap.xml` открывается, `/robots.txt` не запрещает сайт.

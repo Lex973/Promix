@@ -1,6 +1,5 @@
 # Служебные скрипты не попадают в архив темы (git archive) — на хостинге им делать нечего.
 _tools/ export-ignore
 _content/ export-ignore
-_static/ export-ignore
 .gitattributes export-ignore
 .gitignore export-ignore
