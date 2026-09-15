@@ -42,9 +42,10 @@ $stats = promix_field(
             <img class="hero__bg"
                  src="<?php echo esc_url( get_theme_file_uri( 'assets/img/main.webp' ) ); ?>"
                  srcset="<?php echo esc_url( get_theme_file_uri( 'assets/img/main-768.webp' ) ); ?> 768w,
-                         <?php echo esc_url( get_theme_file_uri( 'assets/img/main.webp' ) ); ?> 1536w"
+                         <?php echo esc_url( get_theme_file_uri( 'assets/img/main-1280.webp' ) ); ?> 1280w,
+                         <?php echo esc_url( get_theme_file_uri( 'assets/img/main.webp' ) ); ?> 1920w"
                  sizes="100vw"
-                 alt="" width="1536" height="1024" fetchpriority="high">
+                 alt="" width="1920" height="1280" fetchpriority="high">
         <?php endif; ?>
         <div class="hero__shade" aria-hidden="true"></div>
 
