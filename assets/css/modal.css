@@ -139,10 +139,29 @@ body.is-modal-open {
   cursor: pointer;
 }
 
+/* Свой чекбокс вместо системного: квадрат со скруглением, красный с галочкой,
+   когда отмечен. Тот же вид в заявке и в оформлении заказа */
 .lead__agree input {
-  margin-top: 2px;
-  accent-color: var(--color-brand);
+  appearance: none;
   flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 6px;
+  background: var(--color-surface) center / 14px no-repeat;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.lead__agree:hover input {
+  border-color: var(--color-brand);
+}
+
+.lead__agree input:checked {
+  border-color: var(--color-brand);
+  background-color: var(--color-brand);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
 }
 
 .lead__agree a {
@@ -166,7 +185,6 @@ body.is-modal-open {
 }
 
 .lead__submit:disabled {
-  opacity: 0.6;
   cursor: default;
   transform: none;
 }

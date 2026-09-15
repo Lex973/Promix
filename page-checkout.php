@@ -196,9 +196,11 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
                     <label class="lead__agree">
                         <input type="checkbox" name="agree" value="1" required>
                         <span>
-                            <?php esc_html_e( 'Согласен на обработку персональных данных', 'promix' ); ?>
+                            <?php esc_html_e( 'Согласен с', 'promix' ); ?>
                             <?php if ( $policy_url ) : ?>
-                                — <a href="<?php echo esc_url( $policy_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'политика', 'promix' ); ?></a>
+                                <a href="<?php echo esc_url( $policy_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'политикой обработки персональных данных', 'promix' ); ?></a>
+                            <?php else : ?>
+                                <?php esc_html_e( 'политикой обработки персональных данных', 'promix' ); ?>
                             <?php endif; ?>
                         </span>
                     </label>
