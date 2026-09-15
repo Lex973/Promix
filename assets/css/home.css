@@ -290,7 +290,12 @@
 .brands__rows {
   display: grid;
   gap: var(--brands-gap);
-  margin-bottom: clamp(32px, 3.4vw, 56px);
+  /* Маска режет по границе блока, а она при дробной высоте плиток ложится
+     на нижнюю обводку последней строки. Два пикселя отступа уводят край
+     маски от обводки, margin возвращает прежние расстояния */
+  padding-block: 2px;
+  margin-top: -2px;
+  margin-bottom: calc(clamp(32px, 3.4vw, 56px) - 2px);
   /* края растворяются, чтобы плитки не обрубались о границу экрана */
   mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
@@ -298,6 +303,12 @@
 
 .brands__row {
   overflow: hidden;
+  /* Высота плитки бывает дробной (clamp в padding и line-height), и граница
+     обрезки ложилась ровно на нижнюю обводку — на части экранов её срезало.
+     Пиксель запаса отодвигает обрезку от плитки, отрицательный margin
+     возвращает сетке прежний шаг */
+  padding-block: 1px;
+  margin-block: -1px;
 }
 
 .brands__track {
