@@ -400,7 +400,7 @@
 .filter__list {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 6px;
 }
 
 .check {
@@ -496,8 +496,8 @@
 .filter__sub {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  margin: 1px 0 6px;
+  gap: 6px;
+  margin: 6px 0 4px;
 }
 
 .check__text {
