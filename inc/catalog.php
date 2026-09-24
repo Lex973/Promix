@@ -327,11 +327,12 @@ add_filter( 'loop_shop_per_page', 'promix_catalog_per_page' );
  *
  * Разделы двухуровневые («Инструмент → Кисти»), и плоский список по числу
  * товаров эту связь теряет. Здесь родители идут в порядке, заданном при
- * заведении разделов (мета `order`), а подразделы — сразу за своим
- * родителем, с `depth` для отступа в разметке.
+ * заведении разделов (мета `order`), подразделы лежат в `children` своего
+ * родителя. `open` — внутри что-то отмечено, и в фильтре раздел
+ * показывается сразу раскрытым.
  *
  * @param string[] $checked Отмеченные слаги.
- * @return array<int, array{slug: string, name: string, count: int, url: string, checked: bool, depth: int}>
+ * @return array<int, array{slug: string, name: string, count: int, url: string, checked: bool, open: bool, children: array}>
  */
 function promix_catalog_tree( array $checked ): array {
     $terms = get_terms(
@@ -370,28 +371,28 @@ function promix_catalog_tree( array $checked ): array {
 
     unset( $group );
 
-    $items = array();
+    $walk = static function ( int $parent ) use ( &$walk, $children, $checked ): array {
+        $items = array();
 
-    $walk = static function ( int $parent, int $depth ) use ( &$walk, &$items, $children, $checked ): void {
         foreach ( $children[ $parent ] ?? array() as $term ) {
             $link = get_term_link( $term );
+            $kids = $walk( (int) $term->term_id );
 
             $items[] = array(
-                'slug'    => $term->slug,
-                'name'    => $term->name,
-                'count'   => (int) $term->count,
-                'url'     => is_wp_error( $link ) ? '' : $link,
-                'checked' => in_array( $term->slug, $checked, true ),
-                'depth'   => $depth,
+                'slug'     => $term->slug,
+                'name'     => $term->name,
+                'count'    => (int) $term->count,
+                'url'      => is_wp_error( $link ) ? '' : $link,
+                'checked'  => in_array( $term->slug, $checked, true ),
+                'open'     => (bool) array_filter( $kids, static fn ( array $kid ): bool => $kid['checked'] || $kid['open'] ),
+                'children' => $kids,
             );
-
-            $walk( (int) $term->term_id, $depth + 1 );
         }
+
+        return $items;
     };
 
-    $walk( 0, 0 );
-
-    return $items;
+    return $walk( 0 );
 }
 
 /**

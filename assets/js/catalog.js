@@ -142,6 +142,8 @@
     if (clearBtn) {
       clearBtn.hidden = !(search && search.value);
     }
+
+    openChecked();
   }
 
   function load(url, push) {
@@ -448,6 +450,40 @@
       }
     });
   }
+
+  /* ===== Разделы с подразделами: название раскрывает список ===== */
+
+  function setGroup(group, open) {
+    var btn = group.querySelector('[data-filter-toggle]');
+    var list = btn && document.getElementById(btn.getAttribute('aria-controls'));
+
+    if (!list) {
+      return;
+    }
+
+    group.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    list.hidden = !open;
+  }
+
+  /* Отмеченный подраздел не должен прятаться в свёрнутом списке */
+  function openChecked() {
+    Array.prototype.forEach.call(section.querySelectorAll('[data-filter-group]'), function (group) {
+      if (group.querySelector('.filter__sub input:checked')) {
+        setGroup(group, true);
+      }
+    });
+  }
+
+  section.addEventListener('click', function (event) {
+    var btn = event.target.closest('[data-filter-toggle]');
+
+    if (btn) {
+      var group = btn.closest('[data-filter-group]');
+
+      setGroup(group, !group.classList.contains('is-open'));
+    }
+  });
 
   /* ===== Сеткой или списком =====
      Выбор живёт в браузере: кто смотрит списком, тот и в следующий раз

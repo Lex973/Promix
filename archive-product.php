@@ -125,15 +125,33 @@ $lead     = $term && $term->description
                         <legend class="filter__title"><?php esc_html_e( 'Раздел', 'promix' ); ?></legend>
                         <div class="filter__list">
                             <?php foreach ( $categories as $term ) : ?>
-                                <label class="check<?php echo $term['depth'] ? ' check--child' : ' check--parent'; ?>">
-                                    <input type="checkbox" name="cat[]"
-                                           value="<?php echo esc_attr( $term['slug'] ); ?>"
-                                           data-filter-cat
-                                           <?php echo $term['url'] ? 'data-url="' . esc_url( $term['url'] ) . '"' : ''; ?>
-                                           <?php checked( $term['checked'] ); ?>>
-                                    <span class="check__text"><?php echo esc_html( $term['name'] ); ?></span>
-                                    <span class="check__count"><?php echo esc_html( (string) $term['count'] ); ?></span>
-                                </label>
+                                <?php if ( ! $term['children'] ) : ?>
+                                    <?php get_template_part( 'template-parts/catalog/filter-check', null, array( 'term' => $term, 'class' => 'check--parent' ) ); ?>
+                                <?php else : ?>
+                                    <?php $sub_id = 'filter-sub-' . $term['slug']; ?>
+                                    <div class="filter__group<?php echo $term['open'] ? ' is-open' : ''; ?>" data-filter-group>
+                                        <div class="check check--parent">
+                                            <input type="checkbox" name="cat[]"
+                                                   value="<?php echo esc_attr( $term['slug'] ); ?>"
+                                                   data-filter-cat
+                                                   aria-label="<?php echo esc_attr( $term['name'] ); ?>"
+                                                   <?php echo $term['url'] ? 'data-url="' . esc_url( $term['url'] ) . '"' : ''; ?>
+                                                   <?php checked( $term['checked'] ); ?>>
+                                            <button class="check__toggle" type="button" data-filter-toggle
+                                                    aria-expanded="<?php echo $term['open'] ? 'true' : 'false'; ?>"
+                                                    aria-controls="<?php echo esc_attr( $sub_id ); ?>">
+                                                <span class="check__text"><?php echo esc_html( $term['name'] ); ?></span>
+                                                <span class="check__count"><?php echo esc_html( (string) $term['count'] ); ?></span>
+                                                <?php promix_the_icon( 'chevron-down', 2, 'check__arrow' ); ?>
+                                            </button>
+                                        </div>
+                                        <div class="filter__sub" id="<?php echo esc_attr( $sub_id ); ?>" <?php echo $term['open'] ? '' : 'hidden'; ?>>
+                                            <?php foreach ( $term['children'] as $child ) : ?>
+                                                <?php get_template_part( 'template-parts/catalog/filter-check', null, array( 'term' => $child, 'class' => 'check--child' ) ); ?>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                             <?php endforeach; ?>
                         </div>
                     </fieldset>
