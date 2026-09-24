@@ -3,7 +3,7 @@
  * Список марок, с которыми работает PROMIX.
  *
  * Показывается, пока повторитель в админке пустой. Порядок — как в перечне
- * заказчика; цвет наведения задаётся только там, где фирменный оттенок узнаваем.
+ * заказчика, своя марка первой; цвет наведения задаётся только там, где фирменный оттенок узнаваем.
  * Ссылка пустая: плитка сама найдёт страницу бренда Woo по названию
  * (см. promix_brand_url), в админке её можно переопределить.
  *
@@ -19,13 +19,13 @@ defined( 'ABSPATH' ) || exit;
  */
 function promix_default_brands(): array {
     $names = array(
+        'PROMIX'          => '#DF0101',
         'DLT'             => '',
         'RoxelPro'        => '',
         'STORCH'          => '#E2001A',
         'SUNMIGHT'        => '',
         'LEVEL 5'         => '',
         'OLEJNIK'         => '',
-        "L'Outil Parfait" => '',
         'KORSHUN'         => '',
         'AKSU'            => '',
         'SILK PLASTER'    => '',
@@ -34,48 +34,25 @@ function promix_default_brands(): array {
         'Wooster'         => '',
         'ROLLINGDOG'      => '',
         'Dolphin'         => '',
-        'Tesa'            => '',
-        'ASPRO'           => '',
-        'EMITENT'         => '',
         'TECMASTER'       => '',
         'Vagans'          => '',
-        'Alva'            => '',
         'GOLDBLATT'       => '',
         'FLEX'            => '',
         'Howard'          => '',
         'SHEETROCK'       => '',
-        'Pentrilo'        => '',
         'Perfect Line'    => '',
         'Prime Color'     => '',
         'Mirka'           => '#F2B705',
-        'Folsen'          => '',
-        'Alteritaly'      => '',
-        'STMDECOR'        => '',
         'Bihui'           => '',
-        'Ceresit'         => '#C8102E',
-        'Olfa'            => '',
-        'Grabo'           => '',
         'Bosch'           => '',
         'Knauf'           => '#006EB7',
-        'Flugger'         => '',
-        'Denalt'          => '',
-        'Semin'           => '',
         'Schtaer'         => '',
-        'Hansa'           => '',
-        'Baumit'          => '',
-        'Bergauf'         => '',
-        'Dulux'           => '#00843D',
-        'StMax'           => '',
-        'Berizzi'         => '',
         'Strait-Flex'     => '',
-        'Seal GP'         => '',
         'Graco'           => '#0057A8',
         'LOSSEW'          => '',
-        'Titan'           => '',
         'Abrex'           => '',
         'Formel'          => '',
         'Corner Profi'    => '',
-        'Mons'            => '',
     );
 
     $brands = array();

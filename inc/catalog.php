@@ -16,12 +16,37 @@ defined( 'ABSPATH' ) || exit;
 const PROMIX_CATALOG_PER_PAGE = 24;
 
 /**
+ * Путь ссылки без адреса сайта — для кэша ссылок, см. promix_catalog_url.
+ *
+ * @param string $url Полный адрес на этом сайте.
+ * @return string Путь от корня сайта, например /catalog/instrument/.
+ */
+function promix_link_path( string $url ): string {
+    $home = untrailingslashit( home_url() );
+
+    return str_starts_with( $url, $home ) ? substr( $url, strlen( $home ) ) : $url;
+}
+
+/**
+ * Обратно: путь из кэша — в полный адрес на текущем адресе сайта.
+ *
+ * @param string $path Путь от promix_link_path.
+ * @return string
+ */
+function promix_link_url( string $path ): string {
+    return str_starts_with( $path, '/' ) ? home_url( $path ) : $path;
+}
+
+/**
  * Адрес каталога или его раздела.
  *
  * Карта «название раздела → ссылка» лежит в транзиенте: get_term_by('name')
  * не кэшируется, а подвал спрашивает шесть разделов на каждой странице —
  * это было 12 запросов к базе на любой странице сайта. Сбрасывается,
  * когда разделы меняют (см. promix_catalog_links_flush).
+ *
+ * В транзиенте лежат пути без домена: сайт открывают и по своему адресу,
+ * и через Live Link Local, и полный адрес из кэша уводил бы на чужой хост.
  *
  * @param string $category Название или слаг раздела; пустая строка — весь каталог.
  * @return string
@@ -36,30 +61,32 @@ function promix_catalog_url( string $category = '' ): string {
     }
 
     if ( null === $links ) {
-        $links = get_transient( 'promix_catalog_links' );
+        $links = get_transient( 'promix_catalog_paths' );
         $links = is_array( $links ) ? $links : array();
     }
 
     if ( isset( $links[ $category ] ) ) {
-        return $links[ $category ];
+        return promix_link_url( $links[ $category ] );
     }
 
     $term = get_term_by( 'name', $category, 'product_cat' ) ?: get_term_by( 'slug', $category, 'product_cat' );
     $link = $term instanceof WP_Term ? get_term_link( $term ) : null;
 
-    $links[ $category ] = $link && ! is_wp_error( $link ) ? $link : add_query_arg( 'cat', rawurlencode( $category ), $url );
+    $link = $link && ! is_wp_error( $link ) ? $link : add_query_arg( 'cat', rawurlencode( $category ), $url );
 
-    set_transient( 'promix_catalog_links', $links, DAY_IN_SECONDS );
+    $links[ $category ] = promix_link_path( $link );
 
-    return $links[ $category ];
+    set_transient( 'promix_catalog_paths', $links, DAY_IN_SECONDS );
+
+    return $link;
 }
 
 /**
  * Разделы или адреса поменяли — карта ссылок и счётчик товаров устарели.
  */
 function promix_catalog_links_flush(): void {
-    delete_transient( 'promix_catalog_links' );
-    delete_transient( 'promix_brand_links' );
+    delete_transient( 'promix_catalog_paths' );
+    delete_transient( 'promix_brand_paths' );
 }
 add_action( 'created_product_cat', 'promix_catalog_links_flush' );
 add_action( 'edited_product_cat', 'promix_catalog_links_flush' );
@@ -84,7 +111,7 @@ function promix_brand_url( string $name ): string {
     static $links = null;
 
     if ( null === $links ) {
-        $links = get_transient( 'promix_brand_links' );
+        $links = get_transient( 'promix_brand_paths' );
     }
 
     if ( ! is_array( $links ) ) {
@@ -102,16 +129,16 @@ function promix_brand_url( string $name ): string {
             $link = get_term_link( $term );
 
             if ( ! is_wp_error( $link ) ) {
-                $links[ mb_strtolower( $term->name ) ] = $link;
+                $links[ mb_strtolower( $term->name ) ] = promix_link_path( $link );
             }
         }
 
-        set_transient( 'promix_brand_links', $links, DAY_IN_SECONDS );
+        set_transient( 'promix_brand_paths', $links, DAY_IN_SECONDS );
     }
 
     $key = mb_strtolower( trim( $name ) );
 
-    return isset( $links[ $key ] ) ? $links[ $key ] : '';
+    return isset( $links[ $key ] ) ? promix_link_url( $links[ $key ] ) : '';
 }
 
 /**
