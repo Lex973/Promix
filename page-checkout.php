@@ -220,18 +220,7 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
                 <aside class="checkout__summary">
                     <p class="cart__summary-title"><?php esc_html_e( 'Ваш заказ', 'promix' ); ?></p>
 
-                    <ul class="checkout__items">
-                        <?php foreach ( $cart->get_cart() as $item ) : ?>
-                            <?php $product = $item['data']; ?>
-                            <?php if ( $product instanceof WC_Product ) : ?>
-                                <li class="checkout__item">
-                                    <span class="checkout__item-name"><?php echo esc_html( $product->get_name() ); ?></span>
-                                    <span class="checkout__item-qty">× <?php echo esc_html( (string) $item['quantity'] ); ?></span>
-                                    <span class="checkout__item-sum"><?php echo esc_html( promix_price( (float) $item['line_subtotal'] ) ); ?></span>
-                                </li>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </ul>
+                    <?php get_template_part( 'template-parts/cart/summary-items' ); ?>
 
                     <dl class="cart__rows">
                         <div class="cart__row cart__row--total">

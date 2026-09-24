@@ -93,6 +93,8 @@ $count = (int) $cart->get_cart_contents_count();
         <aside class="cart__summary">
             <p class="cart__summary-title"><?php esc_html_e( 'Ваш заказ', 'promix' ); ?></p>
 
+            <?php get_template_part( 'template-parts/cart/summary-items', null, array( 'limit' => 5 ) ); ?>
+
             <dl class="cart__rows">
                 <div class="cart__row">
                     <dt><?php esc_html_e( 'Товаров', 'promix' ); ?></dt>

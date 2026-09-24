@@ -385,6 +385,20 @@
   line-height: 1.4;
 }
 
+/* Названия из 1С бывают на три строки — в итоге хватает двух */
+.checkout__item-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.checkout__item--more {
+  display: block;
+  color: var(--color-muted);
+}
+
 .checkout__item-qty {
   color: var(--color-muted);
   white-space: nowrap;
