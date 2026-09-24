@@ -401,13 +401,7 @@
   gap: 1px;
 }
 
-/* Длинные списки подрезаны, пока не нажали «Показать все»:
-   видно PROMIX_FILTER_SHORT = 6 пунктов (inc/catalog.php) */
-.filter__list--short .check:nth-child(n + 7) {
-  display: none;
-}
-
-.filter__list--short.is-open .check {
+.check {
   display: flex;
 }
 
@@ -476,18 +470,6 @@
   flex-shrink: 0;
   font-size: 13px;
   color: var(--color-border-strong);
-}
-
-.filter__more {
-  margin-top: 14px;
-  font-size: 14px;
-  font-weight: var(--fw-medium);
-  color: var(--color-brand);
-  cursor: pointer;
-}
-
-.filter__more:hover {
-  color: var(--color-brand-dark);
 }
 
 .filter__price {

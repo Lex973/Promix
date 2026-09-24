@@ -38,10 +38,9 @@
 
   /* ===== Адрес из состояния формы =====
      Один раздел — его собственный адрес вида /catalog/instrument/kisti/,
-     один бренд — /brand/storch/, несколько — общий каталог с параметрами. */
+     несколько — общий каталог с параметрами. */
   function buildUrl() {
     var cats = checkedInputs('[data-filter-cat]');
-    var brands = checkedInputs('[data-filter-brand]');
     var base = shopUrl;
     var params = new URLSearchParams();
 
@@ -49,13 +48,6 @@
       base = cats[0].getAttribute('data-url');
     } else if (cats.length > 1) {
       params.set('cat', values(cats).join(','));
-    }
-
-    /* Один бренд без раздела — его собственная страница /brand/storch/ */
-    if (!cats.length && brands.length === 1 && brands[0].getAttribute('data-url')) {
-      base = brands[0].getAttribute('data-url');
-    } else if (brands.length) {
-      params.set('brand', values(brands).join(','));
     }
 
     var q = (search && search.value || '').trim();
@@ -213,7 +205,7 @@
   }
 
   section.addEventListener('change', function (event) {
-    if (event.target.matches('[data-filter-cat], [data-filter-brand]')) {
+    if (event.target.matches('[data-filter-cat]')) {
       pending();
     }
   });
@@ -268,7 +260,7 @@
     reset.addEventListener('click', function (event) {
       event.preventDefault();
 
-      Array.prototype.forEach.call(section.querySelectorAll('[data-filter-cat], [data-filter-brand]'), function (el) {
+      Array.prototype.forEach.call(section.querySelectorAll('[data-filter-cat]'), function (el) {
         el.checked = false;
       });
 
@@ -456,23 +448,6 @@
       }
     });
   }
-
-  /* ===== Списки, подрезанные до нескольких пунктов ===== */
-
-  Array.prototype.forEach.call(section.querySelectorAll('[data-filter-more]'), function (btn) {
-    var list = btn.parentNode.querySelector('[data-filter-more-list]');
-
-    if (!list) {
-      return;
-    }
-
-    btn.addEventListener('click', function () {
-      var open = list.classList.toggle('is-open');
-
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.textContent = btn.getAttribute(open ? 'data-label-open' : 'data-label-closed') || '';
-    });
-  });
 
   /* ===== Сеткой или списком =====
      Выбор живёт в браузере: кто смотрит списком, тот и в следующий раз

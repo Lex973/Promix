@@ -16,7 +16,6 @@ get_header();
 
 $state      = promix_catalog_state();
 $categories = promix_catalog_tree( $state['cats'] );
-$brands     = promix_catalog_terms( 'product_brand', $state['brands'] );
 $shop_url   = promix_catalog_url();
 $found      = (int) $GLOBALS['wp_query']->found_posts;
 $next_url   = $GLOBALS['wp_query']->max_num_pages > max( 1, (int) get_query_var( 'paged' ) ) ? get_next_posts_page_link() : '';
@@ -137,37 +136,6 @@ $lead     = $term && $term->description
                                 </label>
                             <?php endforeach; ?>
                         </div>
-                    </fieldset>
-
-                    <?php
-                    // Отмеченный бренд в скрытой части списка — список открыт сразу.
-                    $hidden_checked = false;
-
-                    foreach ( array_slice( $brands, PROMIX_FILTER_SHORT ) as $term ) {
-                        $hidden_checked = $hidden_checked || $term['checked'];
-                    }
-                    ?>
-                    <fieldset class="filter">
-                        <legend class="filter__title"><?php esc_html_e( 'Бренд', 'promix' ); ?></legend>
-                        <div class="filter__list filter__list--short<?php echo $hidden_checked ? ' is-open' : ''; ?>" data-filter-more-list>
-                            <?php foreach ( $brands as $term ) : ?>
-                                <label class="check">
-                                    <input type="checkbox" name="brand[]"
-                                           value="<?php echo esc_attr( $term['slug'] ); ?>"
-                                           data-filter-brand
-                                           <?php echo $term['url'] ? 'data-url="' . esc_url( $term['url'] ) . '"' : ''; ?>
-                                           <?php checked( $term['checked'] ); ?>>
-                                    <span class="check__text"><?php echo esc_html( $term['name'] ); ?></span>
-                                    <span class="check__count"><?php echo esc_html( (string) $term['count'] ); ?></span>
-                                </label>
-                            <?php endforeach; ?>
-                        </div>
-                        <?php if ( count( $brands ) > PROMIX_FILTER_SHORT ) : ?>
-                            <button class="filter__more" type="button" data-filter-more aria-expanded="<?php echo $hidden_checked ? 'true' : 'false'; ?>"
-                                    data-label-open="<?php esc_attr_e( 'Свернуть', 'promix' ); ?>" data-label-closed="<?php esc_attr_e( 'Показать все', 'promix' ); ?>">
-                                <?php echo $hidden_checked ? esc_html__( 'Свернуть', 'promix' ) : esc_html__( 'Показать все', 'promix' ); ?>
-                            </button>
-                        <?php endif; ?>
                     </fieldset>
 
                     <fieldset class="filter">

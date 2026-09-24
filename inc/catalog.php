@@ -4,7 +4,7 @@
  *
  * Страница каталога — это «магазин» WooCommerce, разделы — архивы
  * product_cat. Товары выбирает главный запрос WordPress, а здесь к нему
- * добавляются фильтры из адреса: раздел, бренд, поиск. Цена и сортировка
+ * добавляются фильтры из адреса: раздел и поиск. Цена и сортировка
  * идут через штатные параметры Woo (min_price, max_price, orderby) —
  * их плагин обрабатывает сам.
  *
@@ -14,9 +14,6 @@
 defined( 'ABSPATH' ) || exit;
 
 const PROMIX_CATALOG_PER_PAGE = 24;
-
-// Сколько пунктов фильтра видно до «Показать все» (то же число в catalog.css: nth-child(n + 7)).
-const PROMIX_FILTER_SHORT = 6;
 
 /**
  * Адрес каталога или его раздела.
@@ -213,7 +210,7 @@ function promix_catalog_slugs( $raw ): array {
 /**
  * Что выбрано в фильтрах сейчас.
  *
- * @return array{cats: string[], brands: string[], q: string, min: string, max: string, orderby: string}
+ * @return array{cats: string[], q: string, min: string, max: string, orderby: string}
  */
 function promix_catalog_state(): array {
     static $state = null;
@@ -234,22 +231,10 @@ function promix_catalog_state(): array {
         }
     }
 
-    $brands = promix_catalog_slugs( $_GET['brand'] ?? '' );
-
-    // На странице бренда он и есть выбранный фильтр.
-    if ( is_tax( 'product_brand' ) ) {
-        $term = get_queried_object();
-
-        if ( $term instanceof WP_Term ) {
-            $brands = array( $term->slug );
-        }
-    }
-
     $orderby = sanitize_key( (string) wp_unslash( $_GET['orderby'] ?? '' ) );
 
     $state = array(
         'cats'    => $cats,
-        'brands'  => $brands,
         'q'       => trim( sanitize_text_field( (string) wp_unslash( $_GET['q'] ?? '' ) ) ),
         'min'     => isset( $_GET['min_price'] ) && '' !== $_GET['min_price'] ? (string) absint( $_GET['min_price'] ) : '',
         'max'     => isset( $_GET['max_price'] ) && '' !== $_GET['max_price'] ? (string) absint( $_GET['max_price'] ) : '',
@@ -264,7 +249,7 @@ function promix_catalog_state(): array {
  * Фильтры из адреса — в главный запрос товаров.
  *
  * Работает после WC_Query::product_query (приоритет 10): тот уже собрал
- * tax_query по видимости и цене, сюда добавляются раздел, бренд и поиск.
+ * tax_query по видимости и цене, сюда добавляются раздел и поиск.
  *
  * @param WP_Query $query Запрос.
  */
@@ -282,14 +267,6 @@ function promix_catalog_query( WP_Query $query ): void {
             'taxonomy' => 'product_cat',
             'field'    => 'slug',
             'terms'    => $state['cats'],
-        );
-    }
-
-    if ( $state['brands'] && ! is_tax( 'product_brand' ) ) {
-        $tax_query[] = array(
-            'taxonomy' => 'product_brand',
-            'field'    => 'slug',
-            'terms'    => $state['brands'],
         );
     }
 
@@ -344,44 +321,6 @@ function promix_catalog_per_page(): int {
     return PROMIX_CATALOG_PER_PAGE;
 }
 add_filter( 'loop_shop_per_page', 'promix_catalog_per_page' );
-
-/**
- * Пункты фильтра по таксономии: слаг, название, число товаров, отмечен ли.
- *
- * @param string   $taxonomy Таксономия.
- * @param string[] $checked  Отмеченные слаги.
- * @return array<int, array{slug: string, name: string, count: int, url: string, checked: bool}>
- */
-function promix_catalog_terms( string $taxonomy, array $checked ): array {
-    $terms = get_terms(
-        array(
-            'taxonomy'   => $taxonomy,
-            'hide_empty' => true,
-            'orderby'    => 'count',
-            'order'      => 'DESC',
-        )
-    );
-
-    if ( is_wp_error( $terms ) ) {
-        return array();
-    }
-
-    $items = array();
-
-    foreach ( $terms as $term ) {
-        $link = get_term_link( $term );
-
-        $items[] = array(
-            'slug'    => $term->slug,
-            'name'    => $term->name,
-            'count'   => (int) $term->count,
-            'url'     => is_wp_error( $link ) ? '' : $link,
-            'checked' => in_array( $term->slug, $checked, true ),
-        );
-    }
-
-    return $items;
-}
 
 /**
  * Пункты фильтра по разделам каталога — деревом.
