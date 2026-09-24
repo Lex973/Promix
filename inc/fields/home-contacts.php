@@ -30,5 +30,34 @@ promix_front_container( __( 'Где нас найти', 'promix' ) )
                     . esc_html__( 'Телефон, адрес, режим работы и ссылки на карты меняются в разделе «Контакты PROMIX» в боковом меню — они одни на всю страницу.', 'promix' )
                     . '</p>'
                 ),
+
+            Field::make( 'separator', 'promix_contacts_scheme_sep', __( 'Схема проезда', 'promix' ) ),
+
+            Field::make( 'checkbox', 'promix_contacts_scheme_off', __( 'Скрыть схему', 'promix' ) )
+                ->set_option_value( 'yes' ),
+
+            Field::make( 'image', 'promix_contacts_scheme_image', __( 'Картинка схемы', 'promix' ) )
+                ->set_value_type( 'id' )
+                ->set_help_text( __( 'Пусто — схема из темы. Показывается во всю ширину, лучше от 1200 px.', 'promix' ) )
+                ->set_width( 30 )
+                ->set_conditional_logic(
+                    array(
+                        array(
+                            'field' => 'promix_contacts_scheme_off',
+                            'value' => false,
+                        ),
+                    )
+                ),
+
+            Field::make( 'text', 'promix_contacts_scheme_title', __( 'Заголовок схемы', 'promix' ) )
+                ->set_width( 70 )
+                ->set_conditional_logic(
+                    array(
+                        array(
+                            'field' => 'promix_contacts_scheme_off',
+                            'value' => false,
+                        ),
+                    )
+                ),
         )
     );

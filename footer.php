@@ -45,6 +45,9 @@ $promix_policy = get_privacy_policy_url();
                 <h2 class="footer__title"><?php esc_html_e( 'Контакты', 'promix' ); ?></h2>
                 <ul class="footer__list">
                     <li><a class="footer__phone" href="tel:<?php echo esc_attr( promix_tel_href() ); ?>"><?php echo esc_html( $promix['phone'] ); ?></a></li>
+                    <?php if ( $promix['phone_extra'] ) : ?>
+                        <li><a class="footer__phone" href="tel:<?php echo esc_attr( promix_tel_href( $promix['phone_extra'] ) ); ?>"><?php echo esc_html( $promix['phone_extra'] ); ?></a></li>
+                    <?php endif; ?>
                     <li><?php echo esc_html( $promix['address'] ); ?></li>
                     <li><?php echo esc_html( $promix['hours'] ); ?><br><?php echo esc_html( $promix['hours_extra'] ); ?></li>
                 </ul>

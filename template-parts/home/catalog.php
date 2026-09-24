@@ -12,41 +12,31 @@ $title  = promix_field( 'catalog_title', "Всё для полного\nцикл
 $lead   = promix_field( 'catalog_lead', 'Материалы, инструмент и оборудование для всех этапов работы — от подготовки поверхности до финишного покрытия. Подскажем, что подойдёт под ваш объект.' );
 
 /*
- * Шесть самых больших разделов прайса. Названия совпадают с разделами
- * каталога, ссылка ведёт на страницу раздела.
+ * Четыре раздела каталога из структуры заказчика. Названия совпадают
+ * с разделами в WooCommerce, ссылка ведёт на страницу раздела.
  */
 $items = promix_field(
     'catalog_items',
     array(
         array(
-            'cat_title' => 'Шпатели и лезвия',
-            'cat_text'  => 'Японские и фасадные шпатели, сменные лезвия, кельмы. STORCH, OLEJNIK, GOLDBLATT',
-            'cat_url'   => promix_catalog_url( 'Шпатели и лезвия' ),
+            'cat_title' => 'Оборудование',
+            'cat_text'  => 'Краскораспылители, шлифмашины, пылесосы и освещение. TECMASTER, Wagner, FLEX, MIRKA',
+            'cat_url'   => promix_catalog_url( 'Оборудование' ),
         ),
         array(
-            'cat_title' => 'Ленты и укрывные материалы',
-            'cat_text'  => 'Малярные ленты, плёнка, флис и укрывная бумага для защиты помещения',
-            'cat_url'   => promix_catalog_url( 'Ленты и укрывные материалы' ),
+            'cat_title' => 'Материалы',
+            'cat_text'  => 'Шпатлёвки, грунты, краски и клей, стеклохолст и флизелин. PROMIX, OTTINGER, АКСУ',
+            'cat_url'   => promix_catalog_url( 'Материалы' ),
         ),
         array(
-            'cat_title' => 'Валики и ручки',
-            'cat_text'  => 'Валики под любую фактуру, бюгели, телескопические ручки и удлинители',
-            'cat_url'   => promix_catalog_url( 'Валики и ручки' ),
+            'cat_title' => 'Инструмент',
+            'cat_text'  => 'Шпатели и правила, валики, кисти, кельмы, лотки и шлифовальный инструмент',
+            'cat_url'   => promix_catalog_url( 'Инструмент' ),
         ),
         array(
-            'cat_title' => 'Окрасочное оборудование',
-            'cat_text'  => 'Краскораспылители, сопла, фильтры и запчасти. TECMASTER, Graco, Wagner',
-            'cat_url'   => promix_catalog_url( 'Окрасочное оборудование' ),
-        ),
-        array(
-            'cat_title' => 'Шлифование и абразивы',
-            'cat_text'  => 'Круги, сетки и шлифблоки, зерно от P24 до P800. SUNMIGHT, RoxelPro, DLT',
-            'cat_url'   => promix_catalog_url( 'Шлифование и абразивы' ),
-        ),
-        array(
-            'cat_title' => 'Краски, грунты, лаки',
-            'cat_text'  => 'Интерьерные и фасадные краски, грунты и лазури. Ottinger, PROMIX',
-            'cat_url'   => promix_catalog_url( 'Краски, грунты, лаки' ),
+            'cat_title' => 'Расходные материалы',
+            'cat_text'  => 'Малярные ленты, укрывные плёнки и бумага, абразивы и средства защиты',
+            'cat_url'   => promix_catalog_url( 'Расходные материалы' ),
         ),
     )
 );
@@ -70,7 +60,7 @@ $wide_url   = promix_field( 'catalog_wide_url', promix_catalog_url() );
                 <p class="section__lead"><?php echo esc_html( $lead ); ?></p>
             </div>
 
-            <div class="cats">
+            <div class="cats<?php echo 0 === count( $items ) % 4 ? ' cats--rows' : ''; ?>">
             <?php foreach ( $items as $index => $item ) : ?>
                 <a class="cat" href="<?php echo esc_url( $item['cat_url'] ? $item['cat_url'] : '#' ); ?>">
                     <span class="cat__num"><?php echo esc_html( sprintf( '%02d', $index + 1 ) ); ?></span>

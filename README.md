@@ -32,7 +32,9 @@
     assets/fonts/          Onest и Unbounded, переменные woff2, кириллица и латиница
     assets/icons/          иконки Lucide (ISC), в разметку идут инлайном через inc/icons.php
     assets/img/            фон первого экрана в трёх размерах, логотип, og-картинка,
-                           office/ — фото офиса (8.png — исходник фона)
+                           cert*.webp — образец сертификата, scheme*.webp — схема
+                           проезда (исходники в docs/client), office/ — фото офиса
+                           (8.png — исходник фона)
     vendor/                Carbon Fields через composer, коммитится
     _content/              исходники текстов страниц, которые заводятся в админке
     _tools/                скрипты развёртывания и импорта товаров (см. _tools/README.md)

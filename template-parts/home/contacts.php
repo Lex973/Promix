@@ -13,6 +13,11 @@ $lead   = promix_field( 'contacts_lead', 'Малярный центр в цен�
 
 $c = promix_contacts();
 
+$scheme_hidden = (bool) promix_field( 'contacts_scheme_off', false );
+$scheme_title  = promix_field( 'contacts_scheme_title', 'Схема проезда' );
+$scheme_image  = promix_field( 'contacts_scheme_image' );
+$scheme_alt    = 'Схема проезда к PROMIX: улица Габдуллы Тукая, 91, 1 этаж';
+
 ?>
 <section class="section section--alt contacts" id="contacts">
         <div class="container">
@@ -61,6 +66,11 @@ $c = promix_contacts();
                         <div>
                             <h3 class="contact__title"><?php esc_html_e( 'Телефон', 'promix' ); ?></h3>
                             <p class="contact__value"><a href="tel:<?php echo esc_attr( promix_tel_href() ); ?>"><?php echo esc_html( $c['phone'] ); ?></a></p>
+                            <p class="contact__extra"><?php echo esc_html( sprintf( /* translators: %s — часы работы. */ __( 'Основной, %s', 'promix' ), $c['hours'] ) ); ?></p>
+                            <?php if ( $c['phone_extra'] ) : ?>
+                                <p class="contact__value contact__value--second"><a href="tel:<?php echo esc_attr( promix_tel_href( $c['phone_extra'] ) ); ?>"><?php echo esc_html( $c['phone_extra'] ); ?></a></p>
+                                <p class="contact__extra"><?php esc_html_e( 'Дополнительный', 'promix' ); ?></p>
+                            <?php endif; ?>
                             <?php
                             get_template_part(
                                 'template-parts/btn-max',
@@ -105,6 +115,29 @@ $c = promix_contacts();
                 <?php endif; ?>
 
             </div>
+
+            <?php if ( ! $scheme_hidden ) : ?>
+                <div class="scheme">
+                    <h3 class="scheme__title"><?php echo esc_html( $scheme_title ); ?></h3>
+                    <?php if ( $scheme_image ) : ?>
+                        <?php
+                        echo wp_get_attachment_image(
+                            (int) $scheme_image,
+                            'full',
+                            false,
+                            array(
+                                'class'   => 'scheme__img',
+                                'alt'     => $scheme_alt,
+                                'loading' => 'lazy',
+                            )
+                        );
+                        ?>
+                    <?php else : ?>
+                        <img class="scheme__img" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/scheme.webp' ) ); ?>"
+                             alt="<?php echo esc_attr( $scheme_alt ); ?>" loading="lazy" width="1254" height="1254">
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
 
         </div>
     </section>

@@ -24,8 +24,11 @@ $facts = promix_field(
 );
 
 $seminars_hidden = (bool) promix_field( 'about_seminars_off', false );
-$seminars_title  = promix_field( 'about_seminars_title', 'Мы делаем пространство, в которое мастеру удобно заезжать снова' );
-$seminars_text   = promix_field( 'about_seminars_text', 'Проводим семинары и мастер-классы в учебном классе, обучаем работе с материалами и оборудованием, помогаем в подборе и комплектации объектов.' );
+$seminars_title  = promix_field( 'about_seminars_title', 'Пространство, в которое мастеру удобно заезжать снова' );
+$seminars_text   = promix_field( 'about_seminars_text', 'Единственные в Казани проводим семинары и мастер-классы в учебном классе: обучаем работе с материалами и оборудованием, помогаем в подборе и комплектации объектов.' );
+$seminars_cert   = promix_field( 'about_seminars_cert', 'Каждый участник семинара или мастер-класса получает сертификат PROMIX.' );
+$cert_image      = promix_field( 'about_seminars_cert_image' );
+$cert_alt        = 'Сертификат PROMIX о прохождении практикума «Малярные работы»';
 
 /* Рисунки инструментов — фон полосы, порядок задаёт их расстановку по краям. */
 $doodles = array( 'paint-bucket', 'paint-roller', 'brush', 'palette', 'spray-can', 'ruler' );
@@ -89,8 +92,41 @@ $doodles = array( 'paint-bucket', 'paint-roller', 'brush', 'palette', 'spray-can
                 </div>
 
                 <div class="container seminars__inner">
-                    <h3 class="seminars__title"><?php echo promix_nl2br( $seminars_title ); ?></h3>
-                    <p class="seminars__text"><?php echo esc_html( $seminars_text ); ?></p>
+                    <div class="seminars__copy">
+                        <h3 class="seminars__title"><?php echo promix_nl2br( $seminars_title ); ?></h3>
+                        <p class="seminars__text"><?php echo esc_html( $seminars_text ); ?></p>
+                        <?php if ( $seminars_cert ) : ?>
+                            <p class="seminars__cert">
+                                <span class="seminars__cert-icon" aria-hidden="true">
+                                    <?php promix_the_icon( 'award' ); ?>
+                                </span>
+                                <?php echo esc_html( $seminars_cert ); ?>
+                            </p>
+                        <?php endif; ?>
+                    </div>
+
+                    <figure class="seminars__figure">
+                        <?php if ( $cert_image ) : ?>
+                            <?php
+                            echo wp_get_attachment_image(
+                                (int) $cert_image,
+                                'large',
+                                false,
+                                array(
+                                    'class'   => 'seminars__photo',
+                                    'alt'     => $cert_alt,
+                                    'loading' => 'lazy',
+                                )
+                            );
+                            ?>
+                        <?php else : ?>
+                            <img class="seminars__photo" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/cert-800.webp' ) ); ?>"
+                                 srcset="<?php echo esc_url( get_theme_file_uri( 'assets/img/cert-800.webp' ) ); ?> 800w, <?php echo esc_url( get_theme_file_uri( 'assets/img/cert.webp' ) ); ?> 1600w"
+                                 sizes="(max-width: 980px) 100vw, 40vw"
+                                 alt="<?php echo esc_attr( $cert_alt ); ?>" loading="lazy" width="800" height="566">
+                        <?php endif; ?>
+                        <figcaption class="seminars__caption"><?php esc_html_e( 'Сертификат участника практикума', 'promix' ); ?></figcaption>
+                    </figure>
                 </div>
             </div>
         <?php endif; ?>

@@ -62,6 +62,16 @@ while ( have_posts() ) :
             <?php
             $crumbs = array( __( 'Каталог', 'promix' ) => $shop_url );
 
+            // Разделы двухуровневые: перед подразделом показываем его раздел.
+            if ( $category && $category->parent ) {
+                $parent      = get_term( $category->parent, 'product_cat' );
+                $parent_link = $parent instanceof WP_Term ? get_term_link( $parent ) : null;
+
+                if ( $parent instanceof WP_Term && ! is_wp_error( $parent_link ) ) {
+                    $crumbs[ $parent->name ] = $parent_link;
+                }
+            }
+
             if ( $category && $cat_link ) {
                 $crumbs[ $category->name ] = $cat_link;
             }
@@ -146,7 +156,7 @@ while ( have_posts() ) :
                         <p class="single__help-title"><?php esc_html_e( 'Вопрос по товару?', 'promix' ); ?></p>
                         <p class="single__help-text"><?php esc_html_e( 'Позвоните или напишите — подскажем по применению и совместимости, подберём аналог, если этого нет на складе.', 'promix' ); ?></p>
                         <div class="single__help-row">
-                            <a class="single__help-phone" href="<?php echo esc_url( promix_tel_href() ); ?>"><?php echo esc_html( $contacts['phone'] ); ?></a>
+                            <a class="single__help-phone" href="tel:<?php echo esc_attr( promix_tel_href() ); ?>"><?php echo esc_html( $contacts['phone'] ); ?></a>
                             <?php get_template_part( 'template-parts/btn-max', null, array( 'class' => 'single__help-max', 'label' => '', 'aria' => __( 'Написать в MAX', 'promix' ) ) ); ?>
                         </div>
                         <p class="single__help-hours"><?php echo esc_html( promix_hours_full() ); ?></p>

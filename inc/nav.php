@@ -41,14 +41,12 @@ function promix_default_menu( string $location ): array {
             $home . '#reviews'  => __( 'Отзывы', 'promix' ),
             $home . '#contacts' => __( 'Контакты', 'promix' ),
         ),
-        // Шесть самых больших разделов прайса — адреса разделов каталога.
+        // Четыре раздела каталога — как в структуре от заказчика.
         'footer_catalog' => array(
-            promix_catalog_url( 'Шпатели и лезвия' )           => __( 'Шпатели и лезвия', 'promix' ),
-            promix_catalog_url( 'Ленты и укрывные материалы' ) => __( 'Ленты и укрывные материалы', 'promix' ),
-            promix_catalog_url( 'Валики и ручки' )             => __( 'Валики и ручки', 'promix' ),
-            promix_catalog_url( 'Окрасочное оборудование' )    => __( 'Окрасочное оборудование', 'promix' ),
-            promix_catalog_url( 'Шлифование и абразивы' )      => __( 'Шлифование и абразивы', 'promix' ),
-            promix_catalog_url( 'Краски, грунты, лаки' )       => __( 'Краски, грунты, лаки', 'promix' ),
+            promix_catalog_url( 'Оборудование' )        => __( 'Оборудование', 'promix' ),
+            promix_catalog_url( 'Материалы' )           => __( 'Материалы', 'promix' ),
+            promix_catalog_url( 'Инструмент' )          => __( 'Инструмент', 'promix' ),
+            promix_catalog_url( 'Расходные материалы' ) => __( 'Расходные материалы', 'promix' ),
         ),
     );
 

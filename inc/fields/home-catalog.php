@@ -39,7 +39,7 @@ promix_front_container( __( 'Каталог', 'promix' ) )
                             ->set_width( 40 ),
 
                         Field::make( 'text', 'cat_url', __( 'Ссылка', 'promix' ) )
-                            ->set_help_text( __( 'Адрес раздела каталога, например /catalog/valiki-i-ruchki/', 'promix' ) )
+                            ->set_help_text( __( 'Адрес раздела каталога, например /catalog/instrument/kisti/', 'promix' ) )
                             ->set_width( 60 ),
 
                         Field::make( 'textarea', 'cat_text', __( 'Описание', 'promix' ) )

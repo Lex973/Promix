@@ -18,8 +18,12 @@ Container::make( 'theme_options', __( 'Контакты PROMIX', 'promix' ) )
     ->set_icon( 'dashicons-store' )
     ->add_fields(
         array(
-            Field::make( 'text', 'promix_phone', __( 'Телефон', 'promix' ) )
-                ->set_help_text( __( 'Как показывать на сайте: +7 (953) 484-00-00. Ссылка «позвонить» соберётся сама.', 'promix' ) )
+            Field::make( 'text', 'promix_phone', __( 'Основной телефон', 'promix' ) )
+                ->set_help_text( __( 'Как показывать на сайте: +7 (952) 041-00-93. Ссылка «позвонить» соберётся сама.', 'promix' ) )
+                ->set_width( 50 ),
+
+            Field::make( 'text', 'promix_phone_extra', __( 'Дополнительный телефон', 'promix' ) )
+                ->set_help_text( __( 'Например: +7 (953) 484-99-88. Показывается в контактах и подвале; пусто — только основной.', 'promix' ) )
                 ->set_width( 50 ),
 
             Field::make( 'text', 'promix_address', __( 'Адрес магазина', 'promix' ) )

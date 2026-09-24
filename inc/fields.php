@@ -313,7 +313,8 @@ function promix_contacts(): array {
     }
 
     $contacts = array(
-        'phone'       => promix_option( 'phone', '+7 (953) 484-00-00' ),
+        'phone'         => promix_option( 'phone', '+7 (952) 041-00-93' ),
+        'phone_extra'   => promix_option( 'phone_extra', '+7 (953) 484-99-88' ),
         'address'       => promix_option( 'address', 'Казань, ул. Габдуллы Тукая, 91к1' ),
         'hours'         => promix_option( 'hours', 'Пн–Пт 9:00–18:00' ),
         'hours_extra'   => promix_option( 'hours_extra', 'Сб 9:00–14:00 · Вс — выходной' ),
@@ -384,10 +385,11 @@ function promix_legal_line(): string {
  * Отдельное поле для этого держать не нужно — его забывали править вместе
  * с основным, и кнопка звонила по старому номеру.
  *
- * @return string Номер вида +79534840000 или пустая строка.
+ * @param string|null $phone Номер как на сайте; по умолчанию — основной.
+ * @return string Номер вида +79520410093 или пустая строка.
  */
-function promix_tel_href(): string {
-    $digits = (string) preg_replace( '/\D/', '', promix_contacts()['phone'] );
+function promix_tel_href( ?string $phone = null ): string {
+    $digits = (string) preg_replace( '/\D/', '', $phone ?? promix_contacts()['phone'] );
 
     if ( 11 === strlen( $digits ) && '8' === $digits[0] ) {
         $digits = '7' . substr( $digits, 1 );

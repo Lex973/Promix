@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 get_header();
 
 $state      = promix_catalog_state();
-$categories = promix_catalog_terms( 'product_cat', $state['cats'] );
+$categories = promix_catalog_tree( $state['cats'] );
 $brands     = promix_catalog_terms( 'product_brand', $state['brands'] );
 $shop_url   = promix_catalog_url();
 $found      = (int) $GLOBALS['wp_query']->found_posts;
@@ -52,18 +52,23 @@ $lead     = $term && $term->description
 
         <div class="catalog__head" data-catalog-head>
             <?php
-            get_template_part(
-                'template-parts/crumbs',
-                null,
-                array(
-                    'items' => $term
-                        ? array(
-                            __( 'Каталог', 'promix' ) => $shop_url,
-                            $term->name               => '',
-                        )
-                        : array( __( 'Каталог', 'promix' ) => '' ),
-                )
-            );
+            $crumbs = array( __( 'Каталог', 'promix' ) => $term ? $shop_url : '' );
+
+            // Подраздел: между каталогом и им самим — его раздел.
+            if ( $category && $category->parent ) {
+                $parent = get_term( $category->parent, 'product_cat' );
+                $link   = $parent instanceof WP_Term ? get_term_link( $parent ) : null;
+
+                if ( $parent instanceof WP_Term ) {
+                    $crumbs[ $parent->name ] = is_wp_error( $link ) ? '' : $link;
+                }
+            }
+
+            if ( $term ) {
+                $crumbs[ $term->name ] = '';
+            }
+
+            get_template_part( 'template-parts/crumbs', null, array( 'items' => $crumbs ) );
             ?>
             <h1 class="section__title"><?php echo esc_html( $title ); ?></h1>
             <p class="section__lead"><?php echo esc_html( $lead ); ?></p>
@@ -117,43 +122,53 @@ $lead     = $term && $term->description
                         </a>
                     </div>
 
+                    <fieldset class="filter">
+                        <legend class="filter__title"><?php esc_html_e( 'Раздел', 'promix' ); ?></legend>
+                        <div class="filter__list">
+                            <?php foreach ( $categories as $term ) : ?>
+                                <label class="check<?php echo $term['depth'] ? ' check--child' : ' check--parent'; ?>">
+                                    <input type="checkbox" name="cat[]"
+                                           value="<?php echo esc_attr( $term['slug'] ); ?>"
+                                           data-filter-cat
+                                           <?php echo $term['url'] ? 'data-url="' . esc_url( $term['url'] ) . '"' : ''; ?>
+                                           <?php checked( $term['checked'] ); ?>>
+                                    <span class="check__text"><?php echo esc_html( $term['name'] ); ?></span>
+                                    <span class="check__count"><?php echo esc_html( (string) $term['count'] ); ?></span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </fieldset>
+
                     <?php
-                    $groups = array(
-                        'cat'   => array( __( 'Категория', 'promix' ), $categories ),
-                        'brand' => array( __( 'Бренд', 'promix' ), $brands ),
-                    );
+                    // Отмеченный бренд в скрытой части списка — список открыт сразу.
+                    $hidden_checked = false;
 
-                    foreach ( $groups as $field => list( $legend, $terms ) ) :
-                        // Отмеченный пункт в скрытой части списка — список открыт сразу.
-                        $hidden_checked = false;
-
-                        foreach ( array_slice( $terms, PROMIX_FILTER_SHORT ) as $term ) {
-                            $hidden_checked = $hidden_checked || $term['checked'];
-                        }
-                        ?>
-                        <fieldset class="filter">
-                            <legend class="filter__title"><?php echo esc_html( $legend ); ?></legend>
-                            <div class="filter__list filter__list--short<?php echo $hidden_checked ? ' is-open' : ''; ?>" data-filter-more-list>
-                                <?php foreach ( $terms as $term ) : ?>
-                                    <label class="check">
-                                        <input type="checkbox" name="<?php echo esc_attr( $field ); ?>[]"
-                                               value="<?php echo esc_attr( $term['slug'] ); ?>"
-                                               data-filter-<?php echo esc_attr( $field ); ?>
-                                               <?php echo $term['url'] ? 'data-url="' . esc_url( $term['url'] ) . '"' : ''; ?>
-                                               <?php checked( $term['checked'] ); ?>>
-                                        <span class="check__text"><?php echo esc_html( $term['name'] ); ?></span>
-                                        <span class="check__count"><?php echo esc_html( (string) $term['count'] ); ?></span>
-                                    </label>
-                                <?php endforeach; ?>
-                            </div>
-                            <?php if ( count( $terms ) > PROMIX_FILTER_SHORT ) : ?>
-                                <button class="filter__more" type="button" data-filter-more aria-expanded="<?php echo $hidden_checked ? 'true' : 'false'; ?>"
-                                        data-label-open="<?php esc_attr_e( 'Свернуть', 'promix' ); ?>" data-label-closed="<?php esc_attr_e( 'Показать все', 'promix' ); ?>">
-                                    <?php echo $hidden_checked ? esc_html__( 'Свернуть', 'promix' ) : esc_html__( 'Показать все', 'promix' ); ?>
-                                </button>
-                            <?php endif; ?>
-                        </fieldset>
-                    <?php endforeach; ?>
+                    foreach ( array_slice( $brands, PROMIX_FILTER_SHORT ) as $term ) {
+                        $hidden_checked = $hidden_checked || $term['checked'];
+                    }
+                    ?>
+                    <fieldset class="filter">
+                        <legend class="filter__title"><?php esc_html_e( 'Бренд', 'promix' ); ?></legend>
+                        <div class="filter__list filter__list--short<?php echo $hidden_checked ? ' is-open' : ''; ?>" data-filter-more-list>
+                            <?php foreach ( $brands as $term ) : ?>
+                                <label class="check">
+                                    <input type="checkbox" name="brand[]"
+                                           value="<?php echo esc_attr( $term['slug'] ); ?>"
+                                           data-filter-brand
+                                           <?php echo $term['url'] ? 'data-url="' . esc_url( $term['url'] ) . '"' : ''; ?>
+                                           <?php checked( $term['checked'] ); ?>>
+                                    <span class="check__text"><?php echo esc_html( $term['name'] ); ?></span>
+                                    <span class="check__count"><?php echo esc_html( (string) $term['count'] ); ?></span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php if ( count( $brands ) > PROMIX_FILTER_SHORT ) : ?>
+                            <button class="filter__more" type="button" data-filter-more aria-expanded="<?php echo $hidden_checked ? 'true' : 'false'; ?>"
+                                    data-label-open="<?php esc_attr_e( 'Свернуть', 'promix' ); ?>" data-label-closed="<?php esc_attr_e( 'Показать все', 'promix' ); ?>">
+                                <?php echo $hidden_checked ? esc_html__( 'Свернуть', 'promix' ) : esc_html__( 'Показать все', 'promix' ); ?>
+                            </button>
+                        <?php endif; ?>
+                    </fieldset>
 
                     <fieldset class="filter">
                         <legend class="filter__title"><?php esc_html_e( 'Цена', 'promix' ); ?></legend>

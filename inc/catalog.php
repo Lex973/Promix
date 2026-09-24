@@ -384,6 +384,78 @@ function promix_catalog_terms( string $taxonomy, array $checked ): array {
 }
 
 /**
+ * Пункты фильтра по разделам каталога — деревом.
+ *
+ * Разделы двухуровневые («Инструмент → Кисти»), и плоский список по числу
+ * товаров эту связь теряет. Здесь родители идут в порядке, заданном при
+ * заведении разделов (мета `order`), а подразделы — сразу за своим
+ * родителем, с `depth` для отступа в разметке.
+ *
+ * @param string[] $checked Отмеченные слаги.
+ * @return array<int, array{slug: string, name: string, count: int, url: string, checked: bool, depth: int}>
+ */
+function promix_catalog_tree( array $checked ): array {
+    $terms = get_terms(
+        array(
+            'taxonomy'   => 'product_cat',
+            'hide_empty' => true,
+            'orderby'    => 'name',
+        )
+    );
+
+    if ( is_wp_error( $terms ) ) {
+        return array();
+    }
+
+    $children = array();
+
+    foreach ( $terms as $term ) {
+        $children[ (int) $term->parent ][] = $term;
+    }
+
+    /*
+     * Порядок из меты `order` — её ставит WooCommerce и наш wc-recategorize.php.
+     * Сортируем уже здесь, а не запросом: с meta_key разделы без этой меты
+     * (например, заведённые импортом CSV) выпали бы из фильтра совсем.
+     */
+    foreach ( $children as &$group ) {
+        usort(
+            $group,
+            static function ( WP_Term $a, WP_Term $b ): int {
+                $order = (int) get_term_meta( $a->term_id, 'order', true ) <=> (int) get_term_meta( $b->term_id, 'order', true );
+
+                return $order ?: strcoll( $a->name, $b->name );
+            }
+        );
+    }
+
+    unset( $group );
+
+    $items = array();
+
+    $walk = static function ( int $parent, int $depth ) use ( &$walk, &$items, $children, $checked ): void {
+        foreach ( $children[ $parent ] ?? array() as $term ) {
+            $link = get_term_link( $term );
+
+            $items[] = array(
+                'slug'    => $term->slug,
+                'name'    => $term->name,
+                'count'   => (int) $term->count,
+                'url'     => is_wp_error( $link ) ? '' : $link,
+                'checked' => in_array( $term->slug, $checked, true ),
+                'depth'   => $depth,
+            );
+
+            $walk( (int) $term->term_id, $depth + 1 );
+        }
+    };
+
+    $walk( 0, 0 );
+
+    return $items;
+}
+
+/**
  * Первый раздел товара — по нему подбирается иконка вместо фото.
  *
  * @param WC_Product $product Товар.

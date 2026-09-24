@@ -37,7 +37,7 @@
   }
 
   /* ===== Адрес из состояния формы =====
-     Один раздел — его собственный адрес вида /catalog/valiki-i-ruchki/,
+     Один раздел — его собственный адрес вида /catalog/instrument/kisti/,
      один бренд — /brand/storch/, несколько — общий каталог с параметрами. */
   function buildUrl() {
     var cats = checkedInputs('[data-filter-cat]');

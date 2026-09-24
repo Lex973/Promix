@@ -70,6 +70,31 @@ promix_front_container( __( 'О компании', 'promix' ) )
 
             Field::make( 'textarea', 'promix_about_seminars_text', __( 'Текст полосы', 'promix' ) )
                 ->set_rows( 3 )
+                ->set_help_text( __( 'Набран чуть мельче заголовка. Начинается с «Единственные в Казани…».', 'promix' ) )
+                ->set_conditional_logic(
+                    array(
+                        array(
+                            'field' => 'promix_about_seminars_off',
+                            'value' => false,
+                        ),
+                    )
+                ),
+
+            Field::make( 'textarea', 'promix_about_seminars_cert', __( 'Строка про сертификат', 'promix' ) )
+                ->set_rows( 2 )
+                ->set_help_text( __( 'Идёт с медалью под текстом. Пусто — строка не показывается.', 'promix' ) )
+                ->set_conditional_logic(
+                    array(
+                        array(
+                            'field' => 'promix_about_seminars_off',
+                            'value' => false,
+                        ),
+                    )
+                ),
+
+            Field::make( 'image', 'promix_about_seminars_cert_image', __( 'Картинка сертификата', 'promix' ) )
+                ->set_value_type( 'id' )
+                ->set_help_text( __( 'Пусто — образец из темы. Лучше горизонтальная, от 1200 px по ширине.', 'promix' ) )
                 ->set_conditional_logic(
                     array(
                         array(

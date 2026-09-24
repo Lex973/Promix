@@ -458,6 +458,16 @@
   outline-offset: 2px;
 }
 
+/* Разделы — деревом: родитель выделен, подразделы с отступом под его текст */
+.check--parent .check__text {
+  font-weight: var(--fw-medium);
+  color: var(--color-ink);
+}
+
+.check--child {
+  padding-left: 36px;
+}
+
 .check__text {
   flex: 1 1 auto;
 }
