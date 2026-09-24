@@ -147,7 +147,7 @@ $lead     = $term && $term->description
                                         </div>
                                         <div class="filter__sub" id="<?php echo esc_attr( $sub_id ); ?>" <?php echo $term['open'] ? '' : 'hidden'; ?>>
                                             <?php foreach ( $term['children'] as $child ) : ?>
-                                                <?php get_template_part( 'template-parts/catalog/filter-check', null, array( 'term' => $child, 'class' => 'check--child' ) ); ?>
+                                                <?php get_template_part( 'template-parts/catalog/filter-check', null, array( 'term' => $child, 'class' => 'check--child', 'count' => false ) ); ?>
                                             <?php endforeach; ?>
                                         </div>
                                     </div>

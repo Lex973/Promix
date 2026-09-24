@@ -7,6 +7,8 @@
  * @var array $args {
  *     @type array  $term  Пункт из promix_catalog_tree().
  *     @type string $class Модификатор: check--parent или check--child.
+ *     @type bool   $count Показывать число товаров. У подразделов его нет:
+ *                         два десятка чисел в столбик читались как шум.
  * }
  */
 
@@ -21,5 +23,7 @@ $term = $args['term'];
            <?php echo $term['url'] ? 'data-url="' . esc_url( $term['url'] ) . '"' : ''; ?>
            <?php checked( $term['checked'] ); ?>>
     <span class="check__text"><?php echo esc_html( $term['name'] ); ?></span>
-    <span class="check__count"><?php echo esc_html( (string) $term['count'] ); ?></span>
+    <?php if ( $args['count'] ?? true ) : ?>
+        <span class="check__count"><?php echo esc_html( (string) $term['count'] ); ?></span>
+    <?php endif; ?>
 </label>
