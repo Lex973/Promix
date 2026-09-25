@@ -39,11 +39,17 @@ $stats = promix_field(
             );
             ?>
         <?php else : ?>
+            <?php
+            // Версия по дате файла: фото заменили — браузер не покажет старое из кэша.
+            $hero_src = static function ( string $file ): string {
+                return add_query_arg( 'ver', promix_asset_version( "assets/img/{$file}" ), get_theme_file_uri( "assets/img/{$file}" ) );
+            };
+            ?>
             <img class="hero__bg"
-                 src="<?php echo esc_url( get_theme_file_uri( 'assets/img/main.webp' ) ); ?>"
-                 srcset="<?php echo esc_url( get_theme_file_uri( 'assets/img/main-768.webp' ) ); ?> 768w,
-                         <?php echo esc_url( get_theme_file_uri( 'assets/img/main-1280.webp' ) ); ?> 1280w,
-                         <?php echo esc_url( get_theme_file_uri( 'assets/img/main.webp' ) ); ?> 1920w"
+                 src="<?php echo esc_url( $hero_src( 'main.webp' ) ); ?>"
+                 srcset="<?php echo esc_url( $hero_src( 'main-768.webp' ) ); ?> 768w,
+                         <?php echo esc_url( $hero_src( 'main-1280.webp' ) ); ?> 1280w,
+                         <?php echo esc_url( $hero_src( 'main.webp' ) ); ?> 1920w"
                  sizes="100vw"
                  alt="" width="1920" height="1280" fetchpriority="high">
         <?php endif; ?>
