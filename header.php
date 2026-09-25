@@ -74,6 +74,8 @@ $promix = promix_contacts();
     </div>
 </header>
 
+<?php get_template_part( 'template-parts/notice' ); ?>
+
 <div class="menu-overlay" data-menu-overlay aria-hidden="true"></div>
 
 <aside class="mobile-menu" id="mobile-menu" data-menu data-lenis-prevent aria-hidden="true" aria-label="<?php esc_attr_e( 'Мобильное меню', 'promix' ); ?>">

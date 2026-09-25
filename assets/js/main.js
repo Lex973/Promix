@@ -346,4 +346,22 @@
 
     document.body.removeChild(tmp);
   });
+
+  /* ===== Объявление под шапкой =====
+     Крестик прячет плашку и запоминает её по ключу содержимого:
+     новое объявление покажется снова */
+  var notice = document.querySelector('[data-notice]');
+  var noticeClose = notice && notice.querySelector('[data-notice-close]');
+
+  if (noticeClose) {
+    noticeClose.addEventListener('click', function () {
+      try {
+        localStorage.setItem(notice.getAttribute('data-notice'), '1');
+      } catch (e) {
+        /* Не записалось — плашка скрыта до перезагрузки */
+      }
+
+      notice.hidden = true;
+    });
+  }
 })();
