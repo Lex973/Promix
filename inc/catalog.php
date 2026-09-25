@@ -86,60 +86,32 @@ function promix_catalog_url( string $category = '' ): string {
  */
 function promix_catalog_links_flush(): void {
     delete_transient( 'promix_catalog_paths' );
-    delete_transient( 'promix_brand_paths' );
 }
 add_action( 'created_product_cat', 'promix_catalog_links_flush' );
 add_action( 'edited_product_cat', 'promix_catalog_links_flush' );
 add_action( 'delete_product_cat', 'promix_catalog_links_flush' );
-add_action( 'created_product_brand', 'promix_catalog_links_flush' );
-add_action( 'edited_product_brand', 'promix_catalog_links_flush' );
-add_action( 'delete_product_brand', 'promix_catalog_links_flush' );
 add_action( 'update_option_permalink_structure', 'promix_catalog_links_flush' );
 add_action( 'update_option_woocommerce_permalinks', 'promix_catalog_links_flush' );
 
 /**
- * Адрес страницы бренда по названию марки — для плиток на главной.
+ * Своих страниц у брендов нет: бренд в каталоге убран, марка видна только
+ * в карточке товара и в лентах на главной. Таксономия остаётся в админке,
+ * но /brand/марка/ отдаёт 404 и в карту сайта не попадает.
  *
- * Карта «название → ссылка» строится одним запросом по всей таксономии
- * и лежит в транзиенте вместе с картой разделов (тот же сброс). Марки,
- * которых нет среди брендов Woo, остаются без ссылки — плитка будет span.
- *
- * @param string $name Название марки как в повторителе.
- * @return string Ссылка или пустая строка.
+ * @param array<string, mixed> $args     Аргументы register_taxonomy.
+ * @param string               $taxonomy Таксономия.
+ * @return array<string, mixed>
  */
-function promix_brand_url( string $name ): string {
-    static $links = null;
-
-    if ( null === $links ) {
-        $links = get_transient( 'promix_brand_paths' );
+function promix_brand_taxonomy_args( array $args, string $taxonomy ): array {
+    if ( 'product_brand' === $taxonomy ) {
+        $args['publicly_queryable'] = false;
+        $args['query_var']          = false;
+        $args['rewrite']            = false;
     }
 
-    if ( ! is_array( $links ) ) {
-        $links = array();
-        $terms = taxonomy_exists( 'product_brand' )
-            ? get_terms(
-                array(
-                    'taxonomy'   => 'product_brand',
-                    'hide_empty' => true,
-                )
-            )
-            : array();
-
-        foreach ( is_wp_error( $terms ) ? array() : $terms as $term ) {
-            $link = get_term_link( $term );
-
-            if ( ! is_wp_error( $link ) ) {
-                $links[ mb_strtolower( $term->name ) ] = promix_link_path( $link );
-            }
-        }
-
-        set_transient( 'promix_brand_paths', $links, DAY_IN_SECONDS );
-    }
-
-    $key = mb_strtolower( trim( $name ) );
-
-    return isset( $links[ $key ] ) ? promix_link_url( $links[ $key ] ) : '';
+    return $args;
 }
+add_filter( 'register_taxonomy_args', 'promix_brand_taxonomy_args', 10, 2 );
 
 /**
  * Сколько товаров видно в каталоге — для подводки «N позиций».
@@ -218,7 +190,7 @@ function promix_price( float $price ): string {
  * Это страница каталога или его раздела?
  */
 function promix_is_catalog(): bool {
-    return function_exists( 'is_shop' ) && ( is_shop() || is_product_category() || is_tax( 'product_brand' ) );
+    return function_exists( 'is_shop' ) && ( is_shop() || is_product_category() );
 }
 
 /**

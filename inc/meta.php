@@ -70,21 +70,6 @@ function promix_meta_description(): string {
         }
     }
 
-    // Страница бренда: число позиций марки.
-    if ( function_exists( 'is_shop' ) && is_tax( 'product_brand' ) ) {
-        $term = get_queried_object();
-
-        if ( $term instanceof WP_Term ) {
-            return sprintf(
-                /* translators: 1 — бренд, 2 — число позиций, 3 — слово «позиция». */
-                __( '%1$s в PROMIX: %2$s %3$s с ценами. Малярный центр в Казани, самовывоз и доставка.', 'promix' ),
-                $term->name,
-                number_format_i18n( (int) $term->count ),
-                promix_plural( (int) $term->count, __( 'позиция', 'promix' ), __( 'позиции', 'promix' ), __( 'позиций', 'promix' ) )
-            );
-        }
-    }
-
     if ( function_exists( 'is_shop' ) && is_shop() ) {
         $total = (int) wp_count_posts( 'product' )->publish;
 
@@ -177,7 +162,7 @@ function promix_canonical_url(): string {
 function promix_catalog_page_url( int $page ): string {
     global $wp_rewrite;
 
-    $term = is_product_category() || is_tax( 'product_brand' ) ? get_queried_object() : null;
+    $term = is_product_category() ? get_queried_object() : null;
     $base = $term instanceof WP_Term ? get_term_link( $term ) : promix_catalog_url();
     $base = is_wp_error( $base ) ? promix_catalog_url() : $base;
 

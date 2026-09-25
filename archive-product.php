@@ -27,8 +27,8 @@ $sort_options = array(
     'title'      => __( 'по названию', 'promix' ),
 );
 
-// Страница раздела или бренда: заголовок и счёт — по нему, в общем каталоге — всё.
-$term     = is_product_category() || is_tax( 'product_brand' ) ? get_queried_object() : null;
+// Страница раздела: заголовок и счёт — по нему, в общем каталоге — всё.
+$term     = is_product_category() ? get_queried_object() : null;
 $term     = $term instanceof WP_Term ? $term : null;
 $category = $term && 'product_cat' === $term->taxonomy ? $term : null;
 $total    = $term ? (int) $term->count : promix_catalog_total();

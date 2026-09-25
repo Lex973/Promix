@@ -38,7 +38,7 @@ promix_front_container( __( 'Бренды', 'promix' ) )
                             ->set_width( 40 ),
 
                         Field::make( 'text', 'brand_url', __( 'Ссылка', 'promix' ) )
-                            ->set_help_text( __( 'Раздел каталога с товарами марки. Можно оставить пустым.', 'promix' ) )
+                            ->set_help_text( __( 'Необязательно. Пусто — плитка без ссылки.', 'promix' ) )
                             ->set_width( 35 ),
 
                         Field::make( 'color', 'brand_color', __( 'Цвет при наведении', 'promix' ) )
