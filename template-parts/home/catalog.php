@@ -43,7 +43,16 @@ $items = promix_field(
 
 $wide_image = promix_field( 'catalog_wide_image' );
 $wide_title = promix_field( 'catalog_wide_title', 'Весь каталог' );
-$wide_note  = promix_field( 'catalog_wide_note', '1 451 позиция с ценами' );
+$total      = promix_catalog_total();
+$wide_note  = promix_field(
+    'catalog_wide_note',
+    sprintf(
+        /* translators: 1 — число позиций, 2 — слово «позиция». */
+        __( '%1$s %2$s с ценами', 'promix' ),
+        number_format_i18n( $total ),
+        promix_plural( $total, __( 'позиция', 'promix' ), __( 'позиции', 'promix' ), __( 'позиций', 'promix' ) )
+    )
+);
 $wide_url   = promix_field( 'catalog_wide_url', promix_catalog_url() );
 
 ?>

@@ -766,10 +766,6 @@
   transform: translateX(4px);
 }
 
-.reviews__head {
-  align-items: flex-end;
-}
-
 .stars {
   position: relative;
   display: inline-flex;

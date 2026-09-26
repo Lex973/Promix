@@ -60,6 +60,7 @@ promix_front_container( __( 'Каталог', 'promix' ) )
             Field::make( 'text', 'promix_catalog_wide_url', __( 'Ссылка плитки', 'promix' ) )
                 ->set_width( 33 ),
 
-            Field::make( 'text', 'promix_catalog_wide_note', __( 'Подпись на плитке', 'promix' ) ),
+            Field::make( 'text', 'promix_catalog_wide_note', __( 'Подпись на плитке', 'promix' ) )
+                ->set_help_text( __( 'Если оставить пустым, число позиций подставится само и будет меняться вместе с каталогом.', 'promix' ) ),
         )
     );
