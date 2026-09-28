@@ -60,7 +60,7 @@ $policy_url = get_privacy_policy_url();
             </div>
 
             <input type="hidden" name="source" data-lead-source value="">
-            <input type="hidden" name="opened" data-lead-opened value="">
+            <input type="hidden" name="elapsed" data-lead-elapsed value="">
             <?php /* Ключ проверки в разметке не лежит: страничный кэш отдал бы протухший.
                      Форма запрашивает свежий в момент отправки. */ ?>
 

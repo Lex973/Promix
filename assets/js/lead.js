@@ -15,7 +15,7 @@
   var form = modal.querySelector('[data-lead-form]');
   var message = modal.querySelector('[data-lead-message]');
   var sourceInput = modal.querySelector('[data-lead-source]');
-  var openedInput = modal.querySelector('[data-lead-opened]');
+  var elapsedInput = modal.querySelector('[data-lead-elapsed]');
   var titleEl = modal.querySelector('[data-lead-title]');
   var submit = form ? form.querySelector('[type="submit"]') : null;
 
@@ -23,6 +23,7 @@
   var lastFocused = null;
   var releaseTrap = null;
   var closeTimer = null;
+  var openedAt = 0;
 
   /* ===== Маска телефона ===== */
 
@@ -99,7 +100,9 @@
 
     sourceInput.value = source;
     titleEl.textContent = title || defaultTitle;
-    openedInput.value = Math.floor(Date.now() / 1000);
+    /* Отсчёт по performance.now(): часы компьютера могут спешить или
+       отставать, а сервер сравнивал бы их со своими и терял заявки */
+    openedAt = window.performance.now();
 
     message.textContent = '';
     message.className = 'lead__note';
@@ -206,6 +209,8 @@
 
     requestNonce()
       .then(function (nonce) {
+        elapsedInput.value = String(Math.round(window.performance.now() - openedAt));
+
         var data = new FormData(form);
         data.append('action', 'promix_lead');
         data.append('nonce', nonce);
