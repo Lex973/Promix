@@ -359,7 +359,9 @@
   border-radius: var(--radius-pill);
   color: var(--color-muted);
   cursor: pointer;
-  transition: var(--transition-fast);
+  /* Только цвет и фон: при «all» кнопка плавно наследовала и visibility
+     панели, в момент открытия была ещё hidden и не принимала фокус */
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
 
 .filters__close:hover {
@@ -894,11 +896,16 @@
     overscroll-behavior: contain;
     transform: translateX(-100%);
     box-shadow: 24px 0 60px rgba(0, 0, 0, 0.14);
-    transition: transform var(--transition);
+    /* Закрытая панель не только за экраном, но и скрыта: иначе Tab
+       ходит по её невидимым полям. Скрывается после того, как уехала */
+    visibility: hidden;
+    transition: transform var(--transition), visibility 0s var(--transition);
   }
 
   .filters.is-open {
     transform: none;
+    visibility: visible;
+    transition: transform var(--transition), visibility 0s;
   }
 
   .filters__head {

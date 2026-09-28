@@ -165,8 +165,10 @@
       applyView(currentView());
 
       if (push === 'replace') {
-        /* Поиск: каждая буква — не отдельная страница в истории */
-        window.history.replaceState({ promixCatalog: true }, '', url);
+        /* Поиск: первая буква — новая запись в истории, чтобы «Назад»
+           вернул каталог без поиска; следующие буквы её только правят */
+        var searching = window.history.state && window.history.state.promixSearch;
+        window.history[searching ? 'replaceState' : 'pushState']({ promixCatalog: true, promixSearch: true }, '', url);
       } else if (push) {
         window.history.pushState({ promixCatalog: true }, '', url);
       } else {
@@ -548,6 +550,13 @@
     requestAnimationFrame(function () {
       panel.classList.add('is-open');
       overlay.classList.add('is-open');
+
+      /* Фокус в панель, как у меню: иначе он остаётся на кнопке под
+         затемнением, и первый Tab только догоняет его до панели */
+      var first = panel.querySelector('[data-filters-close]');
+      if (first) {
+        first.focus();
+      }
     });
 
     openBtn.setAttribute('aria-expanded', 'true');

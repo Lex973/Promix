@@ -560,6 +560,11 @@ body.is-menu-open {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Якоря и «наверх» — прыжком: Lenis эту настройку уже учитывает, а CSS нет */
+  html {
+    scroll-behavior: auto;
+  }
+
   .btn.is-busy::after,
   .is-loading::before {
     animation-duration: 1.6s;
