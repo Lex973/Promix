@@ -268,6 +268,27 @@ function promix_robots( array $robots ): array {
 add_filter( 'wp_robots', 'promix_robots' );
 
 /**
+ * Защитные заголовки на страницах сайта. Отдаёт тема, а не конфиг сервера:
+ * так они едут на хостинг вместе с ней и не зависят от панели TimeWeb.
+ * Геолокацию не запрещаем — ею пользуется встроенная карта Яндекса.
+ *
+ * @param array<string, string> $headers Заголовки ответа.
+ * @return array<string, string>
+ */
+function promix_security_headers( array $headers ): array {
+    return array_merge(
+        $headers,
+        array(
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options'        => 'SAMEORIGIN',
+            'Referrer-Policy'        => 'strict-origin-when-cross-origin',
+            'Permissions-Policy'     => 'camera=(), microphone=(), payment=(), usb=()',
+        )
+    );
+}
+add_filter( 'wp_headers', 'promix_security_headers' );
+
+/**
  * Карта сайта без пользователей и служебных страниц магазина.
  *
  * @param WP_Sitemaps_Provider|false $provider Провайдер.
