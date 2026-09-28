@@ -150,6 +150,10 @@ define( 'DISABLE_WP_CRON', true );
 - [ ] `/wp-content/themes/promix/README.md` и `/wp-content/themes/promix/_tools/`
       отвечают 403/404. На Apache это делает `.htaccess` темы, под nginx —
       правило из README («Перенос на сервер»).
+- [ ] В корне сайта нет копий конфига и служебных скриптов: `/wp-config.php.bak`,
+      `/wp-config.php.old`, `/wc-setup.php`, `/wc-recategorize.php`, `/*.csv` — 404.
+      Копия `wp-config.php` с расширением не `.php` отдаётся как текст вместе
+      с паролем БД и ключами; если такая была доступна — сменить пароль и ключи.
 - [ ] `/wp-sitemap.xml` открывается, в нём нет записей и рубрик (`…-posts-post-…`,
       `…-taxonomies-category-…`); `/robots.txt` не запрещает сайт.
 - [ ] Галочка «не индексировать» снята (шаг 1.4).
