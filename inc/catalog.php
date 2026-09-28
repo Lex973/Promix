@@ -114,6 +114,22 @@ function promix_brand_taxonomy_args( array $args, string $taxonomy ): array {
 add_filter( 'register_taxonomy_args', 'promix_brand_taxonomy_args', 10, 2 );
 
 /**
+ * На 404 WordPress угадывает запись по началу адреса и делал с /brand/storch/
+ * 301 на случайный товар STORCH. Для брендов угадывание выключено — честный
+ * 404; для остальных адресов оставлено: переименованный товар из 1С
+ * по старой ссылке найдётся.
+ *
+ * @param bool $guess Угадывать ли.
+ * @return bool
+ */
+function promix_brand_no_guess( $guess ) {
+    $path = (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH );
+
+    return 0 === strpos( $path, '/brand/' ) ? false : $guess;
+}
+add_filter( 'do_redirect_guess_404_permalink', 'promix_brand_no_guess' );
+
+/**
  * Сколько товаров видно в каталоге — для подводки «N позиций».
  *
  * wp_count_posts() считает все опубликованные, включая скрытые из каталога,

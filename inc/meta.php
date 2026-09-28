@@ -305,6 +305,24 @@ function promix_sitemap_taxonomies( array $taxonomies ): array {
 add_filter( 'wp_sitemaps_taxonomies', 'promix_sitemap_taxonomies' );
 
 /**
+ * Корневые разделы каталога в карте. Своих товаров у них нет — всё лежит
+ * в подразделах, — и ядро (hide_empty без hierarchical) их выбрасывало.
+ * С hierarchical пустой раздел остаётся, если в подразделах есть товары.
+ *
+ * @param array<string, mixed> $args     Аргументы WP_Term_Query.
+ * @param string               $taxonomy Таксономия.
+ * @return array<string, mixed>
+ */
+function promix_sitemap_category_parents( array $args, string $taxonomy ): array {
+    if ( 'product_cat' === $taxonomy ) {
+        $args['hierarchical'] = true;
+    }
+
+    return $args;
+}
+add_filter( 'wp_sitemaps_taxonomies_query_args', 'promix_sitemap_category_parents', 10, 2 );
+
+/**
  * @param array<string, mixed> $args      Аргументы WP_Query.
  * @param string               $post_type Тип записи.
  * @return array<string, mixed>
