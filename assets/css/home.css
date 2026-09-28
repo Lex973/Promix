@@ -39,7 +39,8 @@
 
 .hero__inner {
   position: relative;
-  padding: 112px 0;
+  /* Только сверху и снизу: боковые поля даёт .container */
+  padding-block: 112px;
   color: #fff;
 }
 
@@ -1262,7 +1263,7 @@
       grid-template-columns: 1fr;
       gap: 32px;
     }
-  .hero__inner { padding: 84px 0; }
+  .hero__inner { padding-block: 84px; }
   .hero__lead { max-width: 560px; }
   .hero__stats { gap: 22px 44px; margin-top: 52px; }
 }
@@ -1308,26 +1309,44 @@
       font-size: 14px;
     }
   .brands__note { font-size: 15px; }
+  /* Телефон: фото — светлым блоком сверху, текст — под ним на тёмном.
+     Сплошное затемнение по всему экрану съедало фото целиком, а фон
+     position: fixed на узком экране показывал в верхней части потолок */
   .hero {
-      min-height: calc(100vh - var(--header-height-sm));
-      min-height: calc(100svh - var(--header-height-sm));
+      --hero-photo: 38vh;
+      --hero-photo: 38svh;
+      display: block;
+      min-height: 0;
     }
+  .hero__bg,
+  .hero__shade {
+      position: absolute;
+      top: 0;
+      bottom: auto;
+      height: var(--hero-photo);
+      min-height: 240px;
+    }
+  .hero__bg { object-position: 50% 50%; }
   .hero__shade {
       background: linear-gradient(180deg,
-        rgba(12, 12, 12, 0.86) 0%,
-        rgba(12, 12, 12, 0.76) 55%,
-        rgba(12, 12, 12, 0.88) 100%);
+        rgba(26, 26, 26, 0) 0%,
+        rgba(26, 26, 26, 0) 40%,
+        rgba(26, 26, 26, 0.75) 80%,
+        var(--color-ink) 100%);
     }
-  .hero__inner { padding: 64px 0; }
+  .hero__inner {
+      padding-block: calc(max(var(--hero-photo), 240px) - 64px) 48px;
+    }
+  .hero__title { text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45); }
   .hero__title br { display: none; }
-  .hero__lead { margin-top: 22px; font-size: 17px; }
-  .hero__cta { margin-top: 34px; width: 100%; justify-content: center; padding: 19px 28px; }
+  .hero__lead { margin-top: 18px; font-size: 16px; }
+  .hero__cta { margin-top: 28px; width: 100%; justify-content: center; padding: 18px 28px; }
   .hero__stats {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 26px 18px;
-      margin-top: 48px;
-      padding-top: 32px;
+      gap: 22px 18px;
+      margin-top: 36px;
+      padding-top: 28px;
     }
   .hero__stat dt { font-size: 24px; }
   .hero__stat dd { font-size: 13px; }
