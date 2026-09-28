@@ -314,7 +314,7 @@ function promix_handle_lead(): void {
 
     $digits = preg_replace( '/\D/', '', $phone );
 
-    if ( strlen( (string) $digits ) < 10 ) {
+    if ( strlen( (string) $digits ) < 10 || strlen( (string) $digits ) > 15 ) {
         wp_send_json_error( array( 'message' => __( 'Проверьте номер телефона.', 'promix' ) ), 400 );
     }
 

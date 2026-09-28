@@ -14,8 +14,11 @@
 
   /* Цена за N штук: формат тот же, что на сервере — пробел между тысячами */
   function showPrice(n) {
-    var total = Math.round(base * Math.max(1, n));
-    price.textContent = total.toLocaleString('ru-RU').replace(/,/g, ' ') + ' ₽';
+    /* Копейки считаем целыми, чтобы 1074.84 × 3 не дало 3224.5199…;
+       показываем их, только если они есть — как promix_price() */
+    var kopecks = Math.round(base * 100) * Math.max(1, n);
+    var digits = kopecks % 100 ? 2 : 0;
+    price.textContent = (kopecks / 100).toLocaleString('ru-RU', { minimumFractionDigits: digits, maximumFractionDigits: digits }) + ' ₽';
   }
 
   document.addEventListener('promix:cart', function (event) {

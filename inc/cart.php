@@ -379,7 +379,6 @@ function promix_checkout_submit(): void {
     }
 
     $errors = array();
-    $digits = preg_replace( '/\D/', '', $v['phone'] );
 
     // Длину режем до проверки: обрезанный после is_email() адрес Woo не примет.
     $v['client']  = mb_substr( $v['client'], 0, 100 );
@@ -389,11 +388,15 @@ function promix_checkout_submit(): void {
     $v['address'] = mb_substr( $v['address'], 0, 200 );
     $v['comment'] = mb_substr( $v['comment'], 0, 2000 );
 
+    // Цифры — по уже обрезанному номеру: в заказ уходит именно он. Больше 15 цифр
+    // номеров не бывает (E.164), это мусор в поле.
+    $digits = preg_replace( '/\D/', '', $v['phone'] );
+
     if ( '' === $v['client'] ) {
         $errors[] = __( 'Напишите, как к вам обращаться.', 'promix' );
     }
 
-    if ( strlen( (string) $digits ) < 10 ) {
+    if ( strlen( (string) $digits ) < 10 || strlen( (string) $digits ) > 15 ) {
         $errors[] = __( 'Проверьте номер телефона.', 'promix' );
     }
 
@@ -431,7 +434,14 @@ function promix_checkout_submit(): void {
     $dedup     = md5( $session . '|' . WC()->cart->get_cart_hash() );
     $lock_name = 'promix_order_' . md5( $session );
 
-    $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 5)', $lock_name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- замок, а не данные.
+    // Замок не взят за 5 секунд (первый запрос завис) или MySQL вернул ошибку:
+    // без замка проверка на дубль ненадёжна, поэтому просим повторить.
+    $locked = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 5)', $lock_name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- замок, а не данные.
+
+    if ( '1' !== (string) $locked ) {
+        promix_checkout_errors( array( __( 'Заказ ещё оформляется. Подождите несколько секунд и нажмите ещё раз.', 'promix' ) ) );
+        return;
+    }
 
     $same = wc_get_orders(
         array(

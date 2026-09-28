@@ -244,6 +244,11 @@
     if (step) {
       var control = controlOf(step);
       var input = control.querySelector('[data-cart-qty]');
+
+      /* Ввод руками ещё ждёт таймера: «+» считается от набранного числа,
+         а таймер отменяем — иначе он следом отправит старое значение */
+      clearTimeout(stepTimers[control.getAttribute('data-cart-control')]);
+
       var current = parseInt((input.value || '').replace(/\D/g, ''), 10) || 1;
 
       stepCart(control, Math.max(0, current + parseInt(step.getAttribute('data-cart-step'), 10)));

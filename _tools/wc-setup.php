@@ -49,7 +49,7 @@ $set('woocommerce_currency', 'RUB');
 $set('woocommerce_currency_pos', 'right_space');
 $set('woocommerce_price_thousand_sep', ' ');
 $set('woocommerce_price_decimal_sep', ',');
-$set('woocommerce_price_num_decimals', '0');
+$set('woocommerce_price_num_decimals', '2'); // копейки из 1С; нули в выводе убирает тема
 $set('woocommerce_weight_unit', 'kg');
 $set('woocommerce_dimension_unit', 'cm');
 $set('woocommerce_calc_taxes', 'no');

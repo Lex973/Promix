@@ -183,8 +183,18 @@ function promix_price( float $price ): string {
         return __( 'Цена по запросу', 'promix' );
     }
 
-    return number_format_i18n( $price ) . ' ₽';
+    // Копейки — только если они есть: цены из 1С бывают дробными (1074,84),
+    // и округление на карточке расходилось с суммой заказа и счётом из 1С.
+    $decimals = abs( $price - round( $price ) ) < 0.005 ? 0 : 2;
+
+    return number_format_i18n( $price, $decimals ) . ' ₽';
 }
+
+/*
+ * Woo считает с копейками (woocommerce_price_num_decimals = 2), а нули
+ * в его собственном выводе — письма, админка — убираем: «950 ₽», не «950,00 ₽».
+ */
+add_filter( 'woocommerce_price_trim_zeros', '__return_true' );
 
 /**
  * Это страница каталога или его раздела?
