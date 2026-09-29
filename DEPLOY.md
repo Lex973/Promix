@@ -268,6 +268,14 @@ define( 'WP_DEBUG', false );
 - `readme.html`, `license.txt`, `wp-config-sample.php` из корня удалены — первый
   выдаёт версию WordPress.
 - Пока «не индексировать» включено, `/wp-sitemap.xml` отдаёт 404 — так и должно быть.
+- ⚠ **Почта на тестовом периоде не работает вообще:** `mail()` → «Could not instantiate
+  mail function», прокси TimeWeb отвечает `connect /run/php-sendmail-proxy.sock failed:
+  Permission denied`; исходящие на smtp.mail.ru (465/587/25) — Connection refused.
+  Заявки и заказы сохраняются в админке, письма — нет. Исходящий HTTPS работает, так что
+  MAX будет доставлять. Нужно: оплатить тариф и спросить поддержку TimeWeb, открыта ли
+  после этого отправка через их почту и внешний SMTP (mail.ru). Проверять реальным письмом.
+- `wp core update` возвращает `readme.html` и `license.txt` в корень — удалять после
+  каждого обновления ядра.
 - ⚠ После `wp core update` сайт стал английским (`WPLANG` не был задан, язык держался
   на `$wp_local_package` в version.php) — цены «1,500 ₽», «1,074.84 ₽». Лечится
   `wp site switch-language ru_RU`; теперь это шаг 1.1.
