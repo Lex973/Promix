@@ -8,9 +8,13 @@ import io
 import sys
 from pathlib import Path
 
+from excluded import keep
+
 PRICE_LIST = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / 'docs' / 'data' / 'katalog-dlya-sayta.csv'
 
 rows = list(csv.DictReader(io.open(PRICE_LIST, encoding='utf-8-sig'), delimiter=';'))
+skipped = [r for r in rows if not keep(r)]
+rows = [r for r in rows if keep(r)]
 # Колонка цены в выгрузках называлась и «Цена», и «Цена, ₽» — ищем по началу.
 PRICE = next(k for k in rows[0] if k.startswith('Цена'))
 
@@ -26,4 +30,4 @@ with io.open(PRICE_LIST.with_name('woo-import.csv'), 'w', encoding='utf-8', newl
         # Бренд — штатная таксономия WooCommerce («Товары → Бренды»), колонка Brands.
         w.writerow(['simple', r['Артикул'], r['Наименование'], 1, 'visible', 1, price, cat, r['ID'], r['Бренд']])
 
-print(len(rows), 'rows')
+print(len(rows), 'rows' + (f', skipped by excluded.py: {len(skipped)}' if skipped else ''))

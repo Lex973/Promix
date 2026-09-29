@@ -20,6 +20,8 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from excluded import keep
+
 _arg = next((a for a in sys.argv[1:] if not a.startswith('--')), '')
 PRICE_LIST = Path(_arg) if _arg else Path(__file__).resolve().parent.parent / 'docs' / 'data' / 'katalog-dlya-sayta.csv'
 CHECK = '--check' in sys.argv
@@ -326,7 +328,9 @@ with io.open(out_dir / 'wc-categories.csv', 'w', encoding='utf-8-sig', newline='
     w = csv.writer(out, delimiter=';')
     w.writerow(['Артикул', 'Раздел', 'Подраздел'])
     for r, sub in result:
-        w.writerow([r['Артикул'], PARENT[sub], sub])
+        # Исключённые (excluded.py) в раскладку не идут; прайс ниже пишется целиком.
+        if keep(r):
+            w.writerow([r['Артикул'], PARENT[sub], sub])
 
 fieldnames = list(rows[0].keys())
 with io.open(PRICE_LIST, 'w', encoding='utf-8-sig', newline='') as out:
