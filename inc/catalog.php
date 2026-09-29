@@ -213,6 +213,86 @@ function promix_price( float $price ): string {
 add_filter( 'woocommerce_price_trim_zeros', '__return_true' );
 
 /**
+ * Цена «от»: минимальная, итог зависит от объёма работ. Так продаются
+ * декоративные покрытия — заказчик считает их за м², а точную сумму
+ * называет менеджер. Флаг и единица — поля товара в админке
+ * («Цена «от»», «Единица цены»), см. inc/woocommerce.php.
+ *
+ * @param WC_Product|null|false $product Товар.
+ * @return bool
+ */
+function promix_price_is_from( $product ): bool {
+    return $product instanceof WC_Product && 'yes' === $product->get_meta( '_promix_price_from' );
+}
+
+/**
+ * Единица цены товара: «м²». Пусто — цена за штуку.
+ *
+ * @param WC_Product|null|false $product Товар.
+ * @return string
+ */
+function promix_price_unit( $product ): string {
+    return $product instanceof WC_Product ? trim( (string) $product->get_meta( '_promix_price_unit' ) ) : '';
+}
+
+/**
+ * Цена товара словами: «от 350 ₽/м²», «2 890 ₽».
+ *
+ * @param WC_Product $product Товар.
+ * @param float|null $amount  Сумма строки вместо цены за единицу — тогда без единицы.
+ * @return string
+ */
+function promix_product_price( WC_Product $product, ?float $amount = null ): string {
+    $price = promix_price( null === $amount ? (float) $product->get_price() : $amount );
+
+    // «Цена по запросу» приставок не получает.
+    if ( (float) $product->get_price() <= 0 ) {
+        return $price;
+    }
+
+    $from = promix_price_is_from( $product ) ? __( 'от', 'promix' ) . ' ' : '';
+    $unit = null === $amount ? promix_price_unit( $product ) : '';
+
+    return $from . $price . ( '' !== $unit ? '/' . $unit : '' );
+}
+
+/**
+ * Итог корзины или заказа: «от», если в нём есть хоть одна цена «от».
+ *
+ * @param float                        $total    Сумма.
+ * @param iterable<WC_Product|null|false> $products Товары позиций.
+ * @return string
+ */
+function promix_total_price( float $total, iterable $products ): string {
+    foreach ( $products as $product ) {
+        if ( promix_price_is_from( $product ) ) {
+            return __( 'от', 'promix' ) . ' ' . promix_price( $total );
+        }
+    }
+
+    return promix_price( $total );
+}
+
+/**
+ * Товары корзины — для promix_total_price().
+ *
+ * @return WC_Product[]
+ */
+function promix_cart_products(): array {
+    return array_values( array_filter( wp_list_pluck( WC()->cart->get_cart(), 'data' ), static fn ( $p ): bool => $p instanceof WC_Product ) );
+}
+
+/**
+ * Товары заказа — для promix_total_price().
+ *
+ * @param WC_Order $order Заказ.
+ * @return array<WC_Product|null|false>
+ */
+function promix_order_products( WC_Order $order ): array {
+    return array_map( static fn ( $item ) => $item instanceof WC_Order_Item_Product ? $item->get_product() : null, array_values( $order->get_items() ) );
+}
+
+/**
  * Это страница каталога или его раздела?
  */
 function promix_is_catalog(): bool {

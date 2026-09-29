@@ -56,7 +56,7 @@ $badge = ( 'PROMIX' === promix_product_brand( $product ) ) ? __( 'Своя ма�
     </div>
 
     <div class="product__foot">
-        <p class="product__price"><?php echo esc_html( promix_price( $price ) ); ?></p>
+        <p class="product__price"><?php echo esc_html( promix_product_price( $product ) ); ?></p>
 
         <div class="product__actions">
             <?php get_template_part( 'template-parts/cart/control', null, array( 'product' => $product ) ); ?>

@@ -27,11 +27,16 @@ git archive --format=zip -o "$out/promix.zip" HEAD
 python _tools/wc-import-csv.py
 python _tools/wc-descriptions.py
 python _tools/wc-categories.py >/dev/null
-cp docs/data/woo-import.csv docs/data/woo-descriptions.csv docs/data/wc-categories.csv "$out/"
+python _tools/wc-decor.py
+cp docs/data/woo-import.csv docs/data/woo-descriptions.csv docs/data/wc-categories.csv docs/data/decor/decor.csv "$out/"
+
+# Образцы цвета AlterItaly — рядом с decor.csv, в папке img/ (DEPLOY.md, шаг 6.4).
+mkdir -p "$out/img"
+cp docs/data/decor/img/*.jpg docs/data/decor/img/*.png "$out/img/"
 
 # В скриптах ключ остаётся плейсхолдером: с ним они не запускаются,
 # настоящий ключ вписывается перед загрузкой на сервер (DEPLOY.md, шаги 5 и 6).
-cp _tools/wc-setup.php _tools/wc-recategorize.php _content/privacy-policy.md DEPLOY.md "$out/"
+cp _tools/wc-setup.php _tools/wc-recategorize.php _tools/wc-decor.php _content/privacy-policy.md DEPLOY.md "$out/"
 
 rows=$(( $(wc -l < "$out/woo-import.csv") - 1 ))
 
@@ -43,12 +48,12 @@ rows=$(( $(wc -l < "$out/woo-import.csv") - 1 ))
     echo "Товаров в woo-import.csv: $rows"
     echo
     echo "Порядок — DEPLOY.md. Перед загрузкой вписать:"
-    echo "  wc-setup.php, wc-recategorize.php — свой ключ вместо СЕКРЕТ (12+ латинских букв и цифр);"
+    echo "  wc-setup.php, wc-recategorize.php, wc-decor.php — свой ключ вместо СЕКРЕТ (12+ латинских букв и цифр);"
     echo "  privacy-policy.md — [ОГРН] и [ДАТА];"
     echo "  wp-config.php на сервере — константы из шага 7."
     echo
     echo "SHA-256:"
-    (cd "$out" && sha256sum promix.zip woo-import.csv woo-descriptions.csv wc-categories.csv)
+    (cd "$out" && sha256sum promix.zip woo-import.csv woo-descriptions.csv wc-categories.csv decor.csv)
 } > "$out/СОСТАВ.txt"
 
 echo "Готово: $out"

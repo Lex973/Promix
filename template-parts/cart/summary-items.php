@@ -29,7 +29,7 @@ $items = $limit ? array_slice( $items, 0, $limit ) : $items;
         <li class="checkout__item">
             <span class="checkout__item-name" title="<?php echo esc_attr( $name ); ?>"><?php echo esc_html( $name ); ?></span>
             <span class="checkout__item-qty">× <?php echo esc_html( (string) $item['quantity'] ); ?></span>
-            <span class="checkout__item-sum"><?php echo esc_html( promix_price( (float) $item['line_subtotal'] ) ); ?></span>
+            <span class="checkout__item-sum"><?php echo esc_html( promix_product_price( $item['data'], (float) $item['line_subtotal'] ) ); ?></span>
         </li>
     <?php endforeach; ?>
 

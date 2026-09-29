@@ -75,7 +75,7 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
 
                     <p class="checkout__done-total">
                         <?php esc_html_e( 'Итого', 'promix' ); ?>
-                        <strong><?php echo esc_html( promix_price( (float) $order->get_total() ) ); ?></strong>
+                        <strong><?php echo esc_html( promix_total_price( (float) $order->get_total(), promix_order_products( $order ) ) ); ?></strong>
                     </p>
 
                     <div class="checkout__done-actions">
@@ -225,7 +225,7 @@ $contacts   = function_exists( 'promix_contacts' ) ? promix_contacts() : array()
                     <dl class="cart__rows">
                         <div class="cart__row cart__row--total">
                             <dt><?php esc_html_e( 'Итого', 'promix' ); ?></dt>
-                            <dd><?php echo esc_html( promix_price( (float) $cart->get_subtotal() ) ); ?></dd>
+                            <dd><?php echo esc_html( promix_total_price( (float) $cart->get_subtotal(), promix_cart_products() ) ); ?></dd>
                         </div>
                     </dl>
 

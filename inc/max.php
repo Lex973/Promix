@@ -274,12 +274,12 @@ function promix_max_order( WC_Order $order ): void {
             $item->get_name(),
             $sku,
             $item->get_quantity(),
-            promix_price( (float) $item->get_total() )
+            ( promix_price_is_from( $product ) ? __( 'от', 'promix' ) . ' ' : '' ) . promix_price( (float) $item->get_total() )
         );
     }
 
     $lines[] = '';
-    $lines[] = sprintf( /* translators: %s — сумма. */ __( 'Итого: %s', 'promix' ), promix_price( (float) $order->get_total() ) );
+    $lines[] = sprintf( /* translators: %s — сумма. */ __( 'Итого: %s', 'promix' ), promix_total_price( (float) $order->get_total(), promix_order_products( $order ) ) );
     $lines[] = promix_order_delivery( $order ) . ( $order->get_shipping_address_1() ? ' — ' . $order->get_shipping_address_1() : '' );
 
     if ( $order->get_customer_note() ) {

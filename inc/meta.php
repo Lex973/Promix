@@ -46,7 +46,7 @@ function promix_meta_description(): string {
                 __( '%1$s — артикул %2$s, цена %3$s. Купить в PROMIX, малярный центр в Казани: самовывоз и доставка.', 'promix' ),
                 $product->get_name(),
                 $product->get_sku(),
-                promix_price( (float) $product->get_price() )
+                promix_product_price( $product )
             );
         }
     }

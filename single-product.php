@@ -127,7 +127,9 @@ while ( have_posts() ) :
                         <?php endif; ?>
                     </dl>
 
-                    <p class="single__price" data-price="<?php echo esc_attr( (string) $price ); ?>"><?php echo esc_html( promix_price( $price ) ); ?></p>
+                    <p class="single__price" data-price="<?php echo esc_attr( (string) $price ); ?>"
+                       data-price-from="<?php echo promix_price_is_from( $product ) ? '1' : ''; ?>"
+                       data-price-unit="<?php echo esc_attr( promix_price_unit( $product ) ); ?>"><?php echo esc_html( promix_product_price( $product ) ); ?></p>
 
                     <?php get_template_part( 'template-parts/cart/control', null, array( 'product' => $product, 'variant' => 'single' ) ); ?>
 

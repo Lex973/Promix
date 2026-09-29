@@ -103,3 +103,72 @@ function promix_woocommerce_body_class( array $classes ): array {
     return array_values( array_diff( $classes, array( 'woocommerce-no-js' ) ) );
 }
 add_filter( 'body_class', 'promix_woocommerce_body_class', 11 );
+
+/**
+ * Поля цены «от» в карточке товара, вкладка «Основные» под ценой.
+ */
+function promix_price_from_fields(): void {
+    woocommerce_wp_checkbox(
+        array(
+            'id'          => '_promix_price_from',
+            'label'       => __( 'Цена «от»', 'promix' ),
+            'description' => __( 'Показывать «от» перед ценой на сайте, в корзине, письмах и MAX — цена минимальная, итог назовёт менеджер.', 'promix' ),
+        )
+    );
+
+    woocommerce_wp_text_input(
+        array(
+            'id'          => '_promix_price_unit',
+            'label'       => __( 'Единица цены', 'promix' ),
+            'placeholder' => __( 'м²', 'promix' ),
+            'desc_tip'    => true,
+            'description' => __( 'За что цена: «м²» даст «от 350 ₽/м²». Пусто — за штуку.', 'promix' ),
+        )
+    );
+}
+add_action( 'woocommerce_product_options_pricing', 'promix_price_from_fields' );
+
+/**
+ * @param WC_Product $product Товар.
+ */
+function promix_price_from_save( WC_Product $product ): void {
+    // phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce проверил Woo до этого хука.
+    $product->update_meta_data( '_promix_price_from', empty( $_POST['_promix_price_from'] ) ? 'no' : 'yes' );
+    $product->update_meta_data( '_promix_price_unit', mb_substr( sanitize_text_field( wp_unslash( $_POST['_promix_price_unit'] ?? '' ) ), 0, 20 ) );
+    // phpcs:enable
+}
+add_action( 'woocommerce_admin_process_product_object', 'promix_price_from_save' );
+
+/**
+ * «от» в письмах Woo: сумма позиции.
+ *
+ * @param string                $subtotal Сумма позиции (HTML).
+ * @param WC_Order_Item_Product $item     Позиция.
+ * @return string
+ */
+function promix_price_from_email_line( $subtotal, $item ) {
+    return $item instanceof WC_Order_Item_Product && promix_price_is_from( $item->get_product() ) ? __( 'от', 'promix' ) . ' ' . $subtotal : $subtotal;
+}
+add_filter( 'woocommerce_order_formatted_line_subtotal', 'promix_price_from_email_line', 10, 2 );
+
+/**
+ * «от» в письмах Woo: подытог и итог, если в заказе есть цена «от».
+ *
+ * @param array<string, array<string, string>> $rows  Строки итогов.
+ * @param WC_Order                             $order Заказ.
+ * @return array<string, array<string, string>>
+ */
+function promix_price_from_email_totals( $rows, $order ) {
+    if ( ! $order instanceof WC_Order || ! array_filter( promix_order_products( $order ), 'promix_price_is_from' ) ) {
+        return $rows;
+    }
+
+    foreach ( array( 'cart_subtotal', 'order_total' ) as $key ) {
+        if ( isset( $rows[ $key ]['value'] ) ) {
+            $rows[ $key ]['value'] = __( 'от', 'promix' ) . ' ' . $rows[ $key ]['value'];
+        }
+    }
+
+    return $rows;
+}
+add_filter( 'woocommerce_get_order_item_totals', 'promix_price_from_email_totals', 10, 2 );
