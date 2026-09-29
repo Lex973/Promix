@@ -62,7 +62,7 @@ $badge = ( 'PROMIX' === promix_product_brand( $product ) ) ? __( 'Своя ма�
             <?php get_template_part( 'template-parts/cart/control', null, array( 'product' => $product ) ); ?>
 
             <?php if ( $sku ) : ?>
-                <button class="product__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>"
+                <button class="product__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>" title="<?php echo esc_attr( $sku ); ?>"
                         data-copy-done="<?php esc_attr_e( 'скопирован', 'promix' ); ?>"
                         aria-label="<?php echo esc_attr( sprintf( /* translators: %s — артикул. */ __( 'Скопировать артикул %s', 'promix' ), $sku ) ); ?>">
                     <span class="product__sku-label"><?php esc_html_e( 'Арт.', 'promix' ); ?></span>

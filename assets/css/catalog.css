@@ -710,9 +710,18 @@
 }
 
 .product__sku svg {
+  flex-shrink: 0;
   width: 13px;
   height: 13px;
   opacity: 0.7;
+}
+
+/* Длинный артикул обрезается многоточием, а не выталкивает иконку
+   за край карточки; целиком он в подсказке и копируется полностью */
+.product__sku [data-copy-label] {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .product__sku:hover {
