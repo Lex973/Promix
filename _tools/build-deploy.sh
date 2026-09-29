@@ -36,7 +36,7 @@ cp docs/data/decor/img/*.jpg docs/data/decor/img/*.png "$out/img/"
 
 # В скриптах ключ остаётся плейсхолдером: с ним они не запускаются,
 # настоящий ключ вписывается перед загрузкой на сервер (DEPLOY.md, шаги 5 и 6).
-cp _tools/wc-setup.php _tools/wc-recategorize.php _tools/wc-decor.php _content/privacy-policy.md DEPLOY.md "$out/"
+cp _tools/wc-setup.php _tools/wc-recategorize.php _tools/wc-decor.php _tools/wc-import.php _content/privacy-policy.md DEPLOY.md "$out/"
 
 rows=$(( $(wc -l < "$out/woo-import.csv") - 1 ))
 

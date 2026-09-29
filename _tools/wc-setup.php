@@ -37,7 +37,7 @@ $set('woocommerce_permalinks', [
     'use_verbose_page_rules' => false,
 ]);
 
-// Магазин: Россия, Казань, рубли без копеек.
+// Магазин: Россия, Казань, рубли (копейки — только где они есть в цене из 1С).
 $set('woocommerce_default_country', 'RU');
 $set('woocommerce_store_city', 'Казань');
 $set('woocommerce_store_address', 'ул. Габдуллы Тукая, 91к1'); // фактический адрес по карте партнёра
