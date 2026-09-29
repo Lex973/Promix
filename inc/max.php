@@ -81,25 +81,22 @@ function promix_max_request( string $method, string $path, array $query = array(
 }
 
 /**
- * Выполнить отправку так, чтобы покупатель её не ждал.
+ * Отправить сразу, в конце запроса.
  *
  * Заявка и заказ заканчиваются редиректом или JSON — то есть exit,
- * а он запускает shutdown. Под PHP-FPM там закрывается соединение
- * с браузером (fastcgi_finish_request), и пять секунд таймаута API MAX
- * ждёт уже только PHP. Без FPM отправка уходит в Action Scheduler
- * WooCommerce — выполнится с ближайшим тиком cron (на хостинге нужен
- * настоящий cron, см. чек-лист переноса). Нет и его — как раньше,
- * синхронно на shutdown.
+ * а он запускает shutdown. Под PHP-FPM там сначала закрывается соединение
+ * с браузером (fastcgi_finish_request), и ответа MAX ждёт уже только PHP.
+ * На TimeWeb PHP — модуль Apache, FPM нет: браузер ждёт ответа MAX
+ * (обычно доли секунды, таймаут 5 с). Раньше отправка без FPM уходила
+ * в очередь Action Scheduler и ждала cron — менеджер узнавал о заявке
+ * через минуты или вообще при заходе в админку. Сообщение важнее
+ * полсекунды на форме, поэтому отправка сразу; не ушло — один повтор
+ * через 5 минут очередью (promix_max_retry).
  *
  * @param string  $hook Действие-отправитель (promix_max_send_lead / _order).
  * @param mixed[] $args Его аргументы — только скаляры, они уходят в базу.
  */
 function promix_max_defer( string $hook, array $args ): void {
-    if ( ! function_exists( 'fastcgi_finish_request' ) && function_exists( 'as_enqueue_async_action' ) ) {
-        as_enqueue_async_action( $hook, $args, 'promix' );
-        return;
-    }
-
     if ( doing_action( 'shutdown' ) || did_action( 'shutdown' ) ) {
         do_action_ref_array( $hook, $args );
         return;
@@ -121,14 +118,33 @@ function promix_max_defer( string $hook, array $args ): void {
  * @param int    $lead_id Идентификатор заявки.
  * @param string $text    Готовый текст сообщения.
  */
-function promix_max_send_lead( int $lead_id, string $text ): void {
+function promix_max_send_lead( int $lead_id, string $text, int $attempt = 0 ): void {
     $result = promix_max_send( $text );
 
     if ( is_wp_error( $result ) ) {
         update_post_meta( $lead_id, '_promix_max_failed', $result->get_error_message() );
+        promix_max_retry( 'promix_max_send_lead', array( $lead_id, $text ), $attempt );
+        return;
+    }
+
+    delete_post_meta( $lead_id, '_promix_max_failed' );
+}
+add_action( 'promix_max_send_lead', 'promix_max_send_lead', 10, 3 );
+
+/**
+ * Не ушло сразу — ещё одна попытка через 5 минут, очередью Woo (её
+ * выполняет cron). Одна: если MAX лежит дольше, заявка и так видна
+ * в админке с пометкой «в MAX не ушло».
+ *
+ * @param string  $hook    Действие-отправитель.
+ * @param mixed[] $args    Его аргументы без номера попытки.
+ * @param int     $attempt Какая это была попытка.
+ */
+function promix_max_retry( string $hook, array $args, int $attempt ): void {
+    if ( $attempt < 1 && function_exists( 'as_schedule_single_action' ) ) {
+        as_schedule_single_action( time() + 5 * MINUTE_IN_SECONDS, $hook, array_merge( $args, array( $attempt + 1 ) ), 'promix' );
     }
 }
-add_action( 'promix_max_send_lead', 'promix_max_send_lead', 10, 2 );
 
 /**
  * Отправка заказа — то, что откладывает promix_max_defer.
@@ -136,7 +152,7 @@ add_action( 'promix_max_send_lead', 'promix_max_send_lead', 10, 2 );
  * @param int    $order_id Номер заказа.
  * @param string $text     Готовый текст сообщения.
  */
-function promix_max_send_order( int $order_id, string $text ): void {
+function promix_max_send_order( int $order_id, string $text, int $attempt = 0 ): void {
     $order = wc_get_order( $order_id );
 
     if ( ! $order instanceof WC_Order ) {
@@ -149,11 +165,15 @@ function promix_max_send_order( int $order_id, string $text ): void {
         $order->update_meta_data( '_promix_max_failed', $result->get_error_message() );
         $order->add_order_note( sprintf( /* translators: %s — ошибка. */ __( 'В MAX не ушло: %s', 'promix' ), $result->get_error_message() ) );
         $order->save();
-    } else {
-        $order->add_order_note( __( 'Отправлено менеджеру в MAX.', 'promix' ) );
+        promix_max_retry( 'promix_max_send_order', array( $order_id, $text ), $attempt );
+        return;
     }
+
+    $order->delete_meta_data( '_promix_max_failed' );
+    $order->add_order_note( __( 'Отправлено менеджеру в MAX.', 'promix' ) );
+    $order->save();
 }
-add_action( 'promix_max_send_order', 'promix_max_send_order', 10, 2 );
+add_action( 'promix_max_send_order', 'promix_max_send_order', 10, 3 );
 
 /**
  * Отдать ответ браузеру и закрыть соединение, не завершая скрипт.
