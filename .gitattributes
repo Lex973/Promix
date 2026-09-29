@@ -5,3 +5,5 @@ _content/ export-ignore
 .gitignore export-ignore
 # Исходник фона первого экрана (4 МБ): на сайт идут собранные WebP.
 assets/img/office/8.png export-ignore
+# Исходник схемы проезда (2 МБ): на сайт идут собранные scheme*.webp.
+assets/img/scheme.png export-ignore

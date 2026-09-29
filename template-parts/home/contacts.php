@@ -133,7 +133,8 @@ $scheme_alt    = 'Схема проезда к PROMIX: улица Габдулл
                         );
                         ?>
                     <?php else : ?>
-                        <img class="scheme__img" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/scheme.webp' ) ); ?>"
+                        <?php // Версия по дате файла: схему заменили — браузер не покажет старую из кэша. ?>
+                        <img class="scheme__img" src="<?php echo esc_url( add_query_arg( 'ver', promix_asset_version( 'assets/img/scheme.webp' ), get_theme_file_uri( 'assets/img/scheme.webp' ) ) ); ?>"
                              alt="<?php echo esc_attr( $scheme_alt ); ?>" loading="lazy" width="1254" height="1254">
                     <?php endif; ?>
                 </div>
