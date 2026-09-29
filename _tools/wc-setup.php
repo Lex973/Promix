@@ -1,7 +1,7 @@
 <?php
 $key = 'СЕКРЕТ';
 // Ключ должен быть заменён на случайную строку из 12+ латинских букв и цифр — с плейсхолдером скрипт не работает.
-if (!preg_match('/^[a-z0-9]{12,}$/i', $key) || ($_GET['k'] ?? '') !== $key) { http_response_code(403); exit('no'); }
+if (!preg_match('/^[a-z0-9]{12,}$/i', $key) || !hash_equals($key, (string) ($_GET['k'] ?? ''))) { http_response_code(403); exit('no'); }
 require __DIR__ . '/wp-load.php';
 header('Content-Type: text/plain; charset=utf-8');
 

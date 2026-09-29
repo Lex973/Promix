@@ -218,10 +218,20 @@ add_filter( 'woocommerce_price_trim_zeros', '__return_true' );
  * называет менеджер. Флаг и единица — поля товара в админке
  * («Цена «от»», «Единица цены»), см. inc/woocommerce.php.
  *
- * @param WC_Product|null|false $product Товар.
+ * Позиция заказа несёт свой флаг, записанный при оформлении: товар потом
+ * могут изменить или удалить, а старый заказ должен остаться «от».
+ * Для заказов, оформленных до снимка, — флаг текущего товара.
+ *
+ * @param WC_Product|WC_Order_Item_Product|null|false $product Товар или позиция заказа.
  * @return bool
  */
 function promix_price_is_from( $product ): bool {
+    if ( $product instanceof WC_Order_Item_Product ) {
+        $snapshot = $product->get_meta( '_promix_price_from' );
+
+        return '' !== $snapshot ? 'yes' === $snapshot : promix_price_is_from( $product->get_product() );
+    }
+
     return $product instanceof WC_Product && 'yes' === $product->get_meta( '_promix_price_from' );
 }
 
@@ -259,8 +269,8 @@ function promix_product_price( WC_Product $product, ?float $amount = null ): str
 /**
  * Итог корзины или заказа: «от», если в нём есть хоть одна цена «от».
  *
- * @param float                        $total    Сумма.
- * @param iterable<WC_Product|null|false> $products Товары позиций.
+ * @param float                                             $total    Сумма.
+ * @param iterable<WC_Product|WC_Order_Item_Product|null|false> $products Товары или позиции заказа.
  * @return string
  */
 function promix_total_price( float $total, iterable $products ): string {
@@ -283,14 +293,36 @@ function promix_cart_products(): array {
 }
 
 /**
- * Товары заказа — для promix_total_price().
+ * Позиции заказа — для promix_total_price(). Именно позиции, а не товары:
+ * у них свой снимок «от» на момент заказа.
  *
  * @param WC_Order $order Заказ.
- * @return array<WC_Product|null|false>
+ * @return WC_Order_Item_Product[]
  */
 function promix_order_products( WC_Order $order ): array {
-    return array_map( static fn ( $item ) => $item instanceof WC_Order_Item_Product ? $item->get_product() : null, array_values( $order->get_items() ) );
+    return array_values( array_filter( $order->get_items(), static fn ( $item ): bool => $item instanceof WC_Order_Item_Product ) );
 }
+
+/**
+ * Снимок «от» и единицы в позицию заказа при её создании.
+ *
+ * @param int           $item_id Позиция.
+ * @param WC_Order_Item $item    Объект позиции.
+ */
+function promix_order_item_price_snapshot( $item_id, $item ): void {
+    if ( ! $item instanceof WC_Order_Item_Product ) {
+        return;
+    }
+
+    $product = $item->get_product();
+
+    wc_update_order_item_meta( $item_id, '_promix_price_from', promix_price_is_from( $product ) ? 'yes' : 'no' );
+
+    if ( promix_price_unit( $product ) ) {
+        wc_update_order_item_meta( $item_id, '_promix_price_unit', promix_price_unit( $product ) );
+    }
+}
+add_action( 'woocommerce_new_order_item', 'promix_order_item_price_snapshot', 10, 2 );
 
 /**
  * Это страница каталога или его раздела?

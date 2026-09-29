@@ -21,7 +21,9 @@ out=docs/deploy
 rm -rf "$out"
 mkdir -p "$out"
 
-git archive --format=zip -o "$out/promix.zip" HEAD
+# Переводы строк — как в репозитории (LF), без оглядки на core.autocrlf
+# машины: иначе на Windows в архив уходят CRLF и суммы не сходятся.
+git -c core.autocrlf=false archive --format=zip -o "$out/promix.zip" HEAD
 
 # CSV — заново из прайса, чтобы на сервер ушли тексты текущего генератора.
 python _tools/wc-import-csv.py
@@ -53,7 +55,7 @@ rows=$(( $(wc -l < "$out/woo-import.csv") - 1 ))
     echo "  wp-config.php на сервере — константы из шага 7."
     echo
     echo "SHA-256:"
-    (cd "$out" && sha256sum promix.zip woo-import.csv woo-descriptions.csv wc-categories.csv decor.csv)
+    (cd "$out" && sha256sum promix.zip woo-import.csv woo-descriptions.csv wc-categories.csv decor.csv wc-setup.php wc-recategorize.php wc-decor.php wc-import.php)
 } > "$out/СОСТАВ.txt"
 
 echo "Готово: $out"

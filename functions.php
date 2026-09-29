@@ -96,6 +96,9 @@ require_once get_theme_file_path( 'inc/lead-form.php' );
 // Почта через SMTP (константы в wp-config.php).
 require_once get_theme_file_path( 'inc/mail.php' );
 
+// Защита входа: XML-RPC, перебор логинов и паролей.
+require_once get_theme_file_path( 'inc/security.php' );
+
 /**
  * Стили и скрипты фронта.
  */

@@ -147,7 +147,7 @@ add_action( 'woocommerce_admin_process_product_object', 'promix_price_from_save'
  * @return string
  */
 function promix_price_from_email_line( $subtotal, $item ) {
-    return $item instanceof WC_Order_Item_Product && promix_price_is_from( $item->get_product() ) ? __( 'от', 'promix' ) . ' ' . $subtotal : $subtotal;
+    return $item instanceof WC_Order_Item_Product && promix_price_is_from( $item ) ? __( 'от', 'promix' ) . ' ' . $subtotal : $subtotal;
 }
 add_filter( 'woocommerce_order_formatted_line_subtotal', 'promix_price_from_email_line', 10, 2 );
 

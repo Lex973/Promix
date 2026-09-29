@@ -274,7 +274,7 @@ function promix_max_order( WC_Order $order ): void {
             $item->get_name(),
             $sku,
             $item->get_quantity(),
-            ( promix_price_is_from( $product ) ? __( 'от', 'promix' ) . ' ' : '' ) . promix_price( (float) $item->get_total() )
+            ( promix_price_is_from( $item ) ? __( 'от', 'promix' ) . ' ' : '' ) . promix_price( (float) $item->get_total() )
         );
     }
 

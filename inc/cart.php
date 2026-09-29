@@ -515,6 +515,12 @@ function promix_checkout_submit(): void {
         // «На удержании»: заказ ждёт звонка, а не оплаты — processing помечал бы его оплаченным.
         $order->update_status( 'on-hold', __( 'Заказ с сайта: ждёт звонка менеджера.', 'promix' ) );
     } catch ( Throwable $e ) {
+        // wc_create_order() сохраняет заказ сразу — без этого в базе остался бы
+        // недособранный заказ, который покупатель не видел и менеджер не ждёт.
+        if ( isset( $order ) && $order instanceof WC_Order && $order->get_id() ) {
+            $order->delete( true );
+        }
+
         $wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- замок, а не данные.
         promix_checkout_errors( array( __( 'Не получилось сохранить заказ. Позвоните нам, пожалуйста.', 'promix' ) ) );
         return;

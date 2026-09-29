@@ -14,9 +14,10 @@
  *     define( 'PROMIX_SMTP_PASS', '…' );              // пароль для внешних приложений, не от почты
  *     define( 'PROMIX_MAIL_FROM_NAME', 'PROMIX' );    // необязательно
  *
- * Пока PROMIX_SMTP_HOST не задан, ничего не меняется — письма идут как раньше.
- * Отправитель всех писем (заявки, заказы, письма Woo) становится SMTP-ящиком:
- * mail.ru не принимает письма с чужим From.
+ * Пока PROMIX_SMTP_HOST не задан, письма идут через sendmail хостинга от
+ * noreply@домен (заявки и письма Woo). С SMTP отправитель всех писем
+ * (заявки, заказы, письма Woo) — SMTP-ящик: mail.ru не принимает письма
+ * с чужим From.
  *
  * @package promix
  */
@@ -95,6 +96,26 @@ function promix_mail_from( $from ) {
     return promix_smtp_ready() && promix_smtp_from() ? promix_smtp_from() : $from;
 }
 add_filter( 'wp_mail_from', 'promix_mail_from' );
+
+/**
+ * Отправитель писем Woo (заказ менеджеру, письмо покупателю). У Woo свой
+ * адрес в настройках — по умолчанию почта магазина promix.kazan@mail.ru,
+ * а письмо «от mail.ru» с сервера хостинга mail.ru отклоняет (DMARC
+ * p=reject), и о заказе никто не узнаёт. Поэтому: при SMTP — сам ящик,
+ * без SMTP — noreply@домен, как у заявок; домен берётся из адреса сайта
+ * и после переезда на боевой меняется сам.
+ *
+ * @param mixed $address Адрес из настроек Woo.
+ * @return mixed
+ */
+function promix_woo_mail_from( $address ) {
+    if ( promix_smtp_ready() && promix_smtp_from() ) {
+        return promix_smtp_from();
+    }
+
+    return function_exists( 'promix_lead_from' ) ? promix_lead_from() : $address;
+}
+add_filter( 'woocommerce_email_from_address', 'promix_woo_mail_from' );
 
 /**
  * Имя отправителя для писем ядра («WordPress» → «PROMIX»).

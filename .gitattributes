@@ -7,3 +7,13 @@ _content/ export-ignore
 assets/img/office/8.png export-ignore
 # Исходник схемы проезда (2 МБ): на сайт идут собранные scheme*.webp.
 assets/img/scheme.png export-ignore
+# Обвязка разработки Carbon Fields: исходники JS, сборка, патчи — на сайте
+# не нужны, работает только собранное из build/ и core/.
+vendor/htmlburger/carbon-fields/bin/ export-ignore
+vendor/htmlburger/carbon-fields/packages/ export-ignore
+vendor/htmlburger/carbon-fields/patches/ export-ignore
+vendor/htmlburger/carbon-fields/webpack.config.js export-ignore
+vendor/htmlburger/carbon-fields/package.json export-ignore
+vendor/htmlburger/carbon-fields/yarn.lock export-ignore
+vendor/htmlburger/carbon-fields/CONTRIBUTING.md export-ignore
+vendor/htmlburger/carbon-fields/ISSUE_TEMPLATE.md export-ignore

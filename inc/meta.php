@@ -276,6 +276,12 @@ add_filter( 'wp_robots', 'promix_robots' );
  * @return array<string, string>
  */
 function promix_security_headers( array $headers ): array {
+    // HSTS — только по HTTPS: браузер год не пустит на сайт по http.
+    // Без includeSubDomains: у домена заказчика могут быть поддомены без SSL.
+    if ( is_ssl() ) {
+        $headers['Strict-Transport-Security'] = 'max-age=31536000';
+    }
+
     return array_merge(
         $headers,
         array(
