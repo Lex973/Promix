@@ -359,10 +359,16 @@
   transition: color var(--transition), border-color var(--transition);
 }
 
+/* Логотип вписывается в рамку: высокие упираются в высоту, широкие — в ширину
+   плитки. Было только max-height: 34px — широкий логотип превращался в полоску.
+   multiply: белый фон у JPG-логотипа сливается с плиткой, а не рисует
+   белый прямоугольник */
 .brand__logo {
-  max-height: 34px;
+  height: clamp(36px, 3.4vw, 52px);
   width: auto;
+  max-width: clamp(110px, 11vw, 170px);
   object-fit: contain;
+  mix-blend-mode: multiply;
   filter: grayscale(1);
   opacity: 0.75;
   transition: filter var(--transition), opacity var(--transition);
