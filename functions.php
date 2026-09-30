@@ -296,6 +296,15 @@ function promix_font_faces(): void {
         }
     }
 
+    // Bebas Neue — только для плитки Prime Color в ленте брендов: так название
+    // написано на банках. Один файл: латинские заглавные и пробел (4 КБ),
+    // браузер качает его, только если плитка есть на странице. Лицензия OFL —
+    // assets/fonts/OFL-BebasNeue.txt.
+    $css .= sprintf(
+        '@font-face{font-family:"Bebas Neue";font-style:normal;font-weight:400;font-display:swap;src:url(%s) format("woff2");unicode-range:U+0020,U+0041-005A}',
+        esc_url( get_theme_file_uri( 'assets/fonts/bebas-neue-latin.woff2' ) )
+    );
+
     // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- css собран из констант выше, адреса пропущены через esc_url().
     echo '<style id="promix-fonts">' . $css . '</style>' . "
 ";

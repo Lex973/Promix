@@ -74,12 +74,14 @@ $rows   = array(
                                 )
                                 : esc_html( $name );
 
+                            // data-brand — метка для точечного оформления марки в css (Prime Color).
                             printf(
-                                '<%1$s class="brand"%2$s%3$s>%4$s</%1$s>',
+                                '<%1$s class="brand" data-brand="%5$s"%2$s%3$s>%4$s</%1$s>',
                                 esc_html( $tag ),
                                 $url ? ' href="' . esc_url( $url ) . '"' : '',
                                 $color ? ' style="--brand-color:' . esc_attr( $color ) . '"' : '',
-                                $inner // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- экранировано выше.
+                                $inner, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- экранировано выше.
+                                esc_attr( sanitize_title( $name ) )
                             );
                             ?>
                         <?php endforeach; ?>
