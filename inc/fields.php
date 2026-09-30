@@ -321,7 +321,7 @@ function promix_contacts(): array {
         'email'         => promix_option( 'email', 'promix.kazan@mail.ru' ),
         'legal_name'    => promix_option( 'legal_name', 'ООО «ПРОМИКС КАЗАНЬ»' ),
         'inn'           => promix_option( 'inn', '1648048364' ),
-        'ogrn'          => promix_option( 'ogrn', '' ),
+        'ogrn'          => promix_option( 'ogrn', '1181690064016' ), // ЕГРЮЛ по ИНН, подтверждено заказчиком 30.09.2026
         'legal_address' => promix_option( 'legal_address', '420095, г. Казань, ул. Шамиля Усманова, д. 12, кв. 17' ),
         'max_url'       => promix_option( 'max_url', '#' ),
         'gis_url'       => promix_option( '2gis_url', 'https://2gis.ru/kazan/firm/70000001060590384' ),
