@@ -209,19 +209,6 @@
   color: var(--color-muted);
 }
 
-.single__help-max {
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-/* Блок серый — светлой кнопке Telegram нужен свой белый фон */
-.single__help .btn-max--tg {
-  background: var(--color-bg);
-}
-
 /* Счётчик на странице товара — той же высоты, что кнопка «В корзину» */
 .cart-control--single {
   margin-top: 22px;

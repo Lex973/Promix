@@ -156,11 +156,9 @@ while ( have_posts() ) :
                     <?php /* Прямой контакт — в отличие от плашки внизу, где форма заявки. */ ?>
                     <aside class="single__help">
                         <p class="single__help-title"><?php esc_html_e( 'Вопрос по товару?', 'promix' ); ?></p>
-                        <p class="single__help-text"><?php esc_html_e( 'Позвоните или напишите — подскажем по применению и совместимости, подберём аналог, если этого нет на складе.', 'promix' ); ?></p>
+                        <p class="single__help-text"><?php esc_html_e( 'Позвоните — подскажем по применению и совместимости, подберём аналог, если этого нет на складе.', 'promix' ); ?></p>
                         <div class="single__help-row">
                             <a class="single__help-phone" href="tel:<?php echo esc_attr( promix_tel_href() ); ?>"><?php echo esc_html( $contacts['phone'] ); ?></a>
-                            <?php get_template_part( 'template-parts/btn-max', null, array( 'class' => 'single__help-max', 'label' => '', 'aria' => __( 'Написать в MAX', 'promix' ) ) ); ?>
-                            <?php get_template_part( 'template-parts/btn-telegram', null, array( 'class' => 'single__help-max', 'label' => '', 'aria' => __( 'Написать в Telegram', 'promix' ) ) ); ?>
                         </div>
                         <p class="single__help-hours"><?php echo esc_html( promix_hours_full() ); ?></p>
                     </aside>
