@@ -61,6 +61,7 @@ function promix_lead_columns( array $columns ): array {
         'promix_phone'  => __( 'Телефон', 'promix' ),
         'promix_source' => __( 'Откуда', 'promix' ),
         'promix_note'   => __( 'Сообщение', 'promix' ),
+        'promix_agree'  => __( 'Согласие', 'promix' ),
         'date'          => __( 'Когда', 'promix' ),
     );
 }
@@ -87,6 +88,11 @@ function promix_lead_column( string $column, int $post_id ): void {
 
         case 'promix_note':
             echo esc_html( wp_trim_words( (string) get_post_meta( $post_id, '_promix_note', true ), 14 ) );
+            break;
+
+        case 'promix_agree':
+            // У заявок до 30.09.2026 отметки нет — согласие тогда не записывалось.
+            echo esc_html( (string) get_post_meta( $post_id, '_promix_consent', true ) ?: '—' );
             break;
     }
 }
@@ -338,6 +344,7 @@ function promix_handle_lead(): void {
     update_post_meta( $lead_id, '_promix_phone', $phone );
     update_post_meta( $lead_id, '_promix_note', $note );
     update_post_meta( $lead_id, '_promix_source', $source );
+    update_post_meta( $lead_id, '_promix_consent', promix_consent_record() );
 
     // Письмо могло не уйти — такую заявку в списке видно сразу.
     if ( ! promix_notify_lead( $name, $phone, $note, $source ) ) {
@@ -368,6 +375,29 @@ add_action( 'wp_ajax_nopriv_promix_lead', 'promix_handle_lead' );
  */
 const PROMIX_CONSENT_SLUG = 'soglasie';
 
+/*
+ * Редакция текста согласия (_content/consent.md). Меняется вместе с текстом:
+ * по ней видно, на каких условиях человек дал согласие.
+ */
+const PROMIX_CONSENT_VERSION = '30.09.2026';
+
+/**
+ * Запись о полученном согласии для заявки и заказа: когда и в какой
+ * редакции. Доказать согласие должен оператор (ч. 3 ст. 9 152-ФЗ);
+ * IP не пишем — Политика обещает его не хранить, человека и так
+ * определяют имя и телефон.
+ *
+ * @return string
+ */
+function promix_consent_record(): string {
+    return sprintf(
+        /* translators: 1 — дата и время, 2 — редакция согласия. */
+        __( 'дано %1$s, согласие в редакции от %2$s', 'promix' ),
+        wp_date( 'd.m.Y H:i' ),
+        PROMIX_CONSENT_VERSION
+    );
+}
+
 /**
  * Адрес страницы согласия; пока её нет — политика, чтобы ссылка не вела в 404.
  *
@@ -387,17 +417,18 @@ function promix_consent_url(): string {
  * Подпись галочки согласия — одна на форму заявки и оформление заказа.
  */
 function promix_the_consent_label(): void {
-    $url  = promix_consent_url();
-    $text = __( 'согласие на обработку персональных данных', 'promix' );
+    $link = static function ( string $url, string $text ): string {
+        return $url
+            ? sprintf( '<a href="%s" target="_blank" rel="noopener">%s</a>', esc_url( $url ), esc_html( $text ) )
+            : esc_html( $text );
+    };
 
-    esc_html_e( 'Даю', 'promix' );
-    echo ' ';
-
-    if ( $url ) {
-        printf( '<a href="%s" target="_blank" rel="noopener">%s</a>', esc_url( $url ), esc_html( $text ) );
-    } else {
-        echo esc_html( $text );
-    }
+    printf(
+        /* translators: 1 — ссылка на согласие, 2 — ссылка на политику. */
+        esc_html__( 'Даю %1$s в соответствии с %2$s', 'promix' ),
+        $link( promix_consent_url(), __( 'согласие на обработку персональных данных', 'promix' ) ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- экранировано в $link.
+        $link( (string) get_privacy_policy_url(), __( 'политикой обработки персональных данных', 'promix' ) ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+    );
 }
 
 /**

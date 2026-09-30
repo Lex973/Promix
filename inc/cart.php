@@ -510,10 +510,12 @@ function promix_checkout_submit(): void {
         $order->set_customer_note( $v['comment'] );
         $order->update_meta_data( '_promix_delivery', $v['delivery'] );
         $order->update_meta_data( '_promix_dedup', $dedup );
+        $order->update_meta_data( '_promix_consent', promix_consent_record() );
         $order->calculate_totals( false );
 
         // «На удержании»: заказ ждёт звонка, а не оплаты — processing помечал бы его оплаченным.
         $order->update_status( 'on-hold', __( 'Заказ с сайта: ждёт звонка менеджера.', 'promix' ) );
+        $order->add_order_note( sprintf( /* translators: %s — когда и в какой редакции. */ __( 'Согласие на обработку персональных данных: %s.', 'promix' ), $order->get_meta( '_promix_consent' ) ) );
     } catch ( Throwable $e ) {
         // wc_create_order() сохраняет заказ сразу — без этого в базе остался бы
         // недособранный заказ, который покупатель не видел и менеджер не ждёт.
