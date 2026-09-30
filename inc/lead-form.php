@@ -360,6 +360,46 @@ function promix_handle_lead(): void {
 add_action( 'wp_ajax_promix_lead', 'promix_handle_lead' );
 add_action( 'wp_ajax_nopriv_promix_lead', 'promix_handle_lead' );
 
+/*
+ * Согласие на обработку персональных данных — отдельная страница /soglasie/:
+ * с 01.09.2025 согласие оформляется отдельно от иных документов
+ * (152-ФЗ в ред. 156-ФЗ), галочка «Согласен с политикой» этого не даёт.
+ * Текст страницы — _content/consent.md.
+ */
+const PROMIX_CONSENT_SLUG = 'soglasie';
+
+/**
+ * Адрес страницы согласия; пока её нет — политика, чтобы ссылка не вела в 404.
+ *
+ * @return string
+ */
+function promix_consent_url(): string {
+    $page = get_page_by_path( PROMIX_CONSENT_SLUG );
+
+    if ( $page instanceof WP_Post && 'publish' === $page->post_status ) {
+        return (string) get_permalink( $page );
+    }
+
+    return (string) get_privacy_policy_url();
+}
+
+/**
+ * Подпись галочки согласия — одна на форму заявки и оформление заказа.
+ */
+function promix_the_consent_label(): void {
+    $url  = promix_consent_url();
+    $text = __( 'согласие на обработку персональных данных', 'promix' );
+
+    esc_html_e( 'Даю', 'promix' );
+    echo ' ';
+
+    if ( $url ) {
+        printf( '<a href="%s" target="_blank" rel="noopener">%s</a>', esc_url( $url ), esc_html( $text ) );
+    } else {
+        echo esc_html( $text );
+    }
+}
+
 /**
  * Обратный адрес письма: ящик на своём домене, иначе письмо уходит в спам.
  *

@@ -7,8 +7,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$policy_url = get_privacy_policy_url();
-
 ?>
 <div class="modal" id="lead-modal" data-lead-modal hidden>
     <div class="modal__overlay" data-lead-close></div>
@@ -42,12 +40,7 @@ $policy_url = get_privacy_policy_url();
             <label class="lead__agree">
                 <input type="checkbox" name="agree" value="1" required>
                 <span>
-                    <?php esc_html_e( 'Согласен с', 'promix' ); ?>
-                    <?php if ( $policy_url ) : ?>
-                        <a href="<?php echo esc_url( $policy_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'политикой обработки персональных данных', 'promix' ); ?></a>
-                    <?php else : ?>
-                        <?php esc_html_e( 'политикой обработки персональных данных', 'promix' ); ?>
-                    <?php endif; ?>
+                    <?php promix_the_consent_label(); ?>
                 </span>
             </label>
 
