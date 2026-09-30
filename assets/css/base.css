@@ -632,3 +632,44 @@ body.is-menu-open {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* ===== Заглушки фото до загрузки =====
+   Пока фото грузится, на его месте светлый фон, который тихо «дышит»;
+   загрузилось — фото проявляется. Класс is-loaded ставит скрипт в <head>
+   (functions.php, promix_image_placeholders), js-img на <html> — он же:
+   без JS заглушек нет и фото видны как обычно.
+   Карточки товара и обложка раздела уже лежат на подложке — у них
+   дышит подложка, а фото проявляется. Остальные фото непрозрачные,
+   фон ставим прямо на <img>: фото ложится поверх. Логотипы брендов
+   не трогаем — они прозрачные и смешиваются с плиткой через multiply. */
+
+.js-img :is(.about__photo, .seminars__photo, .scheme__img) {
+  background-color: var(--color-surface-alt);
+}
+
+.js-img :is(.product__img, .single__img, .cat__photo) {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.js-img :is(.product__img, .single__img, .cat__photo).is-loaded {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .js-img :is(.about__photo, .seminars__photo, .scheme__img):not(.is-loaded),
+  .js-img :is(.product__media, .single__media):has(> img:not(.is-loaded)) {
+    animation: img-wait 1.4s ease-in-out infinite alternate;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-img :is(.product__img, .single__img, .cat__photo) {
+    transition: none;
+  }
+}
+
+@keyframes img-wait {
+  from { background-color: var(--color-surface-alt); }
+  to   { background-color: var(--color-surface-dim); }
+}

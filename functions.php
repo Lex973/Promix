@@ -310,3 +310,22 @@ function promix_font_faces(): void {
 ";
 }
 add_action( 'wp_head', 'promix_font_faces', 2 );
+
+/**
+ * Заглушки фото до загрузки: помечаем загруженные картинки классом is-loaded,
+ * CSS держит на их месте светлый фон и проявляет фото (base.css, «Заглушки»).
+ * Стоит в <head>, до первой картинки: слушатель на document ловит load и error
+ * всех <img>, в том числе подгруженных каталогом позже. Класс js-img на <html>
+ * включает заглушки только при работающем JS — без него фото видны сразу.
+ */
+function promix_image_placeholders(): void {
+    $js = "(function(d){var r=d.documentElement;r.classList.add('js-img');"
+        . "function m(e){var t=e.target;if(t&&t.tagName==='IMG')t.classList.add('is-loaded')}"
+        . "d.addEventListener('load',m,true);d.addEventListener('error',m,true);"
+        // Страховка: картинка из кэша могла загрузиться раньше, чем событие дошло.
+        . "function s(){d.querySelectorAll('img:not(.is-loaded)').forEach(function(i){if(i.complete)i.classList.add('is-loaded')})}"
+        . "d.addEventListener('DOMContentLoaded',s);window.addEventListener('load',s);window.addEventListener('pageshow',s)})(document);";
+
+    wp_print_inline_script_tag( $js, array( 'id' => 'promix-img' ) );
+}
+add_action( 'wp_head', 'promix_image_placeholders', 1 );
