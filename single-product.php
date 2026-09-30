@@ -160,6 +160,7 @@ while ( have_posts() ) :
                         <div class="single__help-row">
                             <a class="single__help-phone" href="tel:<?php echo esc_attr( promix_tel_href() ); ?>"><?php echo esc_html( $contacts['phone'] ); ?></a>
                             <?php get_template_part( 'template-parts/btn-max', null, array( 'class' => 'single__help-max', 'label' => '', 'aria' => __( 'Написать в MAX', 'promix' ) ) ); ?>
+                            <?php get_template_part( 'template-parts/btn-telegram', null, array( 'class' => 'single__help-max', 'label' => '', 'aria' => __( 'Написать в Telegram', 'promix' ) ) ); ?>
                         </div>
                         <p class="single__help-hours"><?php echo esc_html( promix_hours_full() ); ?></p>
                     </aside>

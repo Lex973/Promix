@@ -78,6 +78,9 @@ Container::make( 'theme_options', __( 'Контакты PROMIX', 'promix' ) )
             Field::make( 'text', 'promix_max_url', __( 'Ссылка на MAX', 'promix' ) )
                 ->set_help_text( __( 'Кнопка «Написать в MAX» в шапке, меню, контактах и подвале.', 'promix' ) ),
 
+            Field::make( 'text', 'promix_tg_url', __( 'Ссылка на Telegram', 'promix' ) )
+                ->set_help_text( __( 'Кнопка «Написать в Telegram» рядом с MAX в меню, контактах, подвале и на странице товара. Пусто — кнопки нет. Сейчас: https://t.me/Promix_Kzn', 'promix' ) ),
+
             Field::make( 'text', 'promix_2gis_url', __( 'Карточка в 2ГИС', 'promix' ) )
                 ->set_width( 50 ),
 

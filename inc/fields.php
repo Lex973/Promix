@@ -324,6 +324,7 @@ function promix_contacts(): array {
         'ogrn'          => promix_option( 'ogrn', '1181690064016' ), // ЕГРЮЛ по ИНН, подтверждено заказчиком 30.09.2026
         'legal_address' => promix_option( 'legal_address', '420095, г. Казань, ул. Шамиля Усманова, д. 12, кв. 17' ),
         'max_url'       => promix_option( 'max_url', '#' ),
+        'tg_url'        => promix_option( 'tg_url', 'https://t.me/Promix_Kzn' ),
         'gis_url'       => promix_option( '2gis_url', 'https://2gis.ru/kazan/firm/70000001060590384' ),
         'yandex_url'    => promix_option( 'yandex_url', 'https://yandex.ru/maps/org/promix/59684652364/' ),
         'map_embed'     => promix_option( 'map_embed', 'https://yandex.ru/map-widget/v1/org/promix/59684652364/?ll=49.120092%2C55.774053&z=17' ),

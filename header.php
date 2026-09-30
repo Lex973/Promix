@@ -96,6 +96,7 @@ $promix = promix_contacts();
         <a class="mobile-menu__phone" href="tel:<?php echo esc_attr( promix_tel_href() ); ?>"><?php echo esc_html( $promix['phone'] ); ?></a>
         <p class="mobile-menu__hint"><?php echo esc_html( promix_hours_full() . ' · ' . $promix['address'] ); ?></p>
         <?php get_template_part( 'template-parts/btn-max' ); ?>
+        <?php get_template_part( 'template-parts/btn-telegram' ); ?>
     </div>
 </aside>
 

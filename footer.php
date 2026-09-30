@@ -28,6 +28,11 @@ $promix_policy = get_privacy_policy_url();
                     null,
                     array( 'class' => 'footer__max' )
                 );
+                get_template_part(
+                    'template-parts/btn-telegram',
+                    null,
+                    array( 'class' => 'footer__max' )
+                );
                 ?>
             </div>
 

@@ -77,6 +77,11 @@ $scheme_alt    = 'Схема проезда к PROMIX: улица Габдулл
                                 null,
                                 array( 'class' => 'contact__max' )
                             );
+                            get_template_part(
+                                'template-parts/btn-telegram',
+                                null,
+                                array( 'class' => 'contact__max' )
+                            );
                             ?>
                         </div>
                     </div>

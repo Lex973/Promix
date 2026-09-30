@@ -335,6 +335,10 @@
   height: 54px;
 }
 
+.mobile-menu .btn-max + .btn-max {
+  margin-left: 0;
+}
+
 @media (max-width: 1280px) {
   .nav__list { gap: 26px; }
   .nav__list a { font-size: 16px; }

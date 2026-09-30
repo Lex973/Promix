@@ -235,6 +235,22 @@ html.lenis body {
   flex-shrink: 0;
 }
 
+/* Telegram — рядом с MAX, но светлая: главный канал — MAX */
+.btn-max--tg {
+  background: var(--color-surface-alt);
+  color: var(--color-ink);
+}
+
+.btn-max--tg:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-brand);
+}
+
+/* Две кнопки в строку — с зазором; в колонке (меню) зазор даёт gap */
+.btn-max + .btn-max {
+  margin-left: 10px;
+}
+
 body.is-menu-open {
   overflow: hidden;
 }
