@@ -246,9 +246,10 @@ html.lenis body {
   color: var(--color-brand);
 }
 
-/* Две кнопки в строку — с зазором; в колонке (меню) зазор даёт gap */
-.btn-max + .btn-max {
-  margin-left: 10px;
+/* Две кнопки в строку — зазор справа у первой: если вторая не влезла
+   и перенеслась, она встаёт ровно под первой. В меню (колонка) — gap */
+.btn-max:has(+ .btn-max) {
+  margin-right: 10px;
 }
 
 body.is-menu-open {
