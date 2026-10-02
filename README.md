@@ -57,8 +57,8 @@ WordPress + WooCommerce + Carbon Fields. Содержимое главной и 
 
     git archive --format=zip -o promix.zip HEAD
 
-`export-ignore` в `.gitattributes` выкидывает из архива `_tools/` и `_content/` —
-им на хостинге делать нечего. При `git pull` эти папки и
+`export-ignore` в `.gitattributes` выкидывает из архива `_tools/`, `_content/`,
+`README.md`, `DEPLOY.md` и `composer.*` — им на хостинге делать нечего. При `git pull` эти папки и
 `composer.json`, `composer.lock`, `README.md` окажутся в `wp-content/themes/promix/`
 и будут отдаваться по прямой ссылке. На Apache их закрывает `.htaccess` в корне
 темы; под чистым nginx добавить в server-блок:
