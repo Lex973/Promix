@@ -252,6 +252,24 @@ function promix_meta_tags(): void {
 add_action( 'wp_head', 'promix_meta_tags', 5 );
 
 /**
+ * Логотип PROMIX на вкладке, пока отдельная иконка не задана в WordPress.
+ */
+function promix_favicon(): void {
+    if ( has_site_icon() ) {
+        return;
+    }
+
+    $url = add_query_arg(
+        'ver',
+        promix_asset_version( 'assets/img/favicon.svg' ),
+        get_theme_file_uri( 'assets/img/favicon.svg' )
+    );
+
+    printf( '<link rel="icon" type="image/svg+xml" sizes="any" href="%s">' . "\n", esc_url( $url ) );
+}
+add_action( 'wp_head', 'promix_favicon', 99 );
+
+/**
  * Каталог с фильтрами — noindex, follow.
  *
  * @param array<string, bool> $robots Директивы.
