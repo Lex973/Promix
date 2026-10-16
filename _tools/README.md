@@ -1,5 +1,11 @@
 # Служебные скрипты
 
+- `odata_probe.py` — проверка служебного доступа к 1С через OData: метаданные и
+  явно выбранная небольшая выборка, только GET. Запуск: `python -B _tools/odata_probe.py`.
+  Пароль вводится скрыто; отчёт сохраняется в `docs/integration-1c/odata-runs/` вне git.
+  Не меняет цены в 1С и WooCommerce. Инструкция: `docs/integration-1c/ODATA-PREPARATION-2026-10-08.md`.
+  Проверки: `python -B -m unittest discover -s _tools/tests -p test_odata_probe.py -v`.
+
 Порядок применения на новом сервере — в `DEPLOY.md` в корне репозитория.
 
 Не часть темы. Нужны при развёртывании магазина на новом сервере (Local
