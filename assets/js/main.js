@@ -14,8 +14,10 @@
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
-  /* Плавный скролл только для мыши и трекпада: на тач-устройствах
-     своя системная инерция, а при prefers-reduced-motion он укачивает */
+  /*
+     Плавный скролл только для мыши и трекпада: на тач-устройствах
+     своя системная инерция, а при prefers-reduced-motion он укачивает
+  */
   var lenis = null;
   var isTouch = window.matchMedia('(pointer: coarse)').matches;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -37,10 +39,12 @@
     window.promixLenis = lenis;
   }
 
-  /* ===== Якоря =====
+  /*
+  ===== Якоря =====
      Пункты меню приходят из админки в виде /#catalog — с полным адресом,
      иначе с внутренних страниц они никуда не ведут. Здесь такие ссылки
-     разбираются: свой хэш скроллим сами, чужой адрес отдаём браузеру. */
+     разбираются: свой хэш скроллим сами, чужой адрес отдаём браузеру.
+  */
 
   var HEADER_OFFSET = -112;
 
