@@ -55,3 +55,9 @@ vendor/**/.git/
 
 # исходники логотипов от заказчика (лежат в медиатеке на сервере)
 brands/
+
+# Правила для Claude Code — локальные
+CLAUDE.md
+
+# Кэш Python от _tools
+__pycache__/
