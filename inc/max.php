@@ -272,6 +272,17 @@ function promix_max_order( WC_Order $order ): void {
         return;
     }
 
+    promix_max_defer( 'promix_max_send_order', array( $order->get_id(), promix_max_order_text( $order ) ) );
+}
+add_action( 'promix_order_created', 'promix_max_order' );
+
+/**
+ * Текст сообщения о заказе. У варианта в строке название с вариантом
+ * («Лента малярная — 90 м») и его собственный артикул.
+ *
+ * @param WC_Order $order Заказ.
+ */
+function promix_max_order_text( WC_Order $order ): string {
     $lines = array(
         sprintf( /* translators: %s — номер заказа. */ __( '🛒 Заказ №%s с сайта', 'promix' ), $order->get_order_number() ),
         '',
@@ -310,9 +321,8 @@ function promix_max_order( WC_Order $order ): void {
     $lines[] = '';
     $lines[] = $order->get_edit_order_url();
 
-    promix_max_defer( 'promix_max_send_order', array( $order->get_id(), implode( "\n", $lines ) ) );
+    return implode( "\n", $lines );
 }
-add_action( 'promix_order_created', 'promix_max_order' );
 
 /**
  * Пометка у заявки, которая не дошла до MAX.

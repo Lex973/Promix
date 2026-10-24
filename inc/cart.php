@@ -56,7 +56,11 @@ function promix_cart_count(): int {
 /**
  * Строка корзины с этим товаром: ключ и количество, или null.
  *
- * @param int $product_id Товар.
+ * У варианта в строке product_id — родитель, сам вариант в variation_id.
+ * Поэтому сверяем по варианту, если он есть: иначе товар с вариантами
+ * считался бы лежащим в корзине, когда там один из его вариантов.
+ *
+ * @param int $product_id Товар или вариант.
  * @return array{key: string, qty: int}|null
  */
 function promix_cart_item( int $product_id ): ?array {
@@ -65,7 +69,9 @@ function promix_cart_item( int $product_id ): ?array {
     }
 
     foreach ( WC()->cart->get_cart() as $key => $item ) {
-        if ( (int) $item['product_id'] === $product_id ) {
+        $id = ! empty( $item['variation_id'] ) ? (int) $item['variation_id'] : (int) $item['product_id'];
+
+        if ( $id === $product_id ) {
             return array(
                 'key' => (string) $key,
                 'qty' => (int) $item['quantity'],
@@ -476,8 +482,9 @@ function promix_checkout_submit(): void {
             throw new RuntimeException( $order->get_error_message() );
         }
 
+        // Вариант — «Лента малярная — 90 м», как в корзине: штатное «- 90 м» теряется в названиях из 1С.
         foreach ( WC()->cart->get_cart() as $item ) {
-            $order->add_product( $item['data'], min( (int) $item['quantity'], PROMIX_CART_MAX_QTY ) );
+            $order->add_product( $item['data'], min( (int) $item['quantity'], PROMIX_CART_MAX_QTY ), array( 'name' => promix_cart_item_name( $item['data'] ) ) );
         }
 
         $order->set_address(

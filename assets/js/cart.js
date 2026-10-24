@@ -118,9 +118,10 @@
 
     control.replaceWith(next);
 
-    /* Страница товара пересчитывает цену по количеству в корзине */
+    /* Страница товара пересчитывает цену по количеству в корзине,
+       выбор варианта (variants.js) — переставляет метку «в корзине» */
     var input = next.querySelector('[data-cart-qty]');
-    document.dispatchEvent(new CustomEvent('promix:cart', { detail: { qty: input ? parseInt(input.value, 10) || 0 : 0 } }));
+    document.dispatchEvent(new CustomEvent('promix:cart', { detail: { qty: input ? parseInt(input.value, 10) || 0 : 0, control: next } }));
 
     return next;
   }

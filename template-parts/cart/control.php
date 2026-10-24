@@ -8,7 +8,9 @@
  * скрипт ничего не рисует сам — только подменяет.
  *
  * Аргументы: product (WC_Product), variant — card (в каталоге) или single
- * (страница товара: крупнее). Количество выбирают уже после добавления.
+ * (страница товара: крупнее), hidden — спрятать (кнопки вариантов, кроме
+ * выбранного, см. template-parts/cart/variants.php). Количество выбирают
+ * уже после добавления.
  *
  * @package promix
  */
@@ -17,21 +19,31 @@ defined( 'ABSPATH' ) || exit;
 
 $product = $args['product'] ?? null;
 $variant = ( $args['variant'] ?? 'card' ) === 'single' ? 'single' : 'card';
+$hidden  = ! empty( $args['hidden'] );
 
 if ( ! $product instanceof WC_Product ) {
     return;
 }
 
 $id    = $product->get_id();
-$name  = $product->get_name();
+$name  = promix_cart_item_name( $product );
 $price = (float) $product->get_price();
 $item  = promix_cart_item( $id );
 $url   = $product->get_permalink();
 ?>
-<div class="cart-control cart-control--<?php echo esc_attr( $variant ); ?>" data-cart-control="<?php echo esc_attr( (string) $id ); ?>" data-variant="<?php echo esc_attr( $variant ); ?>">
+<div class="cart-control cart-control--<?php echo esc_attr( $variant ); ?>" data-cart-control="<?php echo esc_attr( (string) $id ); ?>" data-variant="<?php echo esc_attr( $variant ); ?>"<?php echo $hidden ? ' hidden' : ''; ?>>
     <?php if ( $price <= 0 ) : ?>
 
-        <a class="btn btn--outline product__buy" href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'Уточнить', 'promix' ); ?></a>
+        <?php
+        // Цену называет менеджер: та же форма заявки, что у «Спросить у технолога», с товаром и артикулом.
+        $sku    = $product->get_sku();
+        $source = $sku
+            ? sprintf( /* translators: 1 — название, 2 — артикул. */ __( 'Цена: %1$s (арт. %2$s)', 'promix' ), $name, $sku )
+            : sprintf( /* translators: %s — название. */ __( 'Цена: %s', 'promix' ), $name );
+        ?>
+        <a class="btn btn--outline <?php echo 'single' === $variant ? 'single__ask' : 'product__buy'; ?>" href="<?php echo esc_url( $url ); ?>"
+           data-lead-open="<?php echo esc_attr( $source ); ?>"
+           data-lead-title="<?php esc_attr_e( 'Уточним цену', 'promix' ); ?>"><?php esc_html_e( 'Уточнить', 'promix' ); ?></a>
 
     <?php elseif ( $item ) : ?>
 

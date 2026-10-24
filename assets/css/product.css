@@ -209,13 +209,43 @@
   color: var(--color-muted);
 }
 
+/* Варианты на странице товара крупнее, чем в карточке каталога */
+.variants--single {
+  margin-top: 22px;
+}
+
+.variants--single .variants__opt {
+  min-height: 44px;
+  padding: 8px 16px;
+  font-size: 15px;
+}
+
+.variants--single .select {
+  max-width: 360px;
+}
+
+.variants--single .variants__opt.is-in-cart .variants__mark {
+  width: 12px;
+  height: 12px;
+}
+
+.variants--single .variants__error {
+  font-size: 14px;
+}
+
 /* Счётчик на странице товара — той же высоты, что кнопка «В корзину» */
 .cart-control--single {
   margin-top: 22px;
 }
 
-.cart-control--single .single__buy {
+.cart-control--single .single__buy,
+.cart-control--single .single__ask {
   margin-top: 0;
+}
+
+/* «Уточнить» встаёт на место «Спросить у технолога» — не уже неё */
+.cart-control--single .single__ask {
+  min-width: 220px;
 }
 
 .cart-control--single .qty--cart .qty__btn {

@@ -48,6 +48,10 @@ $count = (int) $cart->get_cart_contents_count();
                 $url  = $product->get_permalink();
                 $cat  = promix_product_category( $product );
                 $line = (float) $item['line_subtotal'];
+
+                // У варианта название товара отдельно, выбранная длина — строкой ниже.
+                $title = promix_base_product( $product )->get_name();
+                $chose = $product instanceof WC_Product_Variation ? wp_strip_all_tags( wc_get_formatted_variation( $product, true ) ) : '';
                 ?>
                 <li class="cart-item" data-cart-item="<?php echo esc_attr( $key ); ?>">
                     <a class="cart-item__media" href="<?php echo esc_url( $url ); ?>" aria-hidden="true" tabindex="-1">
@@ -59,7 +63,10 @@ $count = (int) $cart->get_cart_contents_count();
                     </a>
 
                     <div class="cart-item__info">
-                        <a class="cart-item__title" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $product->get_name() ); ?></a>
+                        <a class="cart-item__title" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?></a>
+                        <?php if ( '' !== $chose ) : ?>
+                            <p class="cart-item__variant"><?php echo esc_html( $chose ); ?></p>
+                        <?php endif; ?>
                         <p class="cart-item__meta">
                             <?php if ( $sku ) : ?>
                                 <span><?php echo esc_html( sprintf( /* translators: %s — артикул. */ __( 'Арт. %s', 'promix' ), $sku ) ); ?></span>
@@ -83,7 +90,7 @@ $count = (int) $cart->get_cart_contents_count();
                     <p class="cart-item__total"><?php echo esc_html( promix_product_price( $product, $line ) ); ?></p>
 
                     <a class="cart-item__remove" href="<?php echo esc_url( wc_get_cart_remove_url( $key ) ); ?>" data-cart-remove
-                       aria-label="<?php echo esc_attr( sprintf( /* translators: %s — название товара. */ __( 'Убрать: %s', 'promix' ), $product->get_name() ) ); ?>">
+                       aria-label="<?php echo esc_attr( sprintf( /* translators: %s — название товара. */ __( 'Убрать: %s', 'promix' ), promix_cart_item_name( $product ) ) ); ?>">
                         <?php promix_the_icon( 'x', 2 ); ?>
                     </a>
                 </li>

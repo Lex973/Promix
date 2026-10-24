@@ -232,7 +232,8 @@ function promix_price_is_from( $product ): bool {
         return '' !== $snapshot ? 'yes' === $snapshot : promix_price_is_from( $product->get_product() );
     }
 
-    return $product instanceof WC_Product && 'yes' === $product->get_meta( '_promix_price_from' );
+    // У варианта своих полей нет — флаг стоит у товара.
+    return $product instanceof WC_Product && 'yes' === promix_base_product( $product )->get_meta( '_promix_price_from' );
 }
 
 /**
@@ -242,7 +243,7 @@ function promix_price_is_from( $product ): bool {
  * @return string
  */
 function promix_price_unit( $product ): string {
-    return $product instanceof WC_Product ? trim( (string) $product->get_meta( '_promix_price_unit' ) ) : '';
+    return $product instanceof WC_Product ? trim( (string) promix_base_product( $product )->get_meta( '_promix_price_unit' ) ) : '';
 }
 
 /**
@@ -411,10 +412,12 @@ function promix_catalog_query( WP_Query $query ): void {
 
     /*
      * Поиск — через хранилище Woo: оно ищет и по названию, и по артикулу.
+     * С вариантами: тогда находится и артикул варианта, а Woo добавляет
+     * в ответ его товар. Выключенные варианты в поиск не попадают.
      * Пустой результат отдаёт [0], чтобы post__in не превратился в «все».
      */
     if ( $state['q'] ) {
-        $ids = WC_Data_Store::load( 'product' )->search_products( $state['q'], '', false, false );
+        $ids = WC_Data_Store::load( 'product' )->search_products( $state['q'], '', true, false );
 
         $query->set( 'post__in', $ids ? $ids : array( 0 ) );
     }
@@ -539,7 +542,7 @@ function promix_catalog_tree( array $checked ): array {
  * @return string Название раздела или пустая строка.
  */
 function promix_product_category( WC_Product $product ): string {
-    $terms = get_the_terms( $product->get_id(), 'product_cat' );
+    $terms = get_the_terms( promix_base_product( $product )->get_id(), 'product_cat' );
 
     if ( ! $terms || is_wp_error( $terms ) ) {
         return '';
@@ -558,7 +561,7 @@ function promix_product_category( WC_Product $product ): string {
  * @return string
  */
 function promix_product_brand( WC_Product $product ): string {
-    $terms = get_the_terms( $product->get_id(), 'product_brand' );
+    $terms = get_the_terms( promix_base_product( $product )->get_id(), 'product_brand' );
 
     if ( ! $terms || is_wp_error( $terms ) ) {
         return '';

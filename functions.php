@@ -81,6 +81,9 @@ require_once get_theme_file_path( 'inc/nav.php' );
 // WooCommerce: поддержка темой и транслит адресов.
 require_once get_theme_file_path( 'inc/woocommerce.php' );
 
+// Товары с вариантами (длина, объём).
+require_once get_theme_file_path( 'inc/variants.php' );
+
 // Корзина и оформление заказа.
 require_once get_theme_file_path( 'inc/cart.php' );
 
@@ -170,14 +173,16 @@ function promix_assets(): void {
     );
 
     $scripts = array(
-        'main'    => array( 'lenis' ),
-        'lead'    => array( 'promix-main' ),
-        'brands'  => array(),
-        'reviews' => array(),
-        'cookie'  => array(),
-        'catalog' => array( 'promix-main' ),
-        'product' => array(),
-        'cart'    => array(),
+        'main'     => array( 'lenis' ),
+        'lead'     => array( 'promix-main' ),
+        'brands'   => array(),
+        'reviews'  => array(),
+        'cookie'   => array(),
+        'catalog'  => array( 'promix-main' ),
+        'product'  => array(),
+        'cart'     => array(),
+        'select'   => array(),
+        'variants' => array(),
     );
 
     foreach ( $scripts as $handle => $deps ) {
@@ -196,9 +201,9 @@ function promix_assets(): void {
             continue;
         }
 
-        // Кнопки «В корзину» есть в каталоге, на товаре и в корзине; главной
-        // и политике скрипт с nonce ни к чему.
-        if ( 'cart' === $handle && ! ( $is_catalog || $is_product || $is_cart ) ) {
+        // Кнопки «В корзину» и выбор вариантов есть в каталоге, на товаре
+        // и в корзине; главной и политике скрипт с nonce ни к чему.
+        if ( in_array( $handle, array( 'cart', 'select', 'variants' ), true ) && ! ( $is_catalog || $is_product || $is_cart ) ) {
             continue;
         }
 
@@ -317,9 +322,11 @@ add_action( 'wp_head', 'promix_font_faces', 2 );
  * Стоит в <head>, до первой картинки: слушатель на document ловит load и error
  * всех <img>, в том числе подгруженных каталогом позже. Класс js-img на <html>
  * включает заглушки только при работающем JS — без него фото видны сразу.
+ * Заодно ставится общий класс js: по нему, например, свой выпадающий список
+ * прячет системный (base.css, «Выпадающий список»).
  */
 function promix_image_placeholders(): void {
-    $js = "(function(d){var r=d.documentElement;r.classList.add('js-img');"
+    $js = "(function(d){var r=d.documentElement;r.classList.add('js','js-img');"
         . "function m(e){var t=e.target;if(t&&t.tagName==='IMG')t.classList.add('is-loaded')}"
         . "d.addEventListener('load',m,true);d.addEventListener('error',m,true);"
         // Страховка: картинка из кэша могла загрузиться раньше, чем событие дошло.

@@ -26,7 +26,11 @@ while ( have_posts() ) :
 
     $name     = $product->get_name();
     $sku      = $product->get_sku();
-    $price    = (float) $product->get_price();
+
+    // С вариантами: цена первого, пока вариант не выбран; артикул — выбранного.
+    $variations = promix_variations( $product );
+    $shown      = $variations ? $variations[0] : $product;
+    $price      = (float) $shown->get_price();
     $brand    = promix_product_brand( $product );
     $terms    = get_the_terms( $product->get_id(), 'product_cat' );
     $category = $terms && ! is_wp_error( $terms ) ? $terms[0] : null;
@@ -94,12 +98,12 @@ while ( have_posts() ) :
                     <?php endif; ?>
                 </div>
 
-                <div class="single__info">
+                <div class="single__info"<?php echo $variations ? ' data-variants-scope' : ''; ?>>
                     <h1 class="single__title"><?php echo esc_html( $name ); ?></h1>
 
                     <dl class="single__meta">
-                        <?php if ( $sku ) : ?>
-                            <div class="single__meta-row">
+                        <?php if ( $sku || $variations ) : ?>
+                            <div class="single__meta-row"<?php echo $sku ? '' : ' hidden'; ?> data-variants-sku>
                                 <dt><?php esc_html_e( 'Артикул', 'promix' ); ?></dt>
                                 <dd>
                                     <button class="product__sku single__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>"
@@ -129,13 +133,26 @@ while ( have_posts() ) :
 
                     <p class="single__price" data-price="<?php echo esc_attr( (string) $price ); ?>"
                        data-price-from="<?php echo promix_price_is_from( $product ) ? '1' : ''; ?>"
-                       data-price-unit="<?php echo esc_attr( promix_price_unit( $product ) ); ?>"><?php echo esc_html( promix_product_price( $product ) ); ?></p>
+                       data-price-unit="<?php echo esc_attr( promix_price_unit( $product ) ); ?>" data-variants-price><?php echo esc_html( promix_product_price( $shown ) ); ?></p>
 
-                    <?php get_template_part( 'template-parts/cart/control', null, array( 'product' => $product, 'variant' => 'single' ) ); ?>
+                    <?php if ( $variations ) : ?>
+                        <?php
+                        $variants_args = array(
+                            'product'    => $product,
+                            'variations' => $variations,
+                            'variant'    => 'single',
+                        );
+                        get_template_part( 'template-parts/cart/variants', null, $variants_args );
+                        get_template_part( 'template-parts/cart/variant-controls', null, $variants_args );
+                        ?>
+                    <?php else : ?>
+                        <?php get_template_part( 'template-parts/cart/control', null, array( 'product' => $product, 'variant' => 'single' ) ); ?>
+                    <?php endif; ?>
 
                     <p class="single__note"><?php esc_html_e( 'Наличие и срок поставки подтвердит менеджер после заказа.', 'promix' ); ?></p>
 
-                    <a class="btn btn--outline single__ask" href="#contacts"
+                    <?php /* Без цены есть «Уточнить» с той же формой — вторая такая кнопка лишняя. У вариантов её прячет variants.js. */ ?>
+                    <a class="btn btn--outline single__ask" href="#contacts" data-variants-ask<?php echo $price <= 0 && ! $variations ? ' hidden' : ''; ?>
                        data-lead-open="<?php echo esc_attr( $lead_source ); ?>"
                        data-lead-title="<?php esc_attr_e( 'Спросим у технолога', 'promix' ); ?>">
                         <?php esc_html_e( 'Спросить у технолога', 'promix' ); ?>

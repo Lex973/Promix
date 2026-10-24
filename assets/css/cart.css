@@ -128,6 +128,14 @@
   color: var(--color-brand);
 }
 
+/* Выбранный вариант: «Длина: 90 м» — сразу под названием, темнее артикула */
+.cart-item__variant {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: var(--fw-medium);
+  color: var(--color-ink-soft);
+}
+
 .cart-item__meta {
   display: flex;
   flex-wrap: wrap;

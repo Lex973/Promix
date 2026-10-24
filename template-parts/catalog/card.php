@@ -27,15 +27,18 @@ if ( ! $product instanceof WC_Product ) {
 
 $name  = $product->get_name();
 $sku   = $product->get_sku();
-$price = (float) $product->get_price();
 $cat   = promix_product_category( $product );
 $url   = $product->get_permalink();
+
+// С вариантами: цена первого, пока вариант не выбран; артикул — выбранного.
+$variations = promix_variations( $product );
+$shown      = $variations ? $variations[0] : $product;
 
 // Товары под своей маркой стоит отмечать: их больше нигде не купить.
 $badge = ( 'PROMIX' === promix_product_brand( $product ) ) ? __( 'Своя марка', 'promix' ) : '';
 
 ?>
-<article class="product" data-product data-id="<?php echo esc_attr( (string) $product->get_id() ); ?>">
+<article class="product<?php echo $variations ? ' product--variants' : ''; ?>" data-product data-id="<?php echo esc_attr( (string) $product->get_id() ); ?>"<?php echo $variations ? ' data-variants-scope' : ''; ?>>
 
     <?php if ( $badge ) : ?>
         <span class="product__badge"><?php echo esc_html( $badge ); ?></span>
@@ -56,13 +59,22 @@ $badge = ( 'PROMIX' === promix_product_brand( $product ) ) ? __( 'Своя ма�
     </div>
 
     <div class="product__foot">
-        <p class="product__price"><?php echo esc_html( promix_product_price( $product ) ); ?></p>
+        <p class="product__price" data-variants-price><?php echo esc_html( promix_product_price( $shown ) ); ?></p>
+
+        <?php if ( $variations ) : ?>
+            <?php get_template_part( 'template-parts/cart/variants', null, array( 'product' => $product, 'variations' => $variations ) ); ?>
+        <?php endif; ?>
 
         <div class="product__actions">
-            <?php get_template_part( 'template-parts/cart/control', null, array( 'product' => $product ) ); ?>
+            <?php if ( $variations ) : ?>
+                <?php get_template_part( 'template-parts/cart/variant-controls', null, array( 'product' => $product, 'variations' => $variations ) ); ?>
+            <?php else : ?>
+                <?php get_template_part( 'template-parts/cart/control', null, array( 'product' => $product ) ); ?>
+            <?php endif; ?>
 
-            <?php if ( $sku ) : ?>
-                <button class="product__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>" title="<?php echo esc_attr( $sku ); ?>"
+            <?php /* У товара с вариантами артикул появляется после выбора — кнопка нужна и пустой. */ ?>
+            <?php if ( $sku || $variations ) : ?>
+                <button class="product__sku" type="button" data-copy="<?php echo esc_attr( $sku ); ?>" title="<?php echo esc_attr( $sku ); ?>"<?php echo $sku ? '' : ' hidden'; ?> data-variants-sku
                         data-copy-done="<?php esc_attr_e( 'скопирован', 'promix' ); ?>"
                         aria-label="<?php echo esc_attr( sprintf( /* translators: %s — артикул. */ __( 'Скопировать артикул %s', 'promix' ), $sku ) ); ?>">
                     <span class="product__sku-label"><?php esc_html_e( 'Арт.', 'promix' ); ?></span>

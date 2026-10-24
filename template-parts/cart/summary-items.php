@@ -25,7 +25,7 @@ $items = $limit ? array_slice( $items, 0, $limit ) : $items;
 ?>
 <ul class="checkout__items">
     <?php foreach ( $items as $item ) : ?>
-        <?php $name = $item['data']->get_name(); ?>
+        <?php $name = promix_cart_item_name( $item['data'] ); ?>
         <li class="checkout__item">
             <span class="checkout__item-name" title="<?php echo esc_attr( $name ); ?>"><?php echo esc_html( $name ); ?></span>
             <span class="checkout__item-qty">× <?php echo esc_html( (string) $item['quantity'] ); ?></span>

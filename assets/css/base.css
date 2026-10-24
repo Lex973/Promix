@@ -633,6 +633,181 @@ body.is-menu-open {
   text-underline-offset: 3px;
 }
 
+/* ===== Выпадающий список (template-parts/ui/select.php) =====
+   Без скрипта — системный список, со скриптом — кнопка и меню.
+   Меню того же вида, что «Сортировка» в каталоге. */
+
+.select {
+  min-width: 0;
+}
+
+.select__label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.select__field {
+  position: relative;
+}
+
+.select__native,
+.select__btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: var(--fw-medium);
+  line-height: 1.2;
+  color: var(--color-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.select__btn {
+  display: none;
+  gap: 8px;
+  padding-right: 12px;
+}
+
+.js .select__native {
+  display: none;
+}
+
+.js .select__btn {
+  display: flex;
+}
+
+.select__native:hover,
+.select__btn:hover,
+.select__btn[aria-expanded='true'] {
+  border-color: var(--color-ink);
+}
+
+.select__native:focus-visible,
+.select__btn:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.select__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Пока ничего не выбрано, на кнопке подсказка — она бледнее выбора */
+.select__btn.is-placeholder {
+  color: var(--color-muted);
+}
+
+.select__arrow {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-muted);
+  transition: transform var(--transition-fast);
+}
+
+.select__btn[aria-expanded='true'] .select__arrow {
+  transform: rotate(180deg);
+}
+
+.select__list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: var(--z-header);
+  min-width: 100%;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 32px));
+  max-height: 288px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.14s var(--ease), transform 0.14s var(--ease);
+}
+
+.select__list.is-open {
+  opacity: 1;
+  transform: none;
+}
+
+.select--right .select__list {
+  right: 0;
+  left: auto;
+}
+
+.select--up .select__list {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform: translateY(6px);
+}
+
+.select--up .select__list.is-open {
+  transform: none;
+}
+
+.select__option {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px;
+  border-radius: var(--radius-xs);
+  font-size: 15px;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  outline: none;
+}
+
+.select__option:hover,
+.select__option.is-active {
+  background: var(--color-surface-alt);
+  color: var(--color-ink);
+}
+
+.select__option[aria-selected='true'] {
+  font-weight: var(--fw-medium);
+  color: var(--color-brand);
+}
+
+.select__hint {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  font-weight: var(--fw-regular);
+  white-space: nowrap;
+}
+
+/* Уже в корзине — зелёная точка, как у кнопок вариантов */
+.select__option.is-in-cart .select__text::after {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--color-success);
+  vertical-align: middle;
+}
+
 /* ===== Заглушки фото до загрузки =====
    Пока фото грузится, на его месте светлый фон, который тихо «дышит»;
    загрузилось — фото проявляется. Класс is-loaded ставит скрипт в <head>

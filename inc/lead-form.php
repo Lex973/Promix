@@ -283,10 +283,11 @@ function promix_handle_lead(): void {
     $agree  = ! empty( $_POST['agree'] );
 
     // Длину режем на входе: в базу не должно попадать сочинение на мегабайт.
+    // Источник длиннее сотни: «Цена: товар — вариант (арт. …)».
     $name   = mb_substr( $name, 0, 100 );
     $phone  = mb_substr( $phone, 0, 30 );
     $note   = mb_substr( $note, 0, 2000 );
-    $source = mb_substr( $source, 0, 100 );
+    $source = mb_substr( $source, 0, 250 );
 
     // Ловушка для ботов: поле спрятано от людей и всегда должно быть пустым.
     $trap = isset( $_POST['company'] ) ? trim( (string) wp_unslash( $_POST['company'] ) ) : '';

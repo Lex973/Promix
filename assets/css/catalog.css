@@ -790,6 +790,128 @@
   font-size: 14px;
 }
 
+/* ===== Варианты товара: длина, объём =====
+   Кнопки под ценой. Выбранный — тёмный: красный в сетке остаётся
+   только у «Применить». Зелёная точка — вариант уже в корзине.
+   Когда вариантов много — выпадающий список в одну строку. */
+
+.variants {
+  min-width: 0;
+  margin: 10px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.variants__title {
+  display: block;
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.variants__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.variants__opt {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+  font-size: 13px;
+  font-weight: var(--fw-medium);
+  line-height: 1.2;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.variants__opt:hover {
+  border-color: var(--color-ink);
+}
+
+/* Радиокнопка невидима, но остаётся в форме: required и стрелки клавиатуры работают */
+.variants__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.variants__opt.is-checked,
+.variants__opt:has(.variants__input:checked) {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-on-brand);
+}
+
+.variants__opt:has(.variants__input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.variants__mark {
+  display: none;
+}
+
+.variants__opt.is-in-cart .variants__mark {
+  display: block;
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  background: var(--color-success);
+  pointer-events: none;
+}
+
+/* Список вариантов в карточке — размером с кнопки вариантов */
+.variants--card .select__native,
+.variants--card .select__btn {
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.variants--card .select__option {
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.variants.is-invalid .variants__opt,
+.variants.is-invalid .select__native,
+.variants.is-invalid .select__btn {
+  border-color: var(--color-brand);
+}
+
+.variants__error {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--color-brand);
+}
+
+/* Пальцем по кнопке в 32px легко промахнуться */
+@media (pointer: coarse) {
+  .variants__opt,
+  .variants--card .select__native,
+  .variants--card .select__btn {
+    min-height: 44px;
+  }
+}
+
 /* ===== Списком: строка на товар, больше позиций на экран ===== */
 
 .products--list {
@@ -862,6 +984,34 @@
 .products--list .product__actions {
   justify-content: space-between;
   margin-top: 0;
+}
+
+/* Варианты в строке списка — над ценой и кнопкой, ровно по их ширине.
+   Колонка под артикул не резервируется: у товара с вариантами он
+   появляется только после выбора, а до того справа была бы пустота */
+@media (min-width: 721px) {
+  .products--list .product--variants .product__foot {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "variants variants"
+      "price actions";
+    flex-basis: auto;
+    column-gap: 20px;
+    row-gap: 8px;
+  }
+
+  .products--list .product--variants .variants {
+    grid-area: variants;
+    margin-top: 0;
+  }
+
+  .products--list .product--variants .product__price {
+    grid-area: price;
+  }
+
+  .products--list .product--variants .product__actions {
+    grid-area: actions;
+  }
 }
 
 .products__empty {
@@ -1002,7 +1152,7 @@
      названием выглядят одинаково */
   .products--list .product {
     display: grid;
-    grid-template-columns: 108px minmax(0, 1fr);
+    grid-template-columns: 128px minmax(0, 1fr);
     grid-template-rows: auto auto auto;
     column-gap: 16px;
     row-gap: 6px;
@@ -1010,10 +1160,22 @@
   }
 
   .products--list .product__media {
+    position: relative;
     grid-row: 1 / 4;
     align-self: stretch;
     aspect-ratio: auto;
-    min-height: 120px;
+    min-height: 128px;
+  }
+
+  /* Фото по размеру колонки, а не по своему: иначе миниатюра 300px
+     в высоту растягивала строку карточки втрое */
+  .products--list .product__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
   }
 
   .products--list .product__icon {
@@ -1055,6 +1217,20 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  /* С вариантами в правой колонке четыре строки: название, цена, варианты, кнопка */
+  .products--list .product--variants {
+    grid-template-rows: auto auto auto auto;
+  }
+
+  .products--list .product--variants .product__media {
+    grid-row: 1 / 5;
+  }
+
+  .products--list .variants {
+    min-width: 0;
+    margin-top: 0;
+  }
 }
 
 /* ===== Загрузка выдачи ===== */
@@ -1068,4 +1244,10 @@
 .catalog__results.is-loading > * {
   opacity: 0.45;
   transition: opacity 0.2s var(--ease);
+}
+
+/* Название подраздела в фильтре — ссылка, но выглядит как подпись галочки */
+.check__link {
+  color: inherit;
+  text-decoration: none;
 }
