@@ -66,6 +66,10 @@ Container::make( 'theme_options', __( 'Контакты PROMIX', 'promix' ) )
 
             Field::make( 'separator', 'promix_seo_sep', __( 'Для поиска и мессенджеров', 'promix' ) ),
 
+            Field::make( 'text', 'promix_meta_title', __( 'Заголовок главной в поиске', 'promix' ) )
+                ->set_attribute( 'maxLength', 80 )
+                ->set_help_text( __( 'Текст вкладки браузера и первая строка в выдаче. Если пусто — «PROMIX — малярный центр в Казани: краски, инструмент, колеровка».', 'promix' ) ),
+
             Field::make( 'textarea', 'promix_meta_description', __( 'Описание главной', 'promix' ) )
                 ->set_rows( 2 )
                 ->set_help_text( __( 'Показывается в результатах поиска под заголовком. Две-три строки о магазине.', 'promix' ) ),

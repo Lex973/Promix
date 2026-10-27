@@ -214,6 +214,26 @@
     }
   });
 
+  /* Название подраздела — ссылка для робота. Ссылка внутри label галочку
+     не ставит, поэтому ставим сами, как при клике по названию. */
+  section.addEventListener('click', function (event) {
+    var link = event.target.closest('[data-filter-link]');
+    var input = link && link.closest('label') && link.closest('label').querySelector('[data-filter-cat]');
+
+    if (!input) {
+      return;
+    }
+
+    /* Ctrl/Cmd/Shift и средняя кнопка — открыть ссылку в новой вкладке. */
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.button) {
+      return;
+    }
+
+    event.preventDefault();
+    input.checked = !input.checked;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
   /* Поле цены текстовое, а не number: number отбрасывает значение
      со случайным пробелом целиком и просит «введите число». Здесь
      всё, кроме цифр, просто убирается. */

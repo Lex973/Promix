@@ -23,6 +23,7 @@ wp_body_open();
 $promix = promix_contacts();
 ?>
 
+<!--noindex-->
 <a class="skip-link" href="#main"><?php esc_html_e( 'Перейти к содержимому', 'promix' ); ?></a>
 
 <header class="header" data-header>
@@ -73,6 +74,7 @@ $promix = promix_contacts();
         </div>
     </div>
 </header>
+<!--/noindex-->
 
 <?php get_template_part( 'template-parts/notice' ); ?>
 

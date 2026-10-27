@@ -31,8 +31,8 @@ $sort_options = array(
 $term     = is_product_category() ? get_queried_object() : null;
 $term     = $term instanceof WP_Term ? $term : null;
 $category = $term && 'product_cat' === $term->taxonomy ? $term : null;
-$total    = $term ? (int) $term->count : promix_catalog_total();
-$title    = $term ? $term->name : __( 'Материалы и инструменты', 'promix' );
+$total    = $term ? promix_term_total( $term ) : promix_catalog_total();
+$title    = $term ? promix_term_h1( $term ) : __( 'Каталог малярного инструмента и материалов', 'promix' );
 $lead     = $term && $term->description
     ? wp_strip_all_tags( $term->description )
     : sprintf(

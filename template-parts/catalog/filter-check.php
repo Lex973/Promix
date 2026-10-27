@@ -22,7 +22,12 @@ $term = $args['term'];
            data-filter-cat
            <?php echo $term['url'] ? 'data-url="' . esc_url( $term['url'] ) . '"' : ''; ?>
            <?php checked( $term['checked'] ); ?>>
-    <span class="check__text"><?php echo esc_html( $term['name'] ); ?></span>
+    <?php if ( $term['url'] ) : ?>
+        <?php // Обычная ссылка — чтобы робот нашёл подраздел; скрипт по клику ставит галочку. Вне Tab: с клавиатуры пункт — это галочка. ?>
+        <a class="check__text check__link" href="<?php echo esc_url( $term['url'] ); ?>" tabindex="-1" data-filter-link><?php echo esc_html( $term['name'] ); ?></a>
+    <?php else : ?>
+        <span class="check__text"><?php echo esc_html( $term['name'] ); ?></span>
+    <?php endif; ?>
     <?php if ( $args['count'] ?? true ) : ?>
         <span class="check__count"><?php echo esc_html( (string) $term['count'] ); ?></span>
     <?php endif; ?>

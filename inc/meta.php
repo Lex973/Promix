@@ -26,58 +26,53 @@ function promix_meta_description(): string {
     if ( is_front_page() ) {
         return promix_option(
             'meta_description',
-            'PROMIX — малярный центр в Казани: краски, шпаклёвки, грунты, инструмент и оборудование. Подбор материалов, колеровка, семинары для мастеров.'
+            'Малярный центр PROMIX в Казани: 500+ товаров для маляров и отделочников — краски, шпаклёвки, шпатели, валики, оборудование. Выгодные цены, колеровка, семинары для мастеров. Тукая, 91к1.'
         );
     }
 
-    // Товар: краткое описание из админки, а пока его нет — название, артикул и цена.
+    // Товар: краткое описание, если его писал человек, иначе — название и цена.
     if ( function_exists( 'is_product' ) && is_product() ) {
         $product = wc_get_product( get_queried_object_id() );
 
         if ( $product instanceof WC_Product ) {
-            $short = wp_strip_all_tags( $product->get_short_description(), true );
+            $short = trim( wp_strip_all_tags( $product->get_short_description(), true ) );
 
-            if ( '' !== trim( $short ) ) {
+            if ( '' !== $short && ! promix_is_import_excerpt( $short ) ) {
                 return wp_trim_words( $short, 28, '…' );
             }
 
+            // «Цена по запросу» стоит посреди фразы — со строчной.
+            $price = promix_product_price( $product );
+            $price = (float) $product->get_price() > 0 ? $price : mb_strtolower( $price );
+
             return sprintf(
-                /* translators: 1 — название, 2 — артикул, 3 — цена. */
-                __( '%1$s — артикул %2$s, цена %3$s. Купить в PROMIX, малярный центр в Казани: самовывоз и доставка.', 'promix' ),
+                /* translators: 1 — название, 2 — цена. */
+                __( '%1$s: %2$s. Купить в малярном центре PROMIX в Казани — самовывоз с Габдуллы Тукая, 91к1, заказ на сайте или по телефону.', 'promix' ),
                 $product->get_name(),
-                $product->get_sku(),
-                promix_product_price( $product )
+                $price
             );
         }
     }
 
-    // Раздел каталога: описание раздела или число позиций.
+    // Раздел каталога: поле «Описание в поиске», иначе шаблон по данным раздела.
     if ( function_exists( 'is_product_category' ) && is_product_category() ) {
         $term = get_queried_object();
 
         if ( $term instanceof WP_Term ) {
-            if ( '' !== trim( $term->description ) ) {
-                return wp_trim_words( wp_strip_all_tags( $term->description, true ), 28, '…' );
-            }
+            $manual = trim( (string) get_term_meta( $term->term_id, '_promix_seo_description', true ) );
 
-            return sprintf(
-                /* translators: 1 — название раздела, 2 — число позиций, 3 — слово «позиция». */
-                __( '%1$s в PROMIX: %2$s %3$s с ценами. Малярный центр в Казани, самовывоз и доставка.', 'promix' ),
-                $term->name,
-                number_format_i18n( (int) $term->count ),
-                promix_plural( (int) $term->count, __( 'позиция', 'promix' ), __( 'позиции', 'promix' ), __( 'позиций', 'promix' ) )
-            );
+            return '' !== $manual ? $manual : promix_term_description( $term );
         }
     }
 
     if ( function_exists( 'is_shop' ) && is_shop() ) {
-        $total = (int) wp_count_posts( 'product' )->publish;
+        $total = promix_catalog_total();
 
         return sprintf(
-            /* translators: 1 — число позиций, 2 — слово «позиция». */
-            __( 'Каталог PROMIX: %1$s %2$s для малярных и отделочных работ с ценами. Шпатели, ленты, валики, окрасочное оборудование, абразивы, краски.', 'promix' ),
+            /* translators: 1 — число товаров, 2 — слово «товар». */
+            __( '%1$s %2$s для малярных и отделочных работ: краски, шпаклёвки, шпатели, валики, ленты, абразивы, оборудование. Выгодные цены, самовывоз и доставка по Казани.', 'promix' ),
             number_format_i18n( $total ),
-            promix_plural( $total, __( 'позиция', 'promix' ), __( 'позиции', 'promix' ), __( 'позиций', 'promix' ) )
+            promix_plural( $total, __( 'товар', 'promix' ), __( 'товара', 'promix' ), __( 'товаров', 'promix' ) )
         );
     }
 
@@ -96,6 +91,257 @@ function promix_meta_description(): string {
 
     return (string) get_bloginfo( 'description' );
 }
+
+/**
+ * Число товаров раздела вместе с подразделами.
+ *
+ * $term->count считает только товары, привязанные к самому разделу, а у
+ * корневых разделов своих товаров нет — выходило «0 позиций». Woo хранит
+ * счёт с подразделами в мете термина; если её ещё нет, складываем сами.
+ *
+ * @param WP_Term $term Раздел каталога.
+ * @return int
+ */
+function promix_term_total( WP_Term $term ): int {
+    $meta = get_term_meta( $term->term_id, 'product_count_' . $term->taxonomy, true );
+
+    if ( '' !== $meta && false !== $meta ) {
+        return (int) $meta;
+    }
+
+    $total = (int) $term->count;
+
+    foreach ( (array) get_term_children( $term->term_id, $term->taxonomy ) as $child_id ) {
+        $child = get_term( (int) $child_id, $term->taxonomy );
+        $total += $child instanceof WP_Term ? (int) $child->count : 0;
+    }
+
+    return $total;
+}
+
+/**
+ * Краткое описание из импорта: «Укрывной материал RoxelPro. Раздел «…», артикул 336372.»
+ * Для поиска в нём нет ничего полезного — вместо него описание собирается из цены.
+ *
+ * @param string $text Краткое описание без тегов.
+ * @return bool
+ */
+function promix_is_import_excerpt( string $text ): bool {
+    return (bool) preg_match( '/Раздел «[^»]+», артикул \S+\.?$/u', $text );
+}
+
+/**
+ * H1 раздела: поле «Заголовок на странице», иначе название.
+ *
+ * @param WP_Term $term Раздел.
+ * @return string
+ */
+function promix_term_h1( WP_Term $term ): string {
+    $h1 = trim( (string) get_term_meta( $term->term_id, '_promix_seo_h1', true ) );
+
+    return '' !== $h1 ? $h1 : $term->name;
+}
+
+/**
+ * Самая низкая цена и самые частые марки раздела вместе с подразделами.
+ *
+ * Два запроса к базе на раздел, поэтому результат живёт в транзиенте; любое
+ * сохранение товара меняет версию, и старые записи больше не читаются.
+ *
+ * @param WP_Term $term Раздел.
+ * @return array{min: float, brands: string[]}
+ */
+function promix_term_stats( WP_Term $term ): array {
+    global $wpdb;
+
+    $key   = 'promix_term_stats_' . $term->term_id . '_' . (int) get_option( 'promix_term_stats_ver', 1 );
+    $stats = get_transient( $key );
+
+    if ( is_array( $stats ) ) {
+        return $stats;
+    }
+
+    $ids    = array_merge( array( $term->term_id ), array_map( 'intval', (array) get_term_children( $term->term_id, $term->taxonomy ) ) );
+    $tt_ids = get_terms(
+        array(
+            'taxonomy'   => $term->taxonomy,
+            'include'    => $ids,
+            'fields'     => 'tt_ids',
+            'hide_empty' => false,
+        )
+    );
+    $stats  = array( 'min' => 0.0, 'brands' => array() );
+
+    if ( is_array( $tt_ids ) && $tt_ids ) {
+        $in = implode( ',', array_map( 'intval', $tt_ids ) );
+
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- в $in только целые числа.
+        $stats['min'] = (float) $wpdb->get_var(
+            "SELECT MIN(l.min_price) FROM {$wpdb->prefix}wc_product_meta_lookup l
+             INNER JOIN {$wpdb->term_relationships} tr ON tr.object_id = l.product_id
+             INNER JOIN {$wpdb->posts} p ON p.ID = l.product_id
+             WHERE tr.term_taxonomy_id IN ({$in}) AND p.post_status = 'publish' AND l.min_price > 0"
+        );
+
+        $stats['brands'] = array_map(
+            'strval',
+            (array) $wpdb->get_col(
+                "SELECT t.name FROM {$wpdb->term_relationships} tr
+                 INNER JOIN {$wpdb->posts} p ON p.ID = tr.object_id AND p.post_type = 'product' AND p.post_status = 'publish'
+                 INNER JOIN {$wpdb->term_relationships} tb ON tb.object_id = p.ID
+                 INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tb.term_taxonomy_id AND tt.taxonomy = 'product_brand'
+                 INNER JOIN {$wpdb->terms} t ON t.term_id = tt.term_id
+                 WHERE tr.term_taxonomy_id IN ({$in})
+                 GROUP BY t.term_id, t.name ORDER BY COUNT(*) DESC, t.name ASC LIMIT 3"
+            )
+        );
+        // phpcs:enable
+    }
+
+    set_transient( $key, $stats, 12 * HOUR_IN_SECONDS );
+
+    return $stats;
+}
+
+/**
+ * Товар сохранили или удалили — цены и марки разделов пересчитаются.
+ *
+ * @param int $post_id Запись.
+ */
+function promix_term_stats_flush( int $post_id ): void {
+    if ( 'product' === get_post_type( $post_id ) ) {
+        update_option( 'promix_term_stats_ver', (int) get_option( 'promix_term_stats_ver', 1 ) + 1, false );
+    }
+}
+add_action( 'save_post_product', 'promix_term_stats_flush' );
+add_action( 'deleted_post', 'promix_term_stats_flush' );
+add_action( 'trashed_post', 'promix_term_stats_flush' );
+add_action( 'untrashed_post', 'promix_term_stats_flush' );
+
+/**
+ * Описание раздела по шаблону.
+ *
+ * Корень: число позиций и три крупных подраздела. Подраздел: число, цена «от»
+ * и марки — то, что человек сравнивает в выдаче.
+ *
+ * @param WP_Term $term Раздел.
+ * @return string
+ */
+function promix_term_description( WP_Term $term ): string {
+    $h1    = promix_term_h1( $term );
+    $total = promix_term_total( $term );
+    $count = number_format_i18n( $total ) . ' ' . promix_plural( $total, __( 'позиция', 'promix' ), __( 'позиции', 'promix' ), __( 'позиций', 'promix' ) );
+
+    if ( 0 === (int) $term->parent ) {
+        $children = get_terms(
+            array(
+                'taxonomy' => $term->taxonomy,
+                'parent'   => $term->term_id,
+                'orderby'  => 'count',
+                'order'    => 'DESC',
+                'number'   => 3,
+            )
+        );
+        // «Шпатели и правила» посреди фразы — со строчной; «СИЗ» и марки не трогаем.
+        $names = is_array( $children ) ? array_map(
+            static function ( WP_Term $child ): string {
+                $second = mb_substr( $child->name, 1, 1 );
+
+                return mb_strtolower( $second ) === $second ? mb_strtolower( mb_substr( $child->name, 0, 1 ) ) . mb_substr( $child->name, 1 ) : $child->name;
+            },
+            $children
+        ) : array();
+
+        return sprintf(
+            /* translators: 1 — H1 раздела, 2 — «192 позиции», 3 — подразделы через запятую. */
+            __( '%1$s: %2$s с ценами — %3$s. Магазин PROMIX на Габдуллы Тукая, 91к1.', 'promix' ),
+            $h1,
+            $count,
+            implode( ', ', $names )
+        );
+    }
+
+    $stats = promix_term_stats( $term );
+    $text  = $stats['min'] > 0
+        /* translators: 1 — H1 раздела, 2 — «13 позиций», 3 — цена. */
+        ? sprintf( __( '%1$s в PROMIX: %2$s от %3$s.', 'promix' ), $h1, $count, promix_price( $stats['min'] ) )
+        /* translators: 1 — H1 раздела, 2 — «13 позиций». */
+        : sprintf( __( '%1$s в PROMIX: %2$s с ценами.', 'promix' ), $h1, $count );
+
+    if ( $stats['brands'] ) {
+        /* translators: %s — марки через запятую. */
+        $text .= ' ' . sprintf( __( 'Бренды: %s.', 'promix' ), implode( ', ', $stats['brands'] ) );
+    }
+
+    return $text . ' ' . __( 'Самовывоз из магазина на Габдуллы Тукая.', 'promix' );
+}
+
+/**
+ * Заголовок вкладки и первой строки в выдаче.
+ *
+ * Штатный «Название — PROMIX» не говорит ни что продаём, ни где: главная,
+ * каталог, разделы и товары получают запрос и город. Остальные страницы —
+ * как у WordPress.
+ *
+ * @param string $title Пусто — WordPress соберёт сам.
+ * @return string
+ */
+function promix_document_title( string $title ): string {
+    $is_catalog = function_exists( 'promix_is_catalog' ) && promix_is_catalog();
+
+    if ( is_front_page() ) {
+        $title = promix_option( 'meta_title', 'PROMIX — малярный центр в Казани: краски, инструмент, колеровка' );
+    } elseif ( function_exists( 'is_product_category' ) && is_product_category() && get_queried_object() instanceof WP_Term ) {
+        $term   = get_queried_object();
+        $manual = trim( (string) get_term_meta( $term->term_id, '_promix_seo_title', true ) );
+        $h1     = promix_term_h1( $term );
+
+        if ( '' !== $manual ) {
+            $title = $manual;
+        } elseif ( 0 === (int) $term->parent ) {
+            /* translators: %s — H1 раздела. */
+            $title = sprintf( __( '%s в Казани — цены в PROMIX', 'promix' ), $h1 );
+        } else {
+            /* translators: %s — H1 раздела. */
+            $title = sprintf( __( '%s купить в Казани — PROMIX', 'promix' ), $h1 );
+        }
+    } elseif ( function_exists( 'is_shop' ) && is_shop() ) {
+        $title = __( 'PROMIX — каталог малярного инструмента и красок в Казани', 'promix' );
+    } elseif ( function_exists( 'is_product' ) && is_product() ) {
+        $name = get_the_title( get_queried_object_id() );
+        $name = html_entity_decode( wp_strip_all_tags( $name ), ENT_QUOTES, 'UTF-8' );
+
+        // Длинное название из 1С и так съест строку выдачи — хвост с городом не влезет.
+        /* translators: %s — название товара. */
+        $title = mb_strlen( $name ) <= 44 ? sprintf( __( '%s — купить в Казани, PROMIX', 'promix' ), $name ) : sprintf( __( '%s — PROMIX', 'promix' ), $name );
+    } else {
+        return $title;
+    }
+
+    $paged = max( 1, (int) get_query_var( 'paged' ) );
+
+    if ( $is_catalog && $paged > 1 ) {
+        /* translators: %d — номер страницы. */
+        $title .= ' ' . sprintf( __( '— страница %d', 'promix' ), $paged );
+    }
+
+    return esc_html( $title );
+}
+add_filter( 'pre_get_document_title', 'promix_document_title' );
+
+/**
+ * Наличие на сайте не показывается — «подтвердит менеджер», — поэтому и в
+ * разметке его нет: InStock у всех противоречил бы странице.
+ *
+ * @param array<string, mixed> $offer Разметка предложения.
+ * @return array<string, mixed>
+ */
+function promix_structured_offer( array $offer ): array {
+    unset( $offer['availability'] );
+
+    return $offer;
+}
+add_filter( 'woocommerce_structured_data_product_offer', 'promix_structured_offer' );
 
 /**
  * Картинка для предпросмотра ссылки.
@@ -203,8 +449,19 @@ function promix_meta_tags(): void {
     $title       = wp_get_document_title();
     $is_product  = function_exists( 'is_product' ) && is_product();
 
+    // Страницы серии каталога различаются и описанием, а не только заголовком.
+    if ( $description && function_exists( 'promix_is_catalog' ) && promix_is_catalog() && (int) get_query_var( 'paged' ) > 1 ) {
+        /* translators: %d — номер страницы. */
+        $description .= ' ' . sprintf( __( 'Страница %d.', 'promix' ), (int) get_query_var( 'paged' ) );
+    }
+
     if ( $description ) {
         printf( '<meta name="description" content="%s">' . "\n", esc_attr( $description ) );
+    }
+
+    // Подтверждение прав в Яндекс Вебмастере: робот ищет тег только на главной.
+    if ( is_front_page() ) {
+        echo '<meta name="yandex-verification" content="1d6b6ff77d4ba2ca">' . "\n";
     }
 
     // WordPress ставит canonical только записям; каталогу и разделам — сами.
@@ -265,9 +522,88 @@ function promix_favicon(): void {
         get_theme_file_uri( 'assets/img/favicon.svg' )
     );
 
+    // ICO — для Яндекса (он берёт иконку сниппета из /favicon.ico) и старых
+    // браузеров, PNG 120 — рекомендация Яндекса, PNG 180 — для закладок на
+    // iPhone, SVG — всем остальным.
+    printf( '<link rel="icon" href="%s" sizes="32x32">' . "\n", esc_url( home_url( '/favicon.ico' ) ) );
+    printf( '<link rel="icon" type="image/png" sizes="120x120" href="%s">' . "\n", esc_url( get_theme_file_uri( 'assets/img/favicon-120.png' ) ) );
     printf( '<link rel="icon" type="image/svg+xml" sizes="any" href="%s">' . "\n", esc_url( $url ) );
+    printf(
+        '<link rel="apple-touch-icon" href="%s">' . "\n",
+        esc_url( add_query_arg( 'ver', promix_asset_version( 'assets/img/apple-touch-icon.png' ), get_theme_file_uri( 'assets/img/apple-touch-icon.png' ) ) )
+    );
 }
 add_action( 'wp_head', 'promix_favicon', 99 );
+
+/**
+ * /favicon.ico из темы. Без этого WordPress уводит запрос на свой логотип,
+ * и в выдаче Яндекса рядом с сайтом стоит значок WordPress.
+ */
+function promix_favicon_ico(): void {
+    $file = get_theme_file_path( 'assets/img/favicon.ico' );
+
+    if ( has_site_icon() || ! is_readable( $file ) ) {
+        return;
+    }
+
+    header( 'Content-Type: image/x-icon' );
+    header( 'Content-Length: ' . filesize( $file ) );
+    header( 'Cache-Control: public, max-age=604800' );
+    readfile( $file );
+    exit;
+}
+add_action( 'do_faviconico', 'promix_favicon_ico' );
+
+/**
+ * Опечатка в адресе — честный 404. Иначе WordPress ищет запись по началу
+ * адреса и уводит, например, /product/roxelpro/ на первый попавшийся товар.
+ * Переименованные товары по-прежнему находит wp_old_slug_redirect.
+ */
+add_filter( 'do_redirect_guess_404_permalink', '__return_false' );
+
+/**
+ * robots.txt целиком. Фильтры каталога здесь не закрыты: на них стоит
+ * noindex, follow, а закрытую страницу робот не прочтёт и noindex не увидит.
+ * Clean-param понимает только Яндекс: метки и сортировка не меняют страницу.
+ * Пока индексация закрыта, карта сайта отдаёт 404 — строку Sitemap не печатаем,
+ * иначе Вебмастер покажет ошибку карты.
+ *
+ * @param string     $output Текст от WordPress и Woo.
+ * @param bool       $public Открыта ли индексация (ядро передаёт bool).
+ * @return string
+ */
+function promix_robots_txt( string $output, $public ): string {
+    unset( $output );
+
+    $lines = array(
+        'User-agent: *',
+        'Disallow: /wp-admin/',
+        'Allow: /wp-admin/admin-ajax.php',
+        'Disallow: /wp-content/uploads/wc-logs/',
+        'Disallow: /wp-content/uploads/woocommerce_transient_files/',
+        'Disallow: /wp-content/uploads/woocommerce_uploads/',
+        'Disallow: /cart/',
+        'Disallow: /checkout/',
+        'Disallow: /my-account/',
+        'Disallow: /*add-to-cart=',
+        'Disallow: /*?s=',
+        'Disallow: /search/',
+        'Disallow: /feed/',
+        'Disallow: /*/feed/',
+        'Disallow: /readme.html',
+        '',
+        'Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&yclid&ysclid&gclid&fbclid&openstat&_openstat&from&etext /',
+        'Clean-param: orderby /catalog/',
+    );
+
+    if ( ! empty( $public ) ) {
+        $lines[] = '';
+        $lines[] = 'Sitemap: ' . home_url( '/wp-sitemap.xml' );
+    }
+
+    return implode( "\n", $lines ) . "\n";
+}
+add_filter( 'robots_txt', 'promix_robots_txt', 100, 2 );
 
 /**
  * Каталог с фильтрами — noindex, follow.
