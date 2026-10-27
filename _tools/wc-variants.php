@@ -46,10 +46,14 @@ require __DIR__ . '/wp-load.php';
 
 set_time_limit( 0 );
 header( 'Content-Type: text/plain; charset=utf-8' );
-wp_set_current_user( 1 ); // Термины бренда и корзина записей проверяют права.
 
-$dry   = ! empty( $_GET['dry'] );
-$undo  = ! empty( $_GET['undo'] );
+// Термины бренда и корзина записей проверяют права.
+$admins = get_users( array( 'role' => 'administrator', 'number' => 1, 'fields' => 'ID' ) );
+wp_set_current_user( (int) ( $admins[0] ?? 0 ) );
+
+// Только «1»: dry=0 и undo=0 не должны включать режим.
+$dry   = '1' === ( $_GET['dry'] ?? '' );
+$undo  = '1' === ( $_GET['undo'] ?? '' );
 $only  = isset( $_GET['group'] ) ? (string) $_GET['group'] : '';
 $file  = __DIR__ . '/wc-variants.csv';
 
@@ -313,6 +317,9 @@ $merge = static function ( array $rows, array $sources, array &$made ) use ( $wi
 
         $made['trashed'][] = $d['id'];
     }
+
+    // Пока исходный товар с тем же названием был жив, слаг родителя получил «-2».
+    wp_update_post( array( 'ID' => $parent->get_id(), 'post_name' => '' ) );
 
     foreach ( $data as $i => $d ) {
         $variation = new WC_Product_Variation();

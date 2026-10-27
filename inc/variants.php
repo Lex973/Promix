@@ -53,9 +53,13 @@ function promix_variations( WC_Product $product ): array {
         return array();
     }
 
-    $list = array();
+    $list     = array();
+    $children = $product->get_children();
 
-    foreach ( $product->get_children() as $child_id ) {
+    // Посты и мета всех вариантов — двумя запросами, а не по два на вариант.
+    _prime_post_caches( $children, false, true );
+
+    foreach ( $children as $child_id ) {
         $variation = wc_get_product( $child_id );
 
         if ( $variation instanceof WC_Product_Variation && 'publish' === $variation->get_status() ) {

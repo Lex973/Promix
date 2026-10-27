@@ -199,6 +199,23 @@ function promix_cart_added_message( $message, $products, $show_qty ) {
     foreach ( (array) $products as $product_id => $qty ) {
         $name = wp_strip_all_tags( get_the_title( (int) $product_id ) );
 
+        // Woo передаёт id товара, а не варианта: берём название варианта из корзины,
+        // если строка с этим товаром там одна, — иначе не угадать, какую добавили.
+        $in_cart = array_filter(
+            WC()->cart->get_cart(),
+            static function ( $item ) use ( $product_id ) {
+                return (int) $item['product_id'] === (int) $product_id;
+            }
+        );
+
+        if ( 1 === count( $in_cart ) ) {
+            $item = reset( $in_cart );
+
+            if ( ! empty( $item['variation_id'] ) && $item['data'] instanceof WC_Product ) {
+                $name = wp_strip_all_tags( promix_cart_item_name( $item['data'] ) );
+            }
+        }
+
         if ( '' === $name ) {
             continue;
         }

@@ -87,6 +87,24 @@
     }
   }
 
+  /* «Спросить у технолога» уходит с выбранным вариантом и его артикулом */
+  function setLeadSource(scope, option) {
+    var ask = scope.querySelector('[data-variants-ask]');
+
+    if (!ask) {
+      return;
+    }
+
+    if (!ask.hasAttribute('data-lead-base')) {
+      ask.setAttribute('data-lead-base', ask.getAttribute('data-lead-open') || '');
+    }
+
+    var label = (option.getAttribute('data-line') || option.textContent).replace(/\s+/g, ' ').trim();
+    var sku = option.getAttribute('data-sku');
+
+    ask.setAttribute('data-lead-open', ask.getAttribute('data-lead-base') + ' — ' + label + (sku ? ' (арт. ' + sku + ')' : ''));
+  }
+
   function select(scope, option) {
     Array.prototype.forEach.call(scope.querySelectorAll('[data-variant-option]'), function (el) {
       el.classList.toggle('is-checked', el === option);
@@ -101,6 +119,7 @@
     }
 
     setSku(scope, option.getAttribute('data-sku') || '');
+    setLeadSource(scope, option);
     hideError(scope);
 
     /* Страница товара пересчитает цену за количество этого варианта */
