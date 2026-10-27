@@ -197,14 +197,21 @@ function promix_cart_added_message( $message, $products, $show_qty ) {
     $lines = array();
 
     foreach ( (array) $products as $product_id => $qty ) {
-        $name = wp_strip_all_tags( get_the_title( (int) $product_id ) );
+        // Скрипт корзины шлёт id варианта: название берём у товара, а вариант
+        // добавляем, только если строка этого товара в корзине одна, — иначе
+        // не угадать, какую из них добавили.
+        $parent_id = (int) $product_id;
+        $added     = wc_get_product( $parent_id );
 
-        // Woo передаёт id товара, а не варианта: берём название варианта из корзины,
-        // если строка с этим товаром там одна, — иначе не угадать, какую добавили.
+        if ( $added instanceof WC_Product_Variation ) {
+            $parent_id = $added->get_parent_id();
+        }
+
+        $name    = wp_strip_all_tags( get_the_title( $parent_id ) );
         $in_cart = array_filter(
             WC()->cart->get_cart(),
-            static function ( $item ) use ( $product_id ) {
-                return (int) $item['product_id'] === (int) $product_id;
+            static function ( $item ) use ( $parent_id ) {
+                return (int) $item['product_id'] === $parent_id;
             }
         );
 

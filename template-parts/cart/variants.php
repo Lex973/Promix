@@ -62,6 +62,7 @@ $hidden = 'card' === $variant ? ' visually-hidden' : '';
                 'data-sku'            => $variation->get_sku(),
                 'data-attrs'          => (string) wp_json_encode( $variation->get_variation_attributes() ),
                 'data-line'           => $line,
+                'data-label'          => promix_variation_label( $variation ),
             ),
         );
     }

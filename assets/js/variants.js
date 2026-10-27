@@ -99,7 +99,9 @@
       ask.setAttribute('data-lead-base', ask.getAttribute('data-lead-open') || '');
     }
 
-    var label = (option.getAttribute('data-line') || option.textContent).replace(/\s+/g, ' ').trim();
+    /* Подпись без цены и без скрытого «в корзине» */
+    var text = option.querySelector('.variants__text');
+    var label = (option.getAttribute('data-label') || (text ? text.textContent : '')).replace(/\s+/g, ' ').trim();
     var sku = option.getAttribute('data-sku');
 
     ask.setAttribute('data-lead-open', ask.getAttribute('data-lead-base') + ' — ' + label + (sku ? ' (арт. ' + sku + ')' : ''));
