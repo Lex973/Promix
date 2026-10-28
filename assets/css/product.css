@@ -23,6 +23,9 @@
   justify-content: center;
   gap: 18px;
   aspect-ratio: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   border-radius: var(--radius-sm);
   background: var(--color-surface-alt);
   color: var(--color-border-strong);
@@ -44,6 +47,8 @@
 }
 
 .single__img {
+  min-width: 0;
+  min-height: 0;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;

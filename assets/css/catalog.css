@@ -650,6 +650,11 @@
   align-items: center;
   justify-content: center;
   aspect-ratio: 5 / 6;
+  /* Без нулевых минимумов блок раздувается по размеру фото (на iPhone
+     миниатюра 300px вытаскивала карточку за экран) */
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   border-radius: var(--radius-xs);
   background: var(--color-surface-alt);
   color: var(--color-border-strong);
@@ -660,7 +665,13 @@
   height: auto;
 }
 
+/* Размер задан явно, а не процентными максимумами: так фото держится
+   в блоке и там, где проценты во flex-контейнере с aspect-ratio не считаются */
 .product__img {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
