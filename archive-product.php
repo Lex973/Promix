@@ -32,7 +32,7 @@ $term     = is_product_category() ? get_queried_object() : null;
 $term     = $term instanceof WP_Term ? $term : null;
 $category = $term && 'product_cat' === $term->taxonomy ? $term : null;
 $total    = $term ? promix_term_total( $term ) : promix_catalog_total();
-$title    = $term ? promix_term_h1( $term ) : __( 'Каталог малярного инструмента и материалов', 'promix' );
+$title    = $term ? promix_term_h1( $term ) : __( 'Краски, материалы и инструменты для маляров', 'promix' );
 $lead     = $term && $term->description
     ? wp_strip_all_tags( $term->description )
     : sprintf(

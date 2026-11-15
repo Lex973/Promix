@@ -121,12 +121,42 @@
     }
 
     setSku(scope, option.getAttribute('data-sku') || '');
+    setImage(scope, option);
+    if (scope.matches('[data-product]')) {
+      var url = option.getAttribute('data-url');
+      if (url) {
+        Array.prototype.forEach.call(scope.querySelectorAll('.product__title a, .product__media'), function (link) {
+          link.href = url;
+        });
+      }
+    }
     setLeadSource(scope, option);
     hideError(scope);
 
     /* Страница товара пересчитает цену за количество этого варианта */
     var qty = control && control.querySelector('[data-cart-qty]');
-    document.dispatchEvent(new CustomEvent('promix:variant', { detail: { qty: qty ? parseInt(qty.value, 10) || 0 : 0 } }));
+    document.dispatchEvent(new CustomEvent('promix:variant', { detail: { scope: scope, qty: qty ? parseInt(qty.value, 10) || 0 : 0 } }));
+  }
+
+  function setImage(scope, option) {
+    var root = scope.closest('.single__layout') || scope;
+    var img = root.querySelector('[data-variants-image]');
+    var data;
+    try {
+      data = JSON.parse(option.getAttribute('data-image') || '{}');
+    } catch (error) {
+      return;
+    }
+    if (!img || !data.src) {
+      return;
+    }
+    ['src', 'srcset', 'sizes', 'alt', 'width', 'height'].forEach(function (key) {
+      if (data[key] !== undefined && data[key] !== '') {
+        img.setAttribute(key, data[key]);
+      } else {
+        img.removeAttribute(key);
+      }
+    });
   }
 
   function hideError(scope) {
@@ -216,7 +246,7 @@
 
     var shown = controlFor(scope, current);
     var qty = shown && shown.querySelector('[data-cart-qty]');
-    document.dispatchEvent(new CustomEvent('promix:variant', { detail: { qty: qty ? parseInt(qty.value, 10) || 0 : 0 } }));
+    document.dispatchEvent(new CustomEvent('promix:variant', { detail: { scope: scope, qty: qty ? parseInt(qty.value, 10) || 0 : 0 } }));
   });
 
   /* Браузер может вернуть отмеченную радиокнопку после «Назад» —

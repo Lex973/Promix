@@ -14,7 +14,10 @@
 #     docs/client — документы заказчика, docs/data — выгрузки из 1С
 #     и собранные CSV для импорта, docs/reports — отчёты и ревью.
 #     Маски ниже — страховка, если файл положили не туда ---
-docs/
+/docs/*
+!/docs/data/
+/docs/data/*
+!/docs/data/wc-variants.csv
 *.pdf
 *.docx
 REPORT-*.md
@@ -47,6 +50,10 @@ dist/
 *.xls
 *.xlsx
 *.csv
+!/docs/data/wc-variants.csv
+!REPORT-VARIANT-DISPUTED-2026-11-13.md
+!REPORT-VARIANT-MERGE-2026-11-13.md
+!REPORT-VARIANT-PUBLISHED-2026-11-13.md
 
 # --- Carbon Fields ставится composer'ом, vendor коммитим:
 #     на хостинге composer может быть недоступен ---
@@ -61,3 +68,7 @@ CLAUDE.md
 
 # Кэш Python от _tools
 __pycache__/
+
+# Настройки локальных инструментов и материалы другого проекта
+/.codex/config.toml
+/output/

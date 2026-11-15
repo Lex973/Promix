@@ -46,7 +46,7 @@ $badge = ( 'PROMIX' === promix_product_brand( $product ) ) ? __( 'Своя ма�
 
     <a class="product__media" href="<?php echo esc_url( $url ); ?>" aria-hidden="true" tabindex="-1">
         <?php if ( $product->get_image_id() ) : ?>
-            <?php echo wp_kses_post( $product->get_image( 'woocommerce_thumbnail', array( 'class' => 'product__img', 'loading' => 'lazy' ) ) ); ?>
+            <?php echo wp_kses_post( $product->get_image( 'woocommerce_thumbnail', array( 'class' => 'product__img', 'loading' => 'lazy', 'data-variants-image' => '' ) ) ); ?>
         <?php else : ?>
             <?php promix_the_icon( promix_category_icon( $cat ), 1.2, 'product__icon' ); ?>
         <?php endif; ?>

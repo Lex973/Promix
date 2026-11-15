@@ -91,7 +91,7 @@ while ( have_posts() ) :
                     <?php endif; ?>
 
                     <?php if ( $product->get_image_id() ) : ?>
-                        <?php echo wp_kses_post( $product->get_image( 'woocommerce_single', array( 'class' => 'single__img' ) ) ); ?>
+                        <?php echo wp_kses_post( $product->get_image( 'woocommerce_single', array( 'class' => 'single__img', 'data-variants-image' => '' ) ) ); ?>
                     <?php else : ?>
                         <?php promix_the_icon( promix_category_icon( $category ? $category->name : '' ), 1, 'single__icon' ); ?>
                         <p class="single__nophoto"><?php esc_html_e( 'Фото скоро появится', 'promix' ); ?></p>

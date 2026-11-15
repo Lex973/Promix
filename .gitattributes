@@ -6,6 +6,10 @@ _content/ export-ignore
 # Документация и метаданные composer: vendor/ коммитится, composer на сервере не нужен.
 README.md export-ignore
 DEPLOY.md export-ignore
+AGENTS.md export-ignore
+.codex/ export-ignore
+docs/ export-ignore
+REPORT-*.md export-ignore
 composer.json export-ignore
 composer.lock export-ignore
 # Исходник фона первого экрана (4 МБ): на сайт идут собранные WebP.

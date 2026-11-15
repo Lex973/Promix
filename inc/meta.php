@@ -26,7 +26,7 @@ function promix_meta_description(): string {
     if ( is_front_page() ) {
         return promix_option(
             'meta_description',
-            'Малярный центр PROMIX в Казани: 500+ товаров для маляров и отделочников — краски, шпаклёвки, шпатели, валики, оборудование. Выгодные цены, колеровка, семинары для мастеров. Тукая, 91к1.'
+            'PROMIX — малярный центр в Казани: краски, шпаклёвки, грунты, инструменты и оборудование. Подбор материалов, колеровка и семинары для мастеров. Самовывоз и доставка по Казани.'
         );
     }
 
@@ -70,7 +70,7 @@ function promix_meta_description(): string {
 
         return sprintf(
             /* translators: 1 — число товаров, 2 — слово «товар». */
-            __( '%1$s %2$s для малярных и отделочных работ: краски, шпаклёвки, шпатели, валики, ленты, абразивы, оборудование. Выгодные цены, самовывоз и доставка по Казани.', 'promix' ),
+            __( 'Краски, шпаклёвки, грунты, инструменты и оборудование в PROMIX: %1$s %2$s для маляров и отделочников. Поможем подобрать материалы. Самовывоз и доставка по Казани.', 'promix' ),
             number_format_i18n( $total ),
             promix_plural( $total, __( 'товар', 'promix' ), __( 'товара', 'promix' ), __( 'товаров', 'promix' ) )
         );
@@ -290,7 +290,7 @@ function promix_document_title( string $title ): string {
     $is_catalog = function_exists( 'promix_is_catalog' ) && promix_is_catalog();
 
     if ( is_front_page() ) {
-        $title = promix_option( 'meta_title', 'PROMIX — малярный центр в Казани: краски, инструмент, колеровка' );
+        $title = promix_option( 'meta_title', 'PROMIX — профессиональный малярный центр в Казани' );
     } elseif ( function_exists( 'is_product_category' ) && is_product_category() && get_queried_object() instanceof WP_Term ) {
         $term   = get_queried_object();
         $manual = trim( (string) get_term_meta( $term->term_id, '_promix_seo_title', true ) );
@@ -306,7 +306,7 @@ function promix_document_title( string $title ): string {
             $title = sprintf( __( '%s купить в Казани — PROMIX', 'promix' ), $h1 );
         }
     } elseif ( function_exists( 'is_shop' ) && is_shop() ) {
-        $title = __( 'PROMIX — каталог малярного инструмента и красок в Казани', 'promix' );
+        $title = __( 'Краски, материалы и инструменты для маляров в Казани — PROMIX', 'promix' );
     } elseif ( function_exists( 'is_product' ) && is_product() ) {
         $name = get_the_title( get_queried_object_id() );
         $name = html_entity_decode( wp_strip_all_tags( $name ), ENT_QUOTES, 'UTF-8' );
@@ -459,9 +459,10 @@ function promix_meta_tags(): void {
         printf( '<meta name="description" content="%s">' . "\n", esc_attr( $description ) );
     }
 
-    // Подтверждение прав в Яндекс Вебмастере: робот ищет тег только на главной.
+    // Подтверждение прав в Яндекс Вебмастере и Google Search Console на главной.
     if ( is_front_page() ) {
         echo '<meta name="yandex-verification" content="1d6b6ff77d4ba2ca">' . "\n";
+        echo '<meta name="google-site-verification" content="So_ZJtpnh9UAs5XG0n1mIR4sR6l27iknoRlBRcNp230" />' . "\n";
     }
 
     // WordPress ставит canonical только записям; каталогу и разделам — сами.
@@ -522,11 +523,14 @@ function promix_favicon(): void {
         get_theme_file_uri( 'assets/img/favicon.svg' )
     );
 
-    // ICO — для Яндекса (он берёт иконку сниппета из /favicon.ico) и старых
-    // браузеров, PNG 120 — рекомендация Яндекса, PNG 180 — для закладок на
-    // iPhone, SVG — всем остальным.
-    printf( '<link rel="icon" href="%s" sizes="32x32">' . "\n", esc_url( home_url( '/favicon.ico' ) ) );
-    printf( '<link rel="icon" type="image/png" sizes="120x120" href="%s">' . "\n", esc_url( get_theme_file_uri( 'assets/img/favicon-120.png' ) ) );
+    // Яндекс может выбрать любую объявленную иконку: везде один знак PROMIX.
+    // PNG 120 дополнительно размещается в корне сайта при развёртывании.
+    // PNG 180 — для закладок на iPhone, SVG — для современных браузеров.
+    $ico_url = add_query_arg( 'ver', promix_asset_version( 'assets/img/favicon.ico' ), home_url( '/favicon.ico' ) );
+    printf( '<link rel="icon" type="image/x-icon" href="%s" sizes="32x32">' . "\n", esc_url( $ico_url ) );
+    $png_url = is_readable( ABSPATH . 'favicon.png' ) ? home_url( '/favicon.png' ) : get_theme_file_uri( 'assets/img/favicon-120.png' );
+    $png_url = add_query_arg( 'ver', promix_asset_version( 'assets/img/favicon-120.png' ), $png_url );
+    printf( '<link rel="icon" type="image/png" sizes="120x120" href="%s">' . "\n", esc_url( $png_url ) );
     printf( '<link rel="icon" type="image/svg+xml" sizes="any" href="%s">' . "\n", esc_url( $url ) );
     printf(
         '<link rel="apple-touch-icon" href="%s">' . "\n",

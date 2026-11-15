@@ -3,7 +3,7 @@
  * Товары с вариантами: одна лента — несколько длин.
  *
  * Варианты — штатные вариации Woo: у каждой своя цена и артикул (код
- * из 1С), фото общее у товара. В каталоге и на странице товара они
+ * из 1С) и фото с запасным общим изображением родителя. В каталоге и на странице товара они
  * выводятся кнопками под ценой, а когда вариантов много — выпадающим
  * списком (пороги ниже). Пока вариант не выбран, показана цена первого,
  * а «В корзину» просит выбрать — заранее ничего не отмечено, чтобы не
@@ -79,6 +79,26 @@ function promix_variation_label( WC_Product_Variation $variation ): string {
     return wp_strip_all_tags( wc_get_formatted_variation( $variation, true, false ) );
 }
 
+/** Image of the selected variation; Woo falls back to the parent's image. */
+function promix_variation_image_data( WC_Product_Variation $variation, string $variant ): array {
+    $id = (int) $variation->get_image_id();
+    $size = 'single' === $variant ? 'woocommerce_single' : 'woocommerce_thumbnail';
+    $image = $id ? wp_get_attachment_image_src( $id, $size ) : false;
+
+    if ( ! $image ) {
+        return array();
+    }
+
+    return array(
+        'src' => $image[0],
+        'width' => $image[1],
+        'height' => $image[2],
+        'srcset' => wp_get_attachment_image_srcset( $id, $size ) ?: '',
+        'sizes' => wp_get_attachment_image_sizes( $id, $size ) ?: '',
+        'alt' => (string) get_post_meta( $id, '_wp_attachment_image_alt', true ),
+    );
+}
+
 /**
  * Что выбирают: «Длина» — название атрибута из админки.
  *
@@ -110,6 +130,42 @@ function promix_base_product( WC_Product $product ): WC_Product {
 
     return $product;
 }
+
+/** Keep an existing cart item when its original product becomes a variation. */
+function promix_restore_merged_cart_items(): void {
+    if ( ! WC()->session ) {
+        return;
+    }
+
+    $items = WC()->session->get( 'cart', array() );
+    $changed = false;
+
+    foreach ( $items as &$item ) {
+        if ( ! empty( $item['variation_id'] ) || empty( $item['product_id'] ) ) {
+            continue;
+        }
+
+        $product = wc_get_product( (int) $item['product_id'] );
+
+        if ( ! $product instanceof WC_Product_Variation
+            || ! $product->get_meta( '_promix_merge_group' )
+            || (int) $product->get_meta( '_promix_variants_source' ) !== $product->get_id() ) {
+            continue;
+        }
+
+        $item['product_id'] = $product->get_parent_id();
+        $item['variation_id'] = $product->get_id();
+        $item['variation'] = $product->get_variation_attributes();
+        $item['data_hash'] = wc_get_cart_item_data_hash( $product );
+        $changed = true;
+    }
+    unset( $item );
+
+    if ( $changed ) {
+        WC()->session->set( 'cart', $items );
+    }
+}
+add_action( 'woocommerce_load_cart_from_session', 'promix_restore_merged_cart_items', 1 );
 
 /**
  * Название позиции в корзине и заказе: «Лента малярная — 90 м».

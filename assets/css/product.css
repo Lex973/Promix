@@ -81,6 +81,10 @@
   color: var(--color-muted);
 }
 
+.single__meta dd {
+  min-width: 0;
+}
+
 .single__meta dd a {
   color: var(--color-ink);
   border-bottom: 1px solid var(--color-border-strong);
@@ -93,8 +97,17 @@
 }
 
 .single__sku {
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
   font-size: 15px;
   color: var(--color-ink);
+}
+
+/* Длинный артикул виден целиком и не раздвигает карточку на телефоне. */
+.single__sku [data-copy-label] {
+  overflow: visible;
+  overflow-wrap: anywhere;
 }
 
 .single__sku svg {

@@ -63,6 +63,8 @@ $hidden = 'card' === $variant ? ' visually-hidden' : '';
                 'data-attrs'          => (string) wp_json_encode( $variation->get_variation_attributes() ),
                 'data-line'           => $line,
                 'data-label'          => promix_variation_label( $variation ),
+                'data-image'          => (string) wp_json_encode( promix_variation_image_data( $variation, $variant ) ),
+                'data-url'            => $variation->get_permalink(),
             ),
         );
     }
@@ -99,6 +101,8 @@ $hidden = 'card' === $variant ? ' visually-hidden' : '';
                        data-price="<?php echo esc_attr( (string) (float) $variation->get_price() ); ?>"
                        data-price-text="<?php echo esc_attr( promix_product_price( $variation ) ); ?>"
                        data-sku="<?php echo esc_attr( $variation->get_sku() ); ?>"
+                       data-image="<?php echo esc_attr( (string) wp_json_encode( promix_variation_image_data( $variation, $variant ) ) ); ?>"
+                       data-url="<?php echo esc_url( $variation->get_permalink() ); ?>"
                        data-attrs="<?php echo esc_attr( (string) wp_json_encode( $variation->get_variation_attributes() ) ); ?>">
                     <input class="variants__input" type="radio" name="add-to-cart" value="<?php echo esc_attr( (string) $id ); ?>"
                            form="<?php echo esc_attr( $form ); ?>" required>

@@ -43,6 +43,9 @@
   });
 
   document.addEventListener('promix:variant', function (event) {
+    if (event.detail.scope !== document.querySelector('.single__info[data-variants-scope]')) {
+      return;
+    }
     showPrice(event.detail.qty);
   });
 
