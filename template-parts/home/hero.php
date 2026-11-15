@@ -1,0 +1,81 @@
+<?php
+/**
+ * Секция главной: hero.
+ *
+ * @package promix
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+$hero_image = promix_field( 'hero_image' );
+$hero_title = promix_field( 'hero_title', "Профессиональные материалы\nдля идеального результата" );
+$hero_lead  = promix_field( 'hero_lead', 'Подбор и колеровка материалов, техническая консультация, комплектация объектов под ключ — для частных клиентов, мастеров, дизайнеров и строительных компаний.' );
+$cta_text   = promix_field( 'hero_cta_text', 'Перейти в каталог' );
+$cta_url    = promix_field( 'hero_cta_url', '#catalog' );
+
+$stats = promix_field(
+    'hero_stats',
+    array(
+        array( 'stat_value' => '10+ лет', 'stat_label' => 'опыта в строительной сфере' ),
+        array( 'stat_value' => '3 года',  'stat_label' => 'магазину PROMIX в Казани' ),
+        array( 'stat_value' => '4,9',     'stat_label' => 'рейтинг в 2ГИС' ),
+        array( 'stat_value' => '50+',     'stat_label' => 'отзывов клиентов' ),
+    )
+);
+
+?>
+<section class="hero">
+        <?php if ( $hero_image ) : ?>
+            <?php
+            echo wp_get_attachment_image(
+                (int) $hero_image,
+                'full',
+                false,
+                array(
+                    'class'         => 'hero__bg',
+                    'alt'           => '',
+                    'fetchpriority' => 'high',
+                )
+            );
+            ?>
+        <?php else : ?>
+            <?php
+            // Версия по дате файла: фото заменили — браузер не покажет старое из кэша.
+            $hero_src = static function ( string $file ): string {
+                return add_query_arg( 'ver', promix_asset_version( "assets/img/{$file}" ), get_theme_file_uri( "assets/img/{$file}" ) );
+            };
+            ?>
+            <img class="hero__bg"
+                 src="<?php echo esc_url( $hero_src( 'main.webp' ) ); ?>"
+                 srcset="<?php echo esc_url( $hero_src( 'main-768.webp' ) ); ?> 768w,
+                         <?php echo esc_url( $hero_src( 'main-1280.webp' ) ); ?> 1280w,
+                         <?php echo esc_url( $hero_src( 'main.webp' ) ); ?> 1920w"
+                 sizes="100vw"
+                 alt="" width="1920" height="1280" fetchpriority="high">
+        <?php endif; ?>
+        <div class="hero__shade" aria-hidden="true"></div>
+
+        <div class="container hero__inner">
+            <h1 class="hero__title"><?php echo promix_nl2br( $hero_title ); ?></h1>
+
+            <p class="hero__lead"><?php echo esc_html( $hero_lead ); ?></p>
+
+            <?php if ( $cta_text ) : ?>
+                <a class="hero__cta" href="<?php echo esc_url( $cta_url ); ?>">
+                    <?php echo esc_html( $cta_text ); ?>
+                    <?php promix_the_icon( 'arrow-right', 2 ); ?>
+                </a>
+            <?php endif; ?>
+
+            <?php if ( $stats ) : ?>
+                <dl class="hero__stats">
+                    <?php foreach ( $stats as $stat ) : ?>
+                        <div class="hero__stat">
+                            <dt><?php echo esc_html( $stat['stat_value'] ); ?></dt>
+                            <dd><?php echo esc_html( $stat['stat_label'] ); ?></dd>
+                        </div>
+                    <?php endforeach; ?>
+                </dl>
+            <?php endif; ?>
+        </div>
+    </section>

@@ -1,0 +1,17 @@
+# Служебные файлы темы не для браузера: исходники текстов, статика-архив,
+# скрипты развёртывания, composer и README. Под nginx то же самое делает
+# location из README (раздел «Перенос на сервер»).
+<IfModule mod_authz_core.c>
+    <FilesMatch "\.(json|lock|md)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    <FilesMatch "\.(json|lock|md)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+<IfModule mod_alias.c>
+    RedirectMatch 404 ^/wp-content/themes/promix/_
+</IfModule>

@@ -1,0 +1,28 @@
+# Служебные скрипты не попадают в архив темы (git archive) — на хостинге им делать нечего.
+_tools/ export-ignore
+_content/ export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+# Документация и метаданные composer: vendor/ коммитится, composer на сервере не нужен.
+README.md export-ignore
+DEPLOY.md export-ignore
+AGENTS.md export-ignore
+.codex/ export-ignore
+docs/ export-ignore
+REPORT-*.md export-ignore
+composer.json export-ignore
+composer.lock export-ignore
+# Исходник фона первого экрана (4 МБ): на сайт идут собранные WebP.
+assets/img/office/8.png export-ignore
+# Исходник схемы проезда (2 МБ): на сайт идут собранные scheme*.webp.
+assets/img/scheme.png export-ignore
+# Обвязка разработки Carbon Fields: исходники JS, сборка, патчи — на сайте
+# не нужны, работает только собранное из build/ и core/.
+vendor/htmlburger/carbon-fields/bin/ export-ignore
+vendor/htmlburger/carbon-fields/packages/ export-ignore
+vendor/htmlburger/carbon-fields/patches/ export-ignore
+vendor/htmlburger/carbon-fields/webpack.config.js export-ignore
+vendor/htmlburger/carbon-fields/package.json export-ignore
+vendor/htmlburger/carbon-fields/yarn.lock export-ignore
+vendor/htmlburger/carbon-fields/CONTRIBUTING.md export-ignore
+vendor/htmlburger/carbon-fields/ISSUE_TEMPLATE.md export-ignore

@@ -1,0 +1,133 @@
+<?php
+/**
+ * Секция главной: about.
+ *
+ * @package promix
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+$title     = promix_field( 'about_title', 'О компании PROMIX' );
+$photo     = promix_field( 'about_photo' );
+$photo_alt = promix_field( 'about_photo_alt', 'Торговый зал малярного центра PROMIX' );
+$lead      = promix_field( 'about_lead', 'PROMIX — профессиональный малярный центр в Казани для мастеров, строительных компаний, дизайнеров и частных клиентов.' );
+$text      = promix_field( 'about_text', 'В зале — лакокрасочные материалы, инструмент и оборудование от ведущих производителей. Помогаем подобрать решение под задачу: от ремонта квартиры до большого объекта.' );
+
+$facts = promix_field(
+    'about_facts',
+    array(
+        array( 'fact_icon' => 'circle-check-big', 'fact_value' => '10+ лет',  'fact_label' => 'опыта в стройсфере' ),
+        array( 'fact_icon' => 'star',             'fact_value' => '4,9 из 5', 'fact_label' => '44 отзыва в 2ГИС' ),
+        array( 'fact_icon' => 'package',          'fact_value' => '500+',     'fact_label' => 'товаров в наличии' ),
+        array( 'fact_icon' => 'map-pin',          'fact_value' => 'Казань',   'fact_label' => 'Габдуллы Тукая, 91к1' ),
+    )
+);
+
+$seminars_hidden = (bool) promix_field( 'about_seminars_off', false );
+$seminars_title  = promix_field( 'about_seminars_title', 'Пространство, в которое мастеру удобно заезжать снова' );
+$seminars_text   = promix_field( 'about_seminars_text', 'Единственные в Казани проводим семинары и мастер-классы в учебном классе: обучаем работе с материалами и оборудованием, помогаем в подборе и комплектации объектов.' );
+$seminars_cert   = promix_field( 'about_seminars_cert', 'Каждый участник семинара или мастер-класса получает сертификат PROMIX.' );
+$cert_image      = promix_field( 'about_seminars_cert_image' );
+$cert_alt        = 'Сертификат PROMIX о прохождении практикума «Малярные работы»';
+
+/* Рисунки инструментов — фон полосы, порядок задаёт их расстановку по краям. */
+$doodles = array( 'paint-bucket', 'paint-roller', 'brush', 'palette', 'spray-can', 'ruler' );
+
+?>
+<section class="section section--divided about" id="about">
+        <div class="container">
+
+            <h2 class="section__title about__title"><?php echo esc_html( $title ); ?></h2>
+
+            <div class="about__intro">
+                <?php if ( $photo ) : ?>
+                    <?php
+                    echo wp_get_attachment_image(
+                        (int) $photo,
+                        'large',
+                        false,
+                        array(
+                            'class'   => 'about__photo',
+                            'alt'     => $photo_alt,
+                            'loading' => 'lazy',
+                        )
+                    );
+                    ?>
+                <?php else : ?>
+                    <img class="about__photo" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/office/1.webp' ) ); ?>"
+                         alt="<?php echo esc_attr( $photo_alt ); ?>" loading="lazy" width="1280" height="853">
+                <?php endif; ?>
+
+                <div class="about__copy">
+                    <p class="about__lead"><?php echo esc_html( $lead ); ?></p>
+
+                    <p class="about__text"><?php echo esc_html( $text ); ?></p>
+
+                    <?php if ( $facts ) : ?>
+                        <dl class="facts">
+                            <?php foreach ( $facts as $fact ) : ?>
+                                <div class="fact">
+                                    <span class="fact__icon" aria-hidden="true">
+                                        <?php promix_the_icon( $fact['fact_icon'] ); ?>
+                                    </span>
+                                    <div class="fact__body">
+                                        <dt class="fact__value"><?php echo esc_html( $fact['fact_value'] ); ?></dt>
+                                        <dd class="fact__label"><?php echo esc_html( $fact['fact_label'] ); ?></dd>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </dl>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <?php if ( ! $seminars_hidden ) : ?>
+            <!-- Полоса про семинары: рисунки инструментов — фон, поэтому aria-hidden -->
+            <div class="seminars">
+                <div class="seminars__decor" aria-hidden="true">
+                    <?php foreach ( $doodles as $doodle ) : ?>
+                        <?php promix_the_icon( $doodle, 1.1, 'doodle doodle--' . $doodle ); ?>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="container seminars__inner">
+                    <div class="seminars__copy">
+                        <h3 class="seminars__title"><?php echo promix_nl2br( $seminars_title ); ?></h3>
+                        <p class="seminars__text"><?php echo esc_html( $seminars_text ); ?></p>
+                        <?php if ( $seminars_cert ) : ?>
+                            <p class="seminars__cert">
+                                <span class="seminars__cert-icon" aria-hidden="true">
+                                    <?php promix_the_icon( 'award' ); ?>
+                                </span>
+                                <?php echo esc_html( $seminars_cert ); ?>
+                            </p>
+                        <?php endif; ?>
+                    </div>
+
+                    <figure class="seminars__figure">
+                        <?php if ( $cert_image ) : ?>
+                            <?php
+                            echo wp_get_attachment_image(
+                                (int) $cert_image,
+                                'large',
+                                false,
+                                array(
+                                    'class'   => 'seminars__photo',
+                                    'alt'     => $cert_alt,
+                                    'loading' => 'lazy',
+                                )
+                            );
+                            ?>
+                        <?php else : ?>
+                            <img class="seminars__photo" src="<?php echo esc_url( get_theme_file_uri( 'assets/img/cert-800.webp' ) ); ?>"
+                                 srcset="<?php echo esc_url( get_theme_file_uri( 'assets/img/cert-800.webp' ) ); ?> 800w, <?php echo esc_url( get_theme_file_uri( 'assets/img/cert.webp' ) ); ?> 1600w"
+                                 sizes="(max-width: 980px) 100vw, 40vw"
+                                 alt="<?php echo esc_attr( $cert_alt ); ?>" loading="lazy" width="800" height="566">
+                        <?php endif; ?>
+                        <figcaption class="seminars__caption"><?php esc_html_e( 'Сертификат участника практикума', 'promix' ); ?></figcaption>
+                    </figure>
+                </div>
+            </div>
+        <?php endif; ?>
+    </section>

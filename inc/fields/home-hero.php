@@ -1,0 +1,56 @@
+<?php
+/**
+ * Поля первого экрана главной страницы.
+ *
+ * @package promix
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+use Carbon_Fields\Field;
+
+promix_front_container( __( 'Первый экран', 'promix' ) )
+    ->add_fields(
+        array(
+            Field::make( 'image', 'promix_hero_image', __( 'Фоновое фото', 'promix' ) )
+                ->set_value_type( 'id' )
+                ->set_help_text( __( 'Широкий кадр зала. Поверх фото ложится затемнение, поэтому светлые снимки читаются лучше.', 'promix' ) )
+                ->set_width( 40 ),
+
+            Field::make( 'textarea', 'promix_hero_title', __( 'Заголовок', 'promix' ) )
+                ->set_rows( 2 )
+                ->set_help_text( __( 'Каждая строка — отдельная строка заголовка на сайте.', 'promix' ) )
+                ->set_width( 60 ),
+
+            Field::make( 'textarea', 'promix_hero_lead', __( 'Подзаголовок', 'promix' ) )
+                ->set_rows( 3 ),
+
+            Field::make( 'text', 'promix_hero_cta_text', __( 'Текст кнопки', 'promix' ) )
+                ->set_width( 50 ),
+
+            Field::make( 'text', 'promix_hero_cta_url', __( 'Ссылка кнопки', 'promix' ) )
+                ->set_help_text( __( 'Якорь вида #catalog или полный адрес страницы.', 'promix' ) )
+                ->set_width( 50 ),
+
+            Field::make( 'complex', 'promix_hero_stats', __( 'Цифры', 'promix' ) )
+                ->set_layout( 'tabbed-horizontal' )
+                ->set_max( 4 )
+                ->set_help_text( __( 'До четырёх цифр в ряд под кнопкой.', 'promix' ) )
+                ->setup_labels(
+                    array(
+                        'singular_name' => __( 'Цифру', 'promix' ),
+                        'plural_name'   => __( 'Цифры', 'promix' ),
+                    )
+                )
+                ->add_fields(
+                    array(
+                        Field::make( 'text', 'stat_value', __( 'Значение', 'promix' ) )
+                            ->set_help_text( __( 'Например: 10+ лет', 'promix' ) )
+                            ->set_width( 40 ),
+
+                        Field::make( 'text', 'stat_label', __( 'Подпись', 'promix' ) )
+                            ->set_width( 60 ),
+                    )
+                ),
+        )
+    );

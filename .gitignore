@@ -1,45 +1,27 @@
 # ============================================
-#  В git попадает ТОЛЬКО тема promix.
-#  Ядро WordPress, плагины, загрузки и конфиг
-#  живут локально и на сервере, но не в репозитории.
-#
-#  Префикс **/ обязателен: без него правило со слэшем
-#  внутри привязывается к корню репозитория и не сработает
-#  для WordPress, лежащего в подпапке (app/public/...).
+#  Репозиторий — это сама тема promix.
+#  Клонируется в wp-content/themes/promix.
+#  Ядро WordPress, плагины и загрузки живут
+#  локально и на сервере, но не в git.
 # ============================================
 
-# --- Ядро WordPress ---
-**/wp-admin/
-**/wp-includes/
-**/wp-*.php
-**/xmlrpc.php
-**/license.txt
-**/readme.html
-**/.htaccess
-
-# --- Секреты: НИКОГДА в git ---
+# --- Секреты ---
 **/wp-config.php
-**/wp-config-local.php
-**/.env
-**/.env.local
+.env
+.env.local
 
-# --- wp-content: всё, кроме нашей темы ---
-**/wp-content/plugins/
-**/wp-content/uploads/
-**/wp-content/upgrade/
-**/wp-content/cache/
-**/wp-content/languages/
-**/wp-content/mu-plugins/
-**/wp-content/*.php
-**/wp-content/themes/*
-!**/wp-content/themes/promix/
-
-# --- Служебные папки Local ---
-**/conf/
-**/logs/
-**/app/sql/
-*.sql
-*.sql.gz
+# --- Всё, что не тема, живёт в docs/ и в git не идёт:
+#     docs/client — документы заказчика, docs/data — выгрузки из 1С
+#     и собранные CSV для импорта, docs/reports — отчёты и ревью.
+#     Маски ниже — страховка, если файл положили не туда ---
+/docs/*
+!/docs/data/
+/docs/data/*
+!/docs/data/wc-variants.csv
+*.pdf
+*.docx
+REPORT-*.md
+REVIEW-*.md
 
 # --- IDE ---
 .idea/
@@ -54,13 +36,39 @@ Desktop.ini
 *.zip
 *.rar
 *.7z
+*.sql
+*.sql.gz
 *.tmp
 *.bak
 *~
 
-# --- Node (если понадобится сборка ассетов) ---
+# --- Node, если появится сборка ассетов ---
 node_modules/
 dist/
 
-# --- Клиентские документы и черновики: не в репозиторий ---
-docs/
+# --- Выгрузки из 1С и прочие таблицы (их место — docs/data) ---
+*.xls
+*.xlsx
+*.csv
+!/docs/data/wc-variants.csv
+!REPORT-VARIANT-DISPUTED-2026-11-13.md
+!REPORT-VARIANT-MERGE-2026-11-13.md
+!REPORT-VARIANT-PUBLISHED-2026-11-13.md
+
+# --- Carbon Fields ставится composer'ом, vendor коммитим:
+#     на хостинге composer может быть недоступен ---
+vendor/**/node_modules/
+vendor/**/.git/
+
+# исходники логотипов от заказчика (лежат в медиатеке на сервере)
+brands/
+
+# Правила для Claude Code — локальные
+CLAUDE.md
+
+# Кэш Python от _tools
+__pycache__/
+
+# Настройки локальных инструментов и материалы другого проекта
+/.codex/config.toml
+/output/

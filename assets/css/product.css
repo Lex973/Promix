@@ -1,0 +1,386 @@
+/* PROMIX — страница товара. Карточки соседей и крошки берутся из catalog.css. */
+
+.section.single {
+  padding-top: clamp(28px, 3vw, 44px);
+  padding-bottom: clamp(56px, 6vw, 96px);
+}
+
+.single__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  gap: clamp(28px, 4vw, 64px);
+  align-items: start;
+  margin-top: 8px;
+}
+
+/* ===== Фото ===== */
+
+.single__media {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  aspect-ratio: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
+  color: var(--color-border-strong);
+}
+
+.single__media .product__badge {
+  top: 16px;
+  left: 16px;
+}
+
+.single__icon {
+  width: 26%;
+  height: auto;
+}
+
+.single__nophoto {
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.single__img {
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* ===== Сведения ===== */
+
+.single__title {
+  font-size: clamp(22px, 2.2vw, 30px);
+  font-weight: var(--fw-bold);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.single__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+  font-size: 15px;
+}
+
+.single__meta-row {
+  display: flex;
+  gap: 12px;
+}
+
+.single__meta dt {
+  flex: 0 0 96px;
+  color: var(--color-muted);
+}
+
+.single__meta dd {
+  min-width: 0;
+}
+
+.single__meta dd a {
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-border-strong);
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.single__meta dd a:hover {
+  color: var(--color-brand);
+  border-color: currentColor;
+}
+
+.single__sku {
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
+  font-size: 15px;
+  color: var(--color-ink);
+}
+
+/* Длинный артикул виден целиком и не раздвигает карточку на телефоне. */
+.single__sku [data-copy-label] {
+  overflow: visible;
+  overflow-wrap: anywhere;
+}
+
+.single__sku svg {
+  width: 15px;
+  height: 15px;
+}
+
+.single__price {
+  margin-top: 28px;
+  font-size: clamp(28px, 2.6vw, 36px);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* ===== Количество и кнопка ===== */
+
+.single__buy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.single__add {
+  padding: 15px 30px;
+  border-radius: var(--radius-sm);
+}
+
+.single__add svg {
+  width: 18px;
+  height: 18px;
+}
+
+.single__note {
+  margin-top: 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+.single__ask {
+  margin-top: 22px;
+  padding: 13px 24px;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+}
+
+/* Описание под фото и сведениями, линия — на всю ширину секции.
+   Справа — карточка прямого контакта, чтобы колонка текста не висела
+   в пустоте; текст при этом остаётся читаемой ширины. */
+.single__about {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: clamp(28px, 4vw, 64px);
+  align-items: start;
+  margin-top: clamp(32px, 4vw, 56px);
+  padding-top: clamp(24px, 3vw, 36px);
+  border-top: 1px solid var(--color-border);
+}
+
+.single__about-title {
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+}
+
+.single__desc {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+.single__help {
+  padding: 24px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
+}
+
+.single__help-title {
+  font-size: 18px;
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+}
+
+.single__help-text {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+/* Телефон и кнопка MAX в одну строку */
+.single__help-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.single__help-phone {
+  display: block;
+  font-size: 22px;
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  transition: color var(--transition-fast);
+}
+
+.single__help-phone:hover {
+  color: var(--color-brand);
+}
+
+.single__help-hours {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+/* Варианты на странице товара крупнее, чем в карточке каталога */
+.variants--single {
+  margin-top: 22px;
+}
+
+.variants--single .variants__opt {
+  min-height: 44px;
+  padding: 8px 16px;
+  font-size: 15px;
+}
+
+.variants--single .select {
+  max-width: 360px;
+}
+
+.variants--single .variants__opt.is-in-cart .variants__mark {
+  width: 12px;
+  height: 12px;
+}
+
+.variants--single .variants__error {
+  font-size: 14px;
+}
+
+/* Счётчик на странице товара — той же высоты, что кнопка «В корзину» */
+.cart-control--single {
+  margin-top: 22px;
+}
+
+.cart-control--single .single__buy,
+.cart-control--single .single__ask {
+  margin-top: 0;
+}
+
+/* «Уточнить» встаёт на место «Спросить у технолога» — не уже неё */
+.cart-control--single .single__ask {
+  min-width: 220px;
+}
+
+.cart-control--single .qty--cart .qty__btn {
+  width: 44px;
+  height: 44px;
+}
+
+.cart-control--single .qty--cart .qty__btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cart-control--single .qty--cart .qty__input {
+  width: 56px;
+  height: 44px;
+  font-size: 17px;
+}
+
+/* ===== Соседи по разделу ===== */
+
+.single__related {
+  margin-top: clamp(56px, 6vw, 88px);
+}
+
+.single__related-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 20px;
+}
+
+.single__related-title {
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+}
+
+.single__related-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: var(--fw-medium);
+  color: var(--color-brand);
+}
+
+.single__related-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== Плашка с заявкой ===== */
+
+.section.cta {
+  padding-top: clamp(48px, 5vw, 72px);
+  padding-bottom: clamp(48px, 5vw, 72px);
+}
+
+.cta__box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px 40px;
+}
+
+.cta__text {
+  max-width: 640px;
+}
+
+.cta__title {
+  font-size: clamp(22px, 2.2vw, 30px);
+  font-weight: var(--fw-bold);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.cta__lead {
+  margin-top: 12px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+.cta__btn {
+  flex-shrink: 0;
+  padding: 15px 30px;
+  border-radius: var(--radius-sm);
+}
+
+/* ===== Адаптив ===== */
+
+@media (max-width: 860px) {
+  .single__layout,
+  .single__about {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .single__media {
+    max-width: 480px;
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (max-width: 520px) {
+  .single__meta dt {
+    flex-basis: 80px;
+  }
+
+  .single__add {
+    flex: 1 1 auto;
+  }
+
+  .single__ask,
+  .cta__btn {
+    width: 100%;
+  }
+}

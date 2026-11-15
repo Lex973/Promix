@@ -1,0 +1,415 @@
+<?php
+/**
+ * Carbon Fields: загрузка библиотеки и регистрация полей.
+ *
+ * Поля описаны кодом и лежат в inc/fields/ — так они версионируются
+ * вместе с темой и переносятся на прод обычным git pull.
+ *
+ * @package promix
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+use Carbon_Fields\Carbon_Fields;
+use Carbon_Fields\Container;
+
+/**
+ * Библиотека ставится composer'ом в vendor/ и коммитится вместе с темой:
+ * на хостинге composer может быть недоступен.
+ */
+function promix_boot_carbon_fields(): void {
+    $autoload = get_theme_file_path( 'vendor/autoload.php' );
+
+    if ( ! file_exists( $autoload ) ) {
+        return;
+    }
+
+    require_once $autoload;
+    Carbon_Fields::boot();
+}
+add_action( 'after_setup_theme', 'promix_boot_carbon_fields', 20 );
+
+// Иконки Lucide для полей и шаблонов.
+require_once get_theme_file_path( 'inc/icons.php' );
+
+// Список марок для секции брендов, пока повторитель в админке пустой.
+require_once get_theme_file_path( 'inc/brands-default.php' );
+
+// Отзывы из 2ГИС, пока повторитель в админке пустой.
+require_once get_theme_file_path( 'inc/reviews-default.php' );
+
+/**
+ * Наборы полей подключаются по одному файлу на секцию главной.
+ */
+function promix_register_fields(): void {
+    if ( ! class_exists( Carbon_Fields::class ) ) {
+        return;
+    }
+
+    foreach ( array( 'home-hero', 'home-catalog', 'home-brands', 'options', 'notice', 'home-about', 'home-why', 'home-reviews', 'home-contacts', 'term-seo' ) as $group ) {
+        $file = get_theme_file_path( "inc/fields/{$group}.php" );
+
+        if ( file_exists( $file ) ) {
+            require_once $file;
+        }
+    }
+}
+add_action( 'carbon_fields_register_fields', 'promix_register_fields' );
+
+/**
+ * На главной блочный редактор не нужен: содержимое собирают шаблоны и поля,
+ * а в Gutenberg метабоксы Carbon Fields прячутся в самый низ страницы.
+ *
+ * @param mixed    $use_block_editor Включать ли Gutenberg (тип не гарантирован).
+ * @param \WP_Post $post             Редактируемая запись.
+ * @return mixed
+ */
+function promix_disable_block_editor_on_front( $use_block_editor, $post ) {
+    $front_id = (int) get_option( 'page_on_front' );
+
+    if ( $front_id && isset( $post->ID ) && (int) $post->ID === $front_id ) {
+        return false;
+    }
+
+    return $use_block_editor;
+}
+add_filter( 'use_block_editor_for_post', 'promix_disable_block_editor_on_front', 10, 2 );
+
+/**
+ * Редактор на главной тоже лишний — остаётся заголовок и поля секций.
+ * У остальных страниц он на месте, поэтому проверяем, что открыта именно главная.
+ */
+function promix_hide_front_page_editor(): void {
+    $front_id = (int) get_option( 'page_on_front' );
+
+    if ( ! $front_id ) {
+        return;
+    }
+
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- читаем только id открытой записи.
+    $post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
+
+    if ( $post_id === $front_id ) {
+        remove_post_type_support( 'page', 'editor' );
+    }
+}
+add_action( 'admin_init', 'promix_hide_front_page_editor' );
+
+/**
+ * Значение поля главной страницы с запасным вариантом.
+ *
+ * Пока поля не заполнены, секции показывают согласованные тексты статики —
+ * страница не разъезжается на пустом сайте.
+ *
+ * @param string $name    Имя поля без префикса promix_.
+ * @param mixed  $default Что вернуть, если поле пустое.
+ * @return mixed
+ */
+function promix_field( string $name, $default = '' ) {
+    if ( ! function_exists( 'carbon_get_post_meta' ) ) {
+        return $default;
+    }
+
+    $page_id = (int) get_queried_object_id();
+
+    if ( ! $page_id ) {
+        return $default;
+    }
+
+    $value = promix_cached_value(
+        'promix_fields_' . $page_id,
+        $name,
+        static function () use ( $page_id, $name ) {
+            return carbon_get_post_meta( $page_id, 'promix_' . $name );
+        }
+    );
+
+    if ( '' === $value || null === $value || array() === $value ) {
+        return $default;
+    }
+
+    return $value;
+}
+
+/**
+ * Значение из кэша полей Carbon Fields — или из базы, с записью в кэш.
+ *
+ * Carbon читает каждое поле отдельным запросом мимо кэша WP: главная с
+ * полусотней полей давала 51 запрос, контакты — ещё 8–10 на любой странице.
+ * Значения (включая пустые) складываются в транзиент по одному на страницу
+ * или на настройки; промахи пишутся один раз в конце запроса, а не по
+ * штуке. Сброс — при сохранении полей (см. promix_fields_flush).
+ *
+ * @param string   $bucket Ключ транзиента.
+ * @param string   $name   Имя поля без префикса.
+ * @param callable $read   Чтение из базы, если в кэше нет.
+ * @return mixed
+ */
+function promix_cached_value( string $bucket, string $name, callable $read ) {
+    static $cache = array();
+    static $dirty = array();
+
+    if ( ! isset( $cache[ $bucket ] ) ) {
+        $stored           = get_transient( $bucket );
+        $cache[ $bucket ] = is_array( $stored ) ? $stored : array();
+    }
+
+    if ( array_key_exists( $name, $cache[ $bucket ] ) ) {
+        return $cache[ $bucket ][ $name ];
+    }
+
+    $cache[ $bucket ][ $name ] = $read();
+
+    if ( ! isset( $dirty[ $bucket ] ) ) {
+        $dirty[ $bucket ] = true;
+
+        add_action(
+            'shutdown',
+            static function () use ( $bucket, &$cache ) {
+                set_transient( $bucket, $cache[ $bucket ], DAY_IN_SECONDS );
+            }
+        );
+    }
+
+    return $cache[ $bucket ][ $name ];
+}
+
+/**
+ * Поля сохранили — кэш страницы или настроек устарел.
+ *
+ * @param int|mixed $post_id ID записи для полей страницы; для настроек Carbon передаёт данные формы.
+ */
+function promix_fields_flush( $post_id = 0 ): void {
+    if ( is_numeric( $post_id ) && (int) $post_id > 0 ) {
+        delete_transient( 'promix_fields_' . (int) $post_id );
+        return;
+    }
+
+    delete_transient( 'promix_options' );
+}
+add_action( 'carbon_fields_post_meta_container_saved', 'promix_fields_flush' );
+add_action( 'save_post', 'promix_fields_flush' );
+add_action( 'carbon_fields_theme_options_container_saved', 'promix_fields_flush' );
+
+/**
+ * Контейнер полей для главной страницы.
+ *
+ * Условия у всех секций одинаковые, поэтому собираются в одном месте.
+ * Заодно блок сворачивается по умолчанию: секций семь, развёрнутыми они
+ * превращают страницу редактирования в километровую простыню.
+ *
+ * Поля привязаны к шаблону «Главная PROMIX», а не к ID страницы: ID меняется
+ * при смене главной и при переносе сайта, и поля тогда пропадают из админки.
+ *
+ * @param string $title Заголовок блока в админке.
+ * @return \Carbon_Fields\Container\Post_Meta_Container
+ */
+function promix_front_container( string $title ) {
+    $container = Container::make( 'post_meta', $title )
+        ->where( 'post_type', '=', 'page' )
+        ->where( 'post_template', '=', 'templates/home.php' );
+
+    $GLOBALS['promix_front_containers'][] = $container->get_id();
+
+    return $container;
+}
+
+/**
+ * Разово проставить главной шаблон «Главная PROMIX».
+ *
+ * Поля секций привязаны к шаблону; на уже работающем сайте главная его
+ * не выбирала, поэтому ставим сами — один раз и только если шаблон
+ * не выбран вручную.
+ */
+function promix_ensure_home_template(): void {
+    if ( get_option( 'promix_home_template_set' ) ) {
+        return;
+    }
+
+    $front_id = (int) get_option( 'page_on_front' );
+
+    if ( ! $front_id ) {
+        return;
+    }
+
+    $current = (string) get_post_meta( $front_id, '_wp_page_template', true );
+
+    if ( '' === $current || 'default' === $current ) {
+        update_post_meta( $front_id, '_wp_page_template', 'templates/home.php' );
+    }
+
+    update_option( 'promix_home_template_set', 1, false );
+}
+add_action( 'admin_init', 'promix_ensure_home_template' );
+
+/**
+ * Свернуть блоки полей: фильтры вешаются на add_meta_boxes, когда
+ * зарегистрированы уже все секции — в момент создания контейнера
+ * последний из них не успевал.
+ */
+function promix_collapse_field_boxes(): void {
+    foreach ( (array) ( $GLOBALS['promix_front_containers'] ?? array() ) as $id ) {
+        add_filter( 'postbox_classes_page_' . $id, 'promix_close_postbox' );
+    }
+}
+add_action( 'add_meta_boxes', 'promix_collapse_field_boxes', 99 );
+
+/**
+ * Класс свёрнутого блока — пока редактор не решил иначе.
+ *
+ * Как только он свернёт или развернёт хоть один блок, WordPress запомнит
+ * его выбор в настройках пользователя, и мы больше не вмешиваемся.
+ *
+ * @param string[] $classes Классы блока.
+ * @return string[]
+ */
+function promix_close_postbox( array $classes ): array {
+    if ( false !== get_user_option( 'closedpostboxes_page' ) ) {
+        return $classes;
+    }
+
+    $classes[] = 'closed';
+
+    return $classes;
+}
+
+/**
+ * Значение общей настройки сайта с запасным вариантом.
+ *
+ * Контакты повторяются в шапке, меню, секции контактов и подвале —
+ * читаются одним помощником, чтобы правка в админке доходила везде.
+ *
+ * @param string $name    Имя поля без префикса promix_.
+ * @param string $default Что вернуть, если поле пустое.
+ * @return string
+ */
+function promix_option( string $name, string $default = '' ): string {
+    if ( ! function_exists( 'carbon_get_theme_option' ) ) {
+        return $default;
+    }
+
+    $value = promix_cached_value(
+        'promix_options',
+        $name,
+        static function () use ( $name ) {
+            return carbon_get_theme_option( 'promix_' . $name );
+        }
+    );
+
+    return ( '' === $value || null === $value ) ? $default : (string) $value;
+}
+
+/**
+ * Контакты магазина: значения по умолчанию совпадают с согласованной статикой.
+ *
+ * @return array<string, string>
+ */
+function promix_contacts(): array {
+    // Контакты нужны шапке, меню, секции контактов и подвалу: читаем один раз за запрос.
+    static $contacts = null;
+
+    if ( null !== $contacts ) {
+        return $contacts;
+    }
+
+    $contacts = array(
+        'phone'         => promix_option( 'phone', '+7 (952) 041-00-93' ),
+        'phone_extra'   => promix_option( 'phone_extra', '+7 (953) 484-99-88' ),
+        'address'       => promix_option( 'address', 'Казань, ул. Габдуллы Тукая, 91к1' ),
+        'hours'         => promix_option( 'hours', 'Пн–Пт 9:00–18:00' ),
+        'hours_extra'   => promix_option( 'hours_extra', 'Сб 9:00–14:00 · Вс — выходной' ),
+        'email'         => promix_option( 'email', 'promix.kazan@mail.ru' ),
+        'legal_name'    => promix_option( 'legal_name', 'ООО «ПРОМИКС КАЗАНЬ»' ),
+        'inn'           => promix_option( 'inn', '1648048364' ),
+        'ogrn'          => promix_option( 'ogrn', '1181690064016' ), // ЕГРЮЛ по ИНН, подтверждено заказчиком 30.09.2026
+        'legal_address' => promix_option( 'legal_address', '420095, г. Казань, ул. Шамиля Усманова, д. 12, кв. 17' ),
+        'max_url'       => promix_option( 'max_url', '#' ),
+        'tg_url'        => promix_option( 'tg_url', 'https://t.me/Promix_Kzn' ),
+        'gis_url'       => promix_option( '2gis_url', 'https://2gis.ru/kazan/firm/70000001060590384' ),
+        'yandex_url'    => promix_option( 'yandex_url', 'https://yandex.ru/maps/org/promix/59684652364/' ),
+        'map_embed'     => promix_option( 'map_embed', 'https://yandex.ru/map-widget/v1/org/promix/59684652364/?ll=49.120092%2C55.774053&z=17' ),
+    );
+
+    return $contacts;
+}
+
+/**
+ * Режим работы одной строкой, с субботой: «Пн–Пт 9:00–18:00 · Сб 9:00–14:00 · Вс — выходной».
+ *
+ * Там, где часы упоминаются мимоходом (шапка, оформление, письмо, карточка
+ * товара), одной будней строки мало: покупатель приезжает в субботу к 16:00.
+ *
+ * @param bool $short Без выходного — для шапки, где строка не влезает между меню и телефоном.
+ * @return string
+ */
+function promix_hours_full( bool $short = false ): string {
+    $c     = promix_contacts();
+    $extra = $c['hours_extra'];
+
+    if ( $short ) {
+        $extra = trim( explode( '·', $extra )[0] );
+    }
+
+    return implode( ' · ', array_filter( array( $c['hours'], $extra ) ) );
+}
+
+/**
+ * Реквизиты продавца одной строкой — для подвала: название, ИНН, ОГРН, адрес.
+ *
+ * Магазин обязан показывать продавца (ст. 26.1 закона о защите прав
+ * потребителей); ОГРН пропускается, пока не заполнен.
+ *
+ * @return string
+ */
+function promix_legal_line(): string {
+    $c     = promix_contacts();
+    $parts = array( $c['legal_name'] );
+
+    if ( $c['inn'] ) {
+        $parts[] = sprintf( /* translators: %s — ИНН. */ __( 'ИНН %s', 'promix' ), $c['inn'] );
+    }
+
+    if ( $c['ogrn'] ) {
+        $parts[] = sprintf( /* translators: %s — ОГРН. */ __( 'ОГРН %s', 'promix' ), $c['ogrn'] );
+    }
+
+    if ( $c['legal_address'] ) {
+        $parts[] = $c['legal_address'];
+    }
+
+    return implode( ' · ', array_filter( $parts ) );
+}
+
+/**
+ * Телефон для ссылки «позвонить»: собирается из того же поля, что и видимый.
+ *
+ * Отдельное поле для этого держать не нужно — его забывали править вместе
+ * с основным, и кнопка звонила по старому номеру.
+ *
+ * @param string|null $phone Номер как на сайте; по умолчанию — основной.
+ * @return string Номер вида +79520410093 или пустая строка.
+ */
+function promix_tel_href( ?string $phone = null ): string {
+    $digits = (string) preg_replace( '/\D/', '', $phone ?? promix_contacts()['phone'] );
+
+    if ( 11 === strlen( $digits ) && '8' === $digits[0] ) {
+        $digits = '7' . substr( $digits, 1 );
+    }
+
+    if ( 10 === strlen( $digits ) ) {
+        $digits = '7' . $digits;
+    }
+
+    return $digits ? '+' . $digits : '';
+}
+
+/**
+ * Переносы строк из textarea превращаются в <br>: заголовки секций
+ * ломаются по строкам ровно так, как их набрали в админке.
+ *
+ * @param string $text Текст поля.
+ * @return string Готовая к выводу разметка.
+ */
+function promix_nl2br( string $text ): string {
+    return nl2br( esc_html( $text ), false );
+}
