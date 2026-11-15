@@ -6,6 +6,7 @@ _content/ export-ignore
 # Документация и метаданные composer: vendor/ коммитится, composer на сервере не нужен.
 README.md export-ignore
 DEPLOY.md export-ignore
+LOCAL-SETUP.md export-ignore
 AGENTS.md export-ignore
 .codex/ export-ignore
 docs/ export-ignore
